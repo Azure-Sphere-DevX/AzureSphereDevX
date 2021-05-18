@@ -6,21 +6,20 @@
 extern volatile sig_atomic_t terminationRequired;
 
 // Usage text for command line arguments in application manifest.
-static const char* cmdLineArgsUsageText =
-"DPS connection type: \" CmdArgs \": [ \"--ScopeID\", \"<scope_id>\"]\n"
-"Hostname connection type: \" CmdArgs \": [\"--Hostname\", \"<azureiothub_hostname>\"]\n";
+static const char *cmdLineArgsUsageText =
+    "DPS connection type: \" CmdArgs \": [ \"--ScopeID\", \"<scope_id>\"]\n"
+    "Hostname connection type: \" CmdArgs \": [\"--Hostname\", \"<azureiothub_hostname>\"]\n";
 
 /// <summary>
 ///     Parse the command line arguments given in the application manifest.
 /// </summary>
-bool dx_configParseCmdLineArguments(int argc, char* argv[], DX_USER_CONFIG* userConfig)
+bool dx_configParseCmdLineArguments(int argc, char *argv[], DX_USER_CONFIG *userConfig)
 {
     bool result = true;
     int option = 0;
     static const struct option cmdLineOptions[] = {
         {.name = "ScopeID", .has_arg = required_argument, .flag = NULL, .val = 's'},
-        {.name = "Hostname", .has_arg = required_argument, .flag = NULL, .val = 'h'}
-    };
+        {.name = "Hostname", .has_arg = required_argument, .flag = NULL, .val = 'h'}};
 
     userConfig->connectionType = DX_CONNECTION_TYPE_NOT_DEFINED;
 
@@ -48,7 +47,7 @@ bool dx_configParseCmdLineArguments(int argc, char* argv[], DX_USER_CONFIG* user
         }
     }
 
-    switch (userConfig->connectionType) 	{
+    switch (userConfig->connectionType) {
     case DX_CONNECTION_TYPE_NOT_DEFINED:
         dx_terminate(DX_ExitCode_Validate_Connection_Type_Not_Defined);
         result = false;
