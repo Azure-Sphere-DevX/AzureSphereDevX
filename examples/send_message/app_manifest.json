@@ -1,0 +1,16 @@
+{
+  "SchemaVersion": 1,
+  "Name": "send_message_example",
+  "ComponentId": "b217fd65-ac8d-4d7c-b62c-0d07b5df6357",
+  "EntryPoint": "/bin/app",
+  "CmdArgs": [ "--ScopeID", "0ne000F25AF" ],
+  "Capabilities": {
+    "AllowedConnections": [
+      "global.azure-devices-provisioning.net",
+      "iot-hub-azure-sphere.azure-devices.net",
+      "REPLACE_WITH_YOUR_IOT_HUB_ENDPOINT_URL"
+    ],
+    "DeviceAuthentication": "9d7e79eb-e021-43ce-9f2b-fa944b447494"
+  },
+  "ApplicationType": "Default"
+}
