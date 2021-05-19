@@ -95,10 +95,10 @@ INTERCORE_CONTEXT intercore_ctx_app_two = {
     .intercore_recv_block_length = sizeof(ic_control_block_app_two)};
 
 // Timers
-static DX_TIMER intercoresSendMessageTimer = {
+static DX_TIMER_BINDING intercoresSendMessageTimer = {
     .period = {1, 0}, .name = "intercoresSendMessageTimer", .handler = IntercoreSendMessageHandler};
 
-DX_TIMER *timerSet[] = {&intercoresSendMessageTimer};
+DX_TIMER_BINDING *timerSet[] = {&intercoresSendMessageTimer};
 
 /// <summary>
 /// Send message to realtime core app two

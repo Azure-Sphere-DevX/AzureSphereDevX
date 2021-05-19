@@ -1,6 +1,16 @@
 /* Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License.
  *
+ *   DISCLAIMER
+ *
+ *   The DevX library supports the Azure Sphere Developer Learning Path:
+ *
+ *	   1. are built from the Azure Sphere SDK Samples at
+ *          https://github.com/Azure/azure-sphere-samples
+ *	   2. are not intended as a substitute for understanding the Azure Sphere SDK Samples.
+ *	   3. aim to follow best practices as demonstrated by the Azure Sphere SDK Samples.
+ *	   4. are provided as is and as a convenience to aid the Azure Sphere Developer Learning
+ *experience.
  *
  *   DEVELOPER BOARD SELECTION
  *
@@ -14,15 +24,16 @@
  *   ENABLE YOUR DEVELOPER BOARD
  *
  *   Each Azure Sphere developer board manufacturer maps pins differently. You need to select the
- *configuration that matches your board.
+ *      configuration that matches your board.
  *
  *   Follow these steps:
  *
  *	   1. Open CMakeLists.txt.
  *	   2. Uncomment the set command that matches your developer board.
  *	   3. Click File, then Save to save the CMakeLists.txt file which will auto generate the
- *CMake Cache.
- **/
+ *          CMake Cache.
+ *
+ ************************************************************************************************/
 
 #include "hw/azure_sphere_learning_path.h" // Hardware definition
 
@@ -37,20 +48,31 @@
 
 // https://docs.microsoft.com/en-us/azure/iot-pnp/overview-iot-plug-and-play
 #define IOT_PLUG_AND_PLAY_MODEL_ID "dtmi:com:example:azuresphere:labmonitor;1"
+
 #define NETWORK_INTERFACE "wlan0"
+
 // Number of bytes to allocate for the JSON telemetry message for IoT Central
 #define JSON_MESSAGE_BYTES 256
 static char msgBuffer[JSON_MESSAGE_BYTES] = {0};
+
 DX_USER_CONFIG dx_config;
 
+// Forward declarations
 static void report_now_handler(EventLoopTimer *eventLoopTimer);
 static void dt_desired_sample_rate_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
 
-// Update device twin every 5 seconds
-static DX_TIMER report_now_timer = {
+/****************************************************************************************
+ * Timer Bindings
+ ****************************************************************************************/
+static DX_TIMER_BINDING report_now_timer = {
     .period = {5, 0}, .name = "report_now_timer", .handler = report_now_handler};
 
-// Azure IoT Device Twins
+// All timers in this set will be initialised in the InitPeripheralsAndHandlers function
+DX_TIMER_BINDING *timerSet[] = {&report_now_timer};
+
+/****************************************************************************************
+ * Azure IoT Direct Method Bindings
+ ****************************************************************************************/
 static DX_DEVICE_TWIN_BINDING dt_desired_sample_rate = {.twinProperty = "DesiredSampleRate",
                                                         .twinType = DX_TYPE_INT,
                                                         .handler = dt_desired_sample_rate_handler};
@@ -64,12 +86,12 @@ static DX_DEVICE_TWIN_BINDING dt_reported_humidity = {.twinProperty = "ReportedH
 static DX_DEVICE_TWIN_BINDING dt_reported_utc = {.twinProperty = "ReportedUTC",
                                                  .twinType = DX_TYPE_STRING};
 
-// All timers in this set will be initialised in the InitPeripheralsAndHandlers function
-DX_TIMER *timerSet[] = {&report_now_timer};
-
-// All device twins in this set will be initialised in the InitPeripheralsAndHandlers function
-DX_DEVICE_TWIN_BINDING *deviceTwinBindingSet[] = {&dt_desired_sample_rate, &dt_reported_temperature,
+// All device twins listed in device_twin_bindings will be subscribed to in
+// the InitPeripheralsAndHandlers function
+DX_DEVICE_TWIN_BINDING *device_twin_bindings[] = {&dt_desired_sample_rate, &dt_reported_temperature,
                                                   &dt_reported_humidity, &dt_reported_utc};
+
+// Implementation
 
 static void report_now_handler(EventLoopTimer *eventLoopTimer)
 {
@@ -84,10 +106,10 @@ static void report_now_handler(EventLoopTimer *eventLoopTimer)
     // Update twin with current UTC (Universal Time Coordinate) in ISO format
     dx_deviceTwinReportState(&dt_reported_utc, dx_getCurrentUtc(msgBuffer, sizeof(msgBuffer)));
 
-    // the type passed in must match the Divice Twin Type DX_TYPE_FLOAT
+    // The type passed in must match the Divice Twin Type DX_TYPE_FLOAT
     dx_deviceTwinReportState(&dt_reported_temperature, &temperature);
 
-    // the type passed in must match the Divice Twin Type DX_TYPE_DOUBLE
+    // The type passed in must match the Divice Twin Type DX_TYPE_DOUBLE
     dx_deviceTwinReportState(&dt_reported_humidity, &humidity);
 }
 
@@ -125,7 +147,7 @@ static void InitPeripheralsAndHandlers(void)
 {
     dx_azureConnect(&dx_config, NETWORK_INTERFACE, IOT_PLUG_AND_PLAY_MODEL_ID);
     dx_timerSetStart(timerSet, NELEMS(timerSet));
-    dx_deviceTwinSubscribe(deviceTwinBindingSet, NELEMS(deviceTwinBindingSet));
+    dx_deviceTwinSubscribe(device_twin_bindings, NELEMS(device_twin_bindings));
 }
 
 /// <summary>

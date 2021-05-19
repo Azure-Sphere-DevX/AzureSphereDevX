@@ -1,4 +1,17 @@
-/*
+/* Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
+ *
+ *   DISCLAIMER
+ *
+ *   The DevX library supports the Azure Sphere Developer Learning Path:
+ *
+ *	   1. are built from the Azure Sphere SDK Samples at
+ *          https://github.com/Azure/azure-sphere-samples
+ *	   2. are not intended as a substitute for understanding the Azure Sphere SDK Samples.
+ *	   3. aim to follow best practices as demonstrated by the Azure Sphere SDK Samples.
+ *	   4. are provided as is and as a convenience to aid the Azure Sphere Developer Learning
+ *          experience.
+ *
  *   DEVELOPER BOARD SELECTION
  *
  *   The following developer boards are supported.
@@ -11,15 +24,16 @@
  *   ENABLE YOUR DEVELOPER BOARD
  *
  *   Each Azure Sphere developer board manufacturer maps pins differently. You need to select the
- *configuration that matches your board.
+ *      configuration that matches your board.
  *
  *   Follow these steps:
  *
  *	   1. Open CMakeLists.txt.
  *	   2. Uncomment the set command that matches your developer board.
  *	   3. Click File, then Save to save the CMakeLists.txt file which will auto generate the
- *CMake Cache.
- ***/
+ *          CMake Cache.
+ *
+ ************************************************************************************************/
 
 #include "hw/azure_sphere_learning_path.h" // Hardware definition
 
@@ -30,35 +44,47 @@
 #include "dx_utilities.h"
 #include <applibs/log.h>
 
-#define oneMS 1000000
+#define ONE_MS 1000000
 
+// Forward declarations
 static void BlinkLedHandler(EventLoopTimer *eventLoopTimer);
 static void ButtonPressCheckHandler(EventLoopTimer *eventLoopTimer);
 static void LedOffToggleHandler(EventLoopTimer *eventLoopTimer);
 
-// GPIO Input Peripherals
-static DX_GPIO buttonA = {
+/****************************************************************************************
+ * GPIO Peripherals
+ ****************************************************************************************/
+static DX_GPIO_BINDING buttonA = {
     .pin = BUTTON_A, .name = "buttonA", .direction = DX_INPUT, .detect = DX_GPIO_DETECT_LOW};
 
-static DX_GPIO led = {.pin = LED2,
-                      .name = "led",
-                      .direction = DX_OUTPUT,
-                      .initialState = GPIO_Value_Low,
-                      .invertPin = true};
-// Timers
-static DX_TIMER buttonPressCheckTimer = {
+static DX_GPIO_BINDING led = {.pin = LED2,
+                              .name = "led",
+                              .direction = DX_OUTPUT,
+                              .initialState = GPIO_Value_Low,
+                              .invertPin = true};
+
+// All GPIOs added to gpio_set will be opened in InitPeripheralsAndHandlers
+DX_GPIO_BINDING *gpio_set[] = {&buttonA, &led};
+
+/****************************************************************************************
+ * Timer Bindings
+ ****************************************************************************************/
+static DX_TIMER_BINDING buttonPressCheckTimer = {
     .period = {0, 1000000}, .name = "buttonPressCheckTimer", .handler = ButtonPressCheckHandler};
 
-static DX_TIMER ledOffOneShotTimer = {
+static DX_TIMER_BINDING ledOffOneShotTimer = {
     .period = {0, 0}, .name = "ledOffOneShotTimer", .handler = LedOffToggleHandler};
 
 // This is for Seeed Studio Mini as there are no onboard buttons. The LED will blink every 500 ms
-static DX_TIMER blinkLedTimer = {
-    .period = {0, 500 * oneMS}, .name = "blinkLedTimer", .handler = BlinkLedHandler};
+static DX_TIMER_BINDING blinkLedTimer = {
+    .period = {0, 500 * ONE_MS}, .name = "blinkLedTimer", .handler = BlinkLedHandler};
 
-// Initialize Sets
-DX_GPIO *gpioSet[] = {&buttonA, &led};
-DX_TIMER *timerSet[] = {&buttonPressCheckTimer, &ledOffOneShotTimer, &blinkLedTimer};
+// All timers referenced in timers with be opened in the InitPeripheralsAndHandlers function
+DX_TIMER_BINDING *timerSet[] = {&buttonPressCheckTimer, &ledOffOneShotTimer, &blinkLedTimer};
+
+/****************************************************************************************
+ * Implementation
+ ****************************************************************************************/
 
 /// <summary>
 /// One shot timer handler to turn off Alert LED
@@ -115,7 +141,7 @@ static void BlinkLedHandler(EventLoopTimer *eventLoopTimer)
 /// </summary>
 static void InitPeripheralsAndHandlers(void)
 {
-    dx_gpioSetOpen(gpioSet, NELEMS(gpioSet));
+    dx_gpioSetOpen(gpio_set, NELEMS(gpio_set));
     dx_timerSetStart(timerSet, NELEMS(timerSet));
 }
 
@@ -125,7 +151,7 @@ static void InitPeripheralsAndHandlers(void)
 static void ClosePeripheralsAndHandlers(void)
 {
     dx_timerSetStop(timerSet, NELEMS(timerSet));
-    dx_gpioSetClose(gpioSet, NELEMS(gpioSet));
+    dx_gpioSetClose(gpio_set, NELEMS(gpio_set));
     dx_timerEventLoopStop();
 }
 

@@ -12,13 +12,13 @@ typedef struct {
 	struct timespec period;
 	EventLoopTimer* eventLoopTimer;
 	const char* name;
-} DX_TIMER;
+} DX_TIMER_BINDING;
 
 EventLoop* dx_timerGetEventLoop(void);
-bool dx_timerChange(DX_TIMER* timer, const struct timespec* period);
-bool dx_timerOneShotSet(DX_TIMER* timer, const struct timespec* delay);
-bool dx_timerStart(DX_TIMER* timer);
-void dx_timerSetStart(DX_TIMER* timerSet[], size_t timerCount);
-void dx_timerSetStop(DX_TIMER* timerSet[], size_t timerCount);
-void dx_timerStop(DX_TIMER* timer);
+bool dx_timerChange(DX_TIMER_BINDING* timer, const struct timespec* period);
+bool dx_timerOneShotSet(DX_TIMER_BINDING* timer, const struct timespec* delay);
+bool dx_timerStart(DX_TIMER_BINDING* timer);
+void dx_timerSetStart(DX_TIMER_BINDING* timerSet[], size_t timerCount);
+void dx_timerSetStop(DX_TIMER_BINDING* timerSet[], size_t timerCount);
+void dx_timerStop(DX_TIMER_BINDING* timer);
 void dx_timerEventLoopStop(void);

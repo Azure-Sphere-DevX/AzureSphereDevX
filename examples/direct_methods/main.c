@@ -1,6 +1,16 @@
 /* Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License.
  *
+ *   DISCLAIMER
+ *
+ *   The DevX library supports the Azure Sphere Developer Learning Path:
+ *
+ *	   1. are built from the Azure Sphere SDK Samples at
+ *          https://github.com/Azure/azure-sphere-samples
+ *	   2. are not intended as a substitute for understanding the Azure Sphere SDK Samples.
+ *	   3. aim to follow best practices as demonstrated by the Azure Sphere SDK Samples.
+ *	   4. are provided as is and as a convenience to aid the Azure Sphere Developer Learning
+ *          experience.
  *
  *   DEVELOPER BOARD SELECTION
  *
@@ -14,15 +24,16 @@
  *   ENABLE YOUR DEVELOPER BOARD
  *
  *   Each Azure Sphere developer board manufacturer maps pins differently. You need to select the
- *configuration that matches your board.
+ *      configuration that matches your board.
  *
  *   Follow these steps:
  *
  *	   1. Open CMakeLists.txt.
  *	   2. Uncomment the set command that matches your developer board.
  *	   3. Click File, then Save to save the CMakeLists.txt file which will auto generate the
- *CMake Cache.
- ***/
+ *          CMake Cache.
+ * 
+ ************************************************************************************************/
 
 #include "hw/azure_sphere_learning_path.h" // Hardware definition
 
@@ -37,48 +48,63 @@
 #include <applibs/log.h>
 #include <applibs/powermanagement.h>
 
-#define IOT_PLUG_AND_PLAY_MODEL_ID \
-    "dtmi:com:example:azuresphere:labmonitor;1" // https://docs.microsoft.com/en-us/azure/iot-pnp/overview-iot-plug-and-play
+// https://docs.microsoft.com/en-us/azure/iot-pnp/overview-iot-plug-and-play
+#define IOT_PLUG_AND_PLAY_MODEL_ID "dtmi:com:example:azuresphere:labmonitor;1"
 #define NETWORK_INTERFACE "wlan0"
-#define oneMS 1000000
+#define ONE_MS 1000000
 
+// Forward declarations
 static DX_DIRECT_METHOD_RESPONSE_CODE LightControlHandler(
     JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);
-
 static DX_DIRECT_METHOD_RESPONSE_CODE RestartDeviceHandler(
     JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);
-
 static void DelayRestartDeviceTimerHandler(EventLoopTimer *eventLoopTimer);
 static void LedOffToggleHandler(EventLoopTimer *eventLoopTimer);
 
+// Variables
 DX_USER_CONFIG dx_config;
 
-// GPIO Input Peripherals
-static DX_GPIO led = {.pin = LED2,
-                      .name = "led",
-                      .direction = DX_OUTPUT,
-                      .initialState = GPIO_Value_Low,
-                      .invertPin = true};
+/****************************************************************************************
+ * GPIO Peripherals
+ ****************************************************************************************/
+static DX_GPIO_BINDING led = {.pin = LED2,
+                              .name = "led",
+                              .direction = DX_OUTPUT,
+                              .initialState = GPIO_Value_Low,
+                              .invertPin = true};
 
-// Timers
-static DX_TIMER ledOffOneShotTimer = {
-    .period = {0, 0}, .name = "ledOffOneShotTimer", .handler = LedOffToggleHandler};
+// All GPIOs added to gpio_set will be opened in InitPeripheralsAndHandlers
+DX_GPIO_BINDING *gpio_set[] = {&led};
 
-static DX_TIMER restartDeviceOneShotTimer = {.period = {0, 0},
-                                             .name = "restartDeviceOneShotTimer",
-                                             .handler = DelayRestartDeviceTimerHandler};
+/****************************************************************************************
+ * Timer Bindings
+ ****************************************************************************************/
+static DX_TIMER_BINDING led_off_oneshot_timer = {
+    .period = {0, 0}, .name = "led_off_oneshot_timer", .handler = LedOffToggleHandler};
 
-// Azure IoT Direct Methods
-static DX_DIRECT_METHOD_BINDING dm_lightControl = {.methodName = "LightControl",
-                                                   .handler = LightControlHandler};
+static DX_TIMER_BINDING restart_device_oneshot_timer = {.period = {0, 0},
+                                                        .name = "restart_device_oneshot_timer",
+                                                        .handler = DelayRestartDeviceTimerHandler};
 
-static DX_DIRECT_METHOD_BINDING dm_restartDevice = {.methodName = "RestartDevice",
-                                                    .handler = RestartDeviceHandler};
+// All timers referenced in timers with be opened in the InitPeripheralsAndHandlers function
+DX_TIMER_BINDING *timers[] = {&restart_device_oneshot_timer, &led_off_oneshot_timer};
 
-// Initialize Sets
-DX_DIRECT_METHOD_BINDING *directMethodBindingSet[] = {&dm_restartDevice, &dm_lightControl};
-DX_GPIO *gpioSet[] = {&led};
-DX_TIMER *timerSet[] = {&restartDeviceOneShotTimer, &ledOffOneShotTimer};
+/****************************************************************************************
+ * Azure IoT Direct Method Bindings
+ ****************************************************************************************/
+static DX_DIRECT_METHOD_BINDING dm_light_control = {.methodName = "LightControl",
+                                                    .handler = LightControlHandler};
+
+static DX_DIRECT_METHOD_BINDING dm_restart_device = {.methodName = "RestartDevice",
+                                                     .handler = RestartDeviceHandler};
+
+// All direct methods referenced in direct_method_bindings will be subscribed to in
+// the InitPeripheralsAndHandlers function
+DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = {&dm_restart_device, &dm_light_control};
+
+/****************************************************************************************
+ * Implementation
+ ****************************************************************************************/
 
 /// <summary>
 /// One shot timer handler to turn off Alert LED
@@ -132,7 +158,8 @@ static DX_DIRECT_METHOD_RESPONSE_CODE LightControlHandler(
 
     // If the request was to turn on then turn off after duration seconds
     if (required_argument) {
-        dx_timerOneShotSet(&ledOffOneShotTimer, &(struct timespec){requested_duration_seconds, 0});
+        dx_timerOneShotSet(&led_off_oneshot_timer,
+                           &(struct timespec){requested_duration_seconds, 0});
     }
 
     return DX_METHOD_SUCCEEDED;
@@ -156,8 +183,9 @@ static void DelayRestartDeviceTimerHandler(EventLoopTimer *eventLoopTimer)
 static DX_DIRECT_METHOD_RESPONSE_CODE RestartDeviceHandler(
     JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg)
 {
-    const size_t responseLen = 100; // Allocate and initialize a response message buffer. The
-                                    // calling function is responsible for the freeing memory
+    // Allocate and initialize a response message buffer. The
+    // calling function is responsible for the freeing memory
+    const size_t responseLen = 100;
     static struct timespec period;
 
     *responseMsg = (char *)malloc(responseLen);
@@ -169,16 +197,16 @@ static DX_DIRECT_METHOD_RESPONSE_CODE RestartDeviceHandler(
 
     int seconds = (int)json_value_get_number(json);
 
-    // leave enough time for the device twin dt_reportedRestartUtc to update before restarting the
-    // device
+    // leave enough time for the device twin dt_reportedRestartUtc
+    // to update before restarting the device
     if (seconds > 2 && seconds < 10) {
         // Create Direct Method Response
         snprintf(*responseMsg, responseLen, "%s called. Restart in %d seconds",
                  directMethodBinding->methodName, seconds);
 
-        // Set One Shot DX_TIMER
+        // Set One Shot DX_TIMER_BINDING
         period = (struct timespec){.tv_sec = seconds, .tv_nsec = 0};
-        dx_timerOneShotSet(&restartDeviceOneShotTimer, &period);
+        dx_timerOneShotSet(&restart_device_oneshot_timer, &period);
 
         return DX_METHOD_SUCCEEDED;
     } else {
@@ -195,9 +223,9 @@ static DX_DIRECT_METHOD_RESPONSE_CODE RestartDeviceHandler(
 static void InitPeripheralsAndHandlers(void)
 {
     dx_azureConnect(&dx_config, NETWORK_INTERFACE, IOT_PLUG_AND_PLAY_MODEL_ID);
-    dx_timerSetStart(timerSet, NELEMS(timerSet));
-    dx_gpioSetOpen(gpioSet, NELEMS(gpioSet));
-    dx_directMethodSubscribe(directMethodBindingSet, NELEMS(directMethodBindingSet));
+    dx_timerSetStart(timers, NELEMS(timers));
+    dx_gpioSetOpen(gpio_set, NELEMS(gpio_set));
+    dx_directMethodSubscribe(direct_method_bindings, NELEMS(direct_method_bindings));
 }
 
 /// <summary>
@@ -205,17 +233,15 @@ static void InitPeripheralsAndHandlers(void)
 /// </summary>
 static void ClosePeripheralsAndHandlers(void)
 {
-    dx_timerSetStop(timerSet, NELEMS(timerSet));
-    dx_gpioSetClose(gpioSet, NELEMS(gpioSet));
+    dx_timerSetStop(timers, NELEMS(timers));
+    dx_gpioSetClose(gpio_set, NELEMS(gpio_set));
     dx_directMethodUnsubscribe();
-
     dx_timerEventLoopStop();
 }
 
 int main(int argc, char *argv[])
 {
     dx_registerTerminationHandler();
-
     if (!dx_configParseCmdLineArguments(argc, argv, &dx_config)) {
         return dx_getTerminationExitCode();
     }
@@ -231,6 +257,5 @@ int main(int argc, char *argv[])
     }
 
     ClosePeripheralsAndHandlers();
-    Log_Debug("Application exiting.\n");
     return dx_getTerminationExitCode();
 }

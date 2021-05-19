@@ -13,7 +13,7 @@ EventLoop *dx_timerGetEventLoop(void)
     return eventLoop;
 }
 
-bool dx_timerChange(DX_TIMER *timer, const struct timespec *period)
+bool dx_timerChange(DX_TIMER_BINDING *timer, const struct timespec *period)
 {
     if (timer->eventLoopTimer == NULL) {
         return false;
@@ -25,7 +25,7 @@ bool dx_timerChange(DX_TIMER *timer, const struct timespec *period)
     return result == 0 ? true : false;
 }
 
-bool dx_timerStart(DX_TIMER *timer)
+bool dx_timerStart(DX_TIMER_BINDING *timer)
 {
     EventLoop *eventLoop = dx_timerGetEventLoop();
     if (eventLoop == NULL) {
@@ -37,7 +37,7 @@ bool dx_timerStart(DX_TIMER *timer)
     }
 
     if (timer->period.tv_nsec == 0 &&
-        timer->period.tv_sec == 0) { // Set up a disabled DX_TIMER for oneshot or change timer
+        timer->period.tv_sec == 0) { // Set up a disabled DX_TIMER_BINDING for oneshot or change timer
         timer->eventLoopTimer = CreateEventLoopDisarmedTimer(eventLoop, timer->handler);
         if (timer->eventLoopTimer == NULL) {
             return false;
@@ -53,7 +53,7 @@ bool dx_timerStart(DX_TIMER *timer)
     return true;
 }
 
-void dx_timerStop(DX_TIMER *timer)
+void dx_timerStop(DX_TIMER_BINDING *timer)
 {
     if (timer->eventLoopTimer != NULL) {
         DisposeEventLoopTimer(timer->eventLoopTimer);
@@ -61,7 +61,7 @@ void dx_timerStop(DX_TIMER *timer)
     }
 }
 
-void dx_timerSetStart(DX_TIMER *timerSet[], size_t timerCount)
+void dx_timerSetStart(DX_TIMER_BINDING *timerSet[], size_t timerCount)
 {
     for (int i = 0; i < timerCount; i++) {
         if (!dx_timerStart(timerSet[i])) {
@@ -70,7 +70,7 @@ void dx_timerSetStart(DX_TIMER *timerSet[], size_t timerCount)
     }
 }
 
-void dx_timerSetStop(DX_TIMER *timerSet[], size_t timerCount)
+void dx_timerSetStop(DX_TIMER_BINDING *timerSet[], size_t timerCount)
 {
     for (int i = 0; i < timerCount; i++) {
         dx_timerStop(timerSet[i]);
@@ -85,7 +85,7 @@ void dx_timerEventLoopStop(void)
     }
 }
 
-bool dx_timerOneShotSet(DX_TIMER *timer, const struct timespec *period)
+bool dx_timerOneShotSet(DX_TIMER_BINDING *timer, const struct timespec *period)
 {
     if (timer->eventLoopTimer == NULL || timer->handler == NULL || period == NULL) {
         return false;

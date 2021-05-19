@@ -39,13 +39,13 @@ struct _dx_gpio
 	bool opened;
 };
 
-typedef struct _dx_gpio DX_GPIO;
+typedef struct _dx_gpio DX_GPIO_BINDING;
 
-bool dx_gpioOpen(DX_GPIO* gpio);
-bool dx_gpioStateGet(DX_GPIO* gpio, GPIO_Value_Type* oldState);
-void dx_gpioClose(DX_GPIO* gpio);
-void dx_gpioOff(DX_GPIO* gpio);
-void dx_gpioOn(DX_GPIO* gpio);
-void dx_gpioSetClose(DX_GPIO** gpioSet, size_t gpioSetCount);
-void dx_gpioSetOpen(DX_GPIO** gpioSet, size_t gpioSetCount);
-void dx_gpioStateSet(DX_GPIO* gpio, bool state);
+bool dx_gpioOpen(DX_GPIO_BINDING* gpio);
+bool dx_gpioStateGet(DX_GPIO_BINDING* gpio, GPIO_Value_Type* oldState);
+void dx_gpioClose(DX_GPIO_BINDING* gpio);
+void dx_gpioOff(DX_GPIO_BINDING* gpio);
+void dx_gpioOn(DX_GPIO_BINDING* gpio);
+void dx_gpioSetClose(DX_GPIO_BINDING** gpioSet, size_t gpioSetCount);
+void dx_gpioSetOpen(DX_GPIO_BINDING** gpioSet, size_t gpioSetCount);
+void dx_gpioStateSet(DX_GPIO_BINDING* gpio, bool state);

@@ -1,6 +1,17 @@
 /* Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License.
  *
+ *   DISCLAIMER
+ *
+ *   The DevX library supports the Azure Sphere Developer Learning Path:
+ *
+ *	   1. are built from the Azure Sphere SDK Samples at
+ *          https://github.com/Azure/azure-sphere-samples
+ *	   2. are not intended as a substitute for understanding the Azure Sphere SDK Samples.
+ *	   3. aim to follow best practices as demonstrated by the Azure Sphere SDK Samples.
+ *	   4. are provided as is and as a convenience to aid the Azure Sphere Developer Learning
+ *          experience.
+ *
  *   DEVELOPER BOARD SELECTION
  *
  *   The following developer boards are supported.
@@ -13,15 +24,16 @@
  *   ENABLE YOUR DEVELOPER BOARD
  *
  *   Each Azure Sphere developer board manufacturer maps pins differently. You need to select the
- *configuration that matches your board.
+ *      configuration that matches your board.
  *
  *   Follow these steps:
  *
  *	   1. Open CMakeLists.txt.
  *	   2. Uncomment the set command that matches your developer board.
  *	   3. Click File, then Save to save the CMakeLists.txt file which will auto generate the
- *CMake Cache.
- **/
+ *          CMake Cache.
+ *
+ ************************************************************************************************/
 
 #include "hw/azure_sphere_learning_path.h" // Hardware definition
 
@@ -31,20 +43,26 @@
 #include "dx_utilities.h"
 #include <applibs/log.h>
 
-#define oneMS 1000000
+#define ONE_MS 1000000
 
 static void PeriodicHandler(EventLoopTimer *eventLoopTimer);
 static void oneShotHandler(EventLoopTimer *eventLoopTimer);
 
-// Timers
-static DX_TIMER periodicTimer = {
+/****************************************************************************************
+ * Timer Bindings
+ ****************************************************************************************/
+static DX_TIMER_BINDING periodicTimer = {
     .period = {6, 0}, .name = "periodicTimer", .handler = PeriodicHandler};
 
 // a timer with no period specified or a zero period are initialized as oneshot timers
-static DX_TIMER oneShotTimer = {.name = "oneShotTimer", .handler = oneShotHandler};
+static DX_TIMER_BINDING oneShotTimer = {.name = "oneShotTimer", .handler = oneShotHandler};
 
-// Initialize Sets
-DX_TIMER *timerSet[] = {&periodicTimer, &oneShotTimer};
+// All timers referenced in timers with be opened in the InitPeripheralsAndHandlers function
+DX_TIMER_BINDING *timers[] = {&periodicTimer, &oneShotTimer};
+
+/****************************************************************************************
+ * Implementation
+ ****************************************************************************************/
 
 /// <summary>
 /// One shot timer handler example
@@ -57,7 +75,7 @@ static void oneShotHandler(EventLoopTimer *eventLoopTimer)
     }
     Log_Debug("Hello from the oneshot timer. Reloading the oneshot timer period\n");
     // The oneshot timer will trigger again in 2.5 seconds
-    dx_timerOneShotSet(&oneShotTimer, &(struct timespec){2, 500 * oneMS});
+    dx_timerOneShotSet(&oneShotTimer, &(struct timespec){2, 500 * ONE_MS});
 }
 
 /// <summary>
@@ -77,9 +95,9 @@ static void PeriodicHandler(EventLoopTimer *eventLoopTimer)
 /// </summary>
 static void InitPeripheralsAndHandlers(void)
 {
-    dx_timerSetStart(timerSet, NELEMS(timerSet));
+    dx_timerSetStart(timers, NELEMS(timers));
     // set the oneshot timer to fire
-    dx_timerOneShotSet(&oneShotTimer, &(struct timespec){2, 500 * oneMS});
+    dx_timerOneShotSet(&oneShotTimer, &(struct timespec){2, 500 * ONE_MS});
 }
 
 /// <summary>
@@ -87,7 +105,7 @@ static void InitPeripheralsAndHandlers(void)
 /// </summary>
 static void ClosePeripheralsAndHandlers(void)
 {
-    dx_timerSetStop(timerSet, NELEMS(timerSet));
+    dx_timerSetStop(timers, NELEMS(timers));
     dx_timerEventLoopStop();
 }
 
@@ -106,6 +124,5 @@ int main(void)
     }
 
     ClosePeripheralsAndHandlers();
-    Log_Debug("Application exiting.\n");
     return dx_getTerminationExitCode();
 }

@@ -3,7 +3,7 @@
 
 #include "dx_gpio.h"
 
-bool dx_gpioOpen(DX_GPIO *peripheral)
+bool dx_gpioOpen(DX_GPIO_BINDING *peripheral)
 {
     if (peripheral == NULL || peripheral->pin < 0) {
         return false;
@@ -56,7 +56,7 @@ bool dx_gpioOpen(DX_GPIO *peripheral)
     return true;
 }
 
-void dx_gpioSetOpen(DX_GPIO **gpioSet, size_t gpioSetCount)
+void dx_gpioSetOpen(DX_GPIO_BINDING **gpioSet, size_t gpioSetCount)
 {
     for (int i = 0; i < gpioSetCount; i++) {
         if (!dx_gpioOpen(gpioSet[i])) {
@@ -70,7 +70,7 @@ void dx_gpioSetOpen(DX_GPIO **gpioSet, size_t gpioSetCount)
 /// </summary>
 /// <param name="fd">File descriptor to close</param>
 /// <param name="fdName">File descriptor name to use in error message</param>
-void dx_gpioClose(DX_GPIO *peripheral)
+void dx_gpioClose(DX_GPIO_BINDING *peripheral)
 {
     if (peripheral->opened && peripheral->fd >= 0) {
         int result = close(peripheral->fd);
@@ -84,14 +84,14 @@ void dx_gpioClose(DX_GPIO *peripheral)
     peripheral->opened = false;
 }
 
-void dx_gpioSetClose(DX_GPIO **gpioSet, size_t gpioSetCount)
+void dx_gpioSetClose(DX_GPIO_BINDING **gpioSet, size_t gpioSetCount)
 {
     for (int i = 0; i < gpioSetCount; i++) {
         dx_gpioClose(gpioSet[i]);
     }
 }
 
-void dx_gpioOn(DX_GPIO *peripheral)
+void dx_gpioOn(DX_GPIO_BINDING *peripheral)
 {
     if (peripheral == NULL || !peripheral->opened) {
         dx_terminate(DX_ExitCode_Gpio_Not_Initialized);
@@ -101,7 +101,7 @@ void dx_gpioOn(DX_GPIO *peripheral)
     GPIO_SetValue(peripheral->fd, peripheral->invertPin ? GPIO_Value_Low : GPIO_Value_High);
 }
 
-void dx_gpioOff(DX_GPIO *peripheral)
+void dx_gpioOff(DX_GPIO_BINDING *peripheral)
 {
     if (peripheral == NULL || !peripheral->opened) {
         dx_terminate(DX_ExitCode_Gpio_Not_Initialized);
@@ -111,7 +111,7 @@ void dx_gpioOff(DX_GPIO *peripheral)
     GPIO_SetValue(peripheral->fd, peripheral->invertPin ? GPIO_Value_High : GPIO_Value_Low);
 }
 
-void dx_gpioStateSet(DX_GPIO *peripheral, bool state)
+void dx_gpioStateSet(DX_GPIO_BINDING *peripheral, bool state)
 {
     if (state) {
         dx_gpioOn(peripheral);
@@ -121,9 +121,9 @@ void dx_gpioStateSet(DX_GPIO *peripheral, bool state)
 }
 
 /// <summary>
-/// Read Button DX_GPIO returns state
+/// Read Button DX_GPIO_BINDING returns state
 /// </summary>
-bool dx_gpioStateGet(DX_GPIO *peripheral, GPIO_Value_Type *oldState)
+bool dx_gpioStateGet(DX_GPIO_BINDING *peripheral, GPIO_Value_Type *oldState)
 {
     bool isGpioOn = false;
     GPIO_Value_Type newState;

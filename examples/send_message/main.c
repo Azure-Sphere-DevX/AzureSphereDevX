@@ -1,6 +1,17 @@
 /* Copyright (c) Microsoft Corporation. All rights reserved.
  * Licensed under the MIT License.
  *
+ *   DISCLAIMER
+ *
+ *   The DevX library supports the Azure Sphere Developer Learning Path:
+ *
+ *	   1. are built from the Azure Sphere SDK Samples at
+ *          https://github.com/Azure/azure-sphere-samples
+ *	   2. are not intended as a substitute for understanding the Azure Sphere SDK Samples.
+ *	   3. aim to follow best practices as demonstrated by the Azure Sphere SDK Samples.
+ *	   4. are provided as is and as a convenience to aid the Azure Sphere Developer Learning
+ *          experience.
+ *
  *   DEVELOPER BOARD SELECTION
  *
  *   The following developer boards are supported.
@@ -13,15 +24,16 @@
  *   ENABLE YOUR DEVELOPER BOARD
  *
  *   Each Azure Sphere developer board manufacturer maps pins differently. You need to select the
- *configuration that matches your board.
+ *      configuration that matches your board.
  *
  *   Follow these steps:
  *
  *	   1. Open CMakeLists.txt.
  *	   2. Uncomment the set command that matches your developer board.
  *	   3. Click File, then Save to save the CMakeLists.txt file which will auto generate the
- *CMake Cache.
- */
+ *          CMake Cache.
+ *
+ ************************************************************************************************/
 
 #include "hw/azure_sphere_learning_path.h" // Hardware definition
 
@@ -37,11 +49,19 @@
 // https://docs.microsoft.com/en-us/azure/iot-pnp/overview-iot-plug-and-play
 #define IOT_PLUG_AND_PLAY_MODEL_ID "dtmi:com:example:azuresphere:labmonitor;1"
 #define NETWORK_INTERFACE "wlan0"
+
+// Forward declarations
+static void publish_message_handler(EventLoopTimer *eventLoopTimer);
+
 // Number of bytes to allocate for the JSON telemetry message for IoT Hub/Central
 #define JSON_MESSAGE_BYTES 256
 static char msgBuffer[JSON_MESSAGE_BYTES] = {0};
 
-// Message templates and property sets
+DX_USER_CONFIG dx_config;
+
+/****************************************************************************************
+ * Telemetry message templates and property sets
+ ****************************************************************************************/
 static const char *msgTemplate =
     "{ \"Temperature\":%3.2f, \"Humidity\":%3.1f, \"Pressure\":%3.1f }";
 
@@ -53,16 +73,18 @@ static DX_MESSAGE_PROPERTY *messageProperties[] = {
 static DX_MESSAGE_CONTENT_PROPERTIES contentProperties = {.contentEncoding = "utf-8",
                                                           .contentType = "application/json"};
 
-static void publish_message_handler(EventLoopTimer *eventLoopTimer);
-
-DX_USER_CONFIG dx_config;
-
-// Timers - both are set to trigger every 5 seconds
-static DX_TIMER publish_message = {
+/****************************************************************************************
+ * Timer Bindings
+ ****************************************************************************************/
+static DX_TIMER_BINDING publish_message = {
     .period = {5, 0}, .name = "publish_message", .handler = publish_message_handler};
 
-// Add all timers by reference to this timer set
-DX_TIMER *timerSet[] = {&publish_message};
+// All timers referenced in timers with be opened in the InitPeripheralsAndHandlers function
+DX_TIMER_BINDING *timers[] = {&publish_message};
+
+/****************************************************************************************
+ * Implementation
+ ****************************************************************************************/
 
 static void publish_message_handler(EventLoopTimer *eventLoopTimer)
 {
@@ -85,7 +107,7 @@ static void publish_message_handler(EventLoopTimer *eventLoopTimer)
 static void InitPeripheralsAndHandlers(void)
 {
     dx_azureConnect(&dx_config, NETWORK_INTERFACE, IOT_PLUG_AND_PLAY_MODEL_ID);
-    dx_timerSetStart(timerSet, NELEMS(timerSet));
+    dx_timerSetStart(timers, NELEMS(timers));
 }
 
 /// <summary>
@@ -93,7 +115,7 @@ static void InitPeripheralsAndHandlers(void)
 /// </summary>
 static void ClosePeripheralsAndHandlers(void)
 {
-    dx_timerSetStop(timerSet, NELEMS(timerSet));
+    dx_timerSetStop(timers, NELEMS(timers));
     dx_timerEventLoopStop();
 }
 

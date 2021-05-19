@@ -56,7 +56,7 @@ static IoTHubClientAuthenticationState iotHubClientAuthenticationState =
 
 static PROV_DEVICE_RESULT dpsRegisterStatus = PROV_DEVICE_RESULT_INVALID_STATE;
 
-static DX_TIMER cloudToDeviceTimer = {.period = {0, 0}, // one-shot timer
+static DX_TIMER_BINDING cloudToDeviceTimer = {.period = {0, 0}, // one-shot timer
                                       .name = "Cloud2DeviceDoWork",
                                       .handler = &AzureCloudToDeviceHandler};
 
