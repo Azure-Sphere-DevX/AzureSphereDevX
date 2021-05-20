@@ -15,6 +15,7 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE iothubClientHandle = NULL;
 static char *iotHubUri = NULL;
 static const char *_networkInterface = NULL;
 static DX_USER_CONFIG *_userConfig = NULL;
+static int outstandingMessageCount = 0;
 
 static char *_pnpModelIdJson = NULL;
 static const char *_pnpModelId = NULL;
@@ -154,6 +155,7 @@ bool dx_isAzureConnected(void)
 /// <param name="context">User specified context</param>
 static void SendMessageCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void *context)
 {
+    outstandingMessageCount--;
 #if DX_LOGGING_ENABLED
     Log_Debug("INFO: Message received by IoT Hub. Result is: %d\n", result);
 #endif
@@ -213,20 +215,9 @@ bool dx_azurePublish(const void *message, size_t messageLength,
         return false;
     }
 
-    // If content type is mime type "application/octet-stream" then create a binary array message
-    // else default to creating a string message
-    if (messageContentProperties != NULL &&
-        !dx_isStringNullOrEmpty(messageContentProperties->contentType)) {
-        if (strcmp(messageContentProperties->contentType, "application/octet-stream") == 0) {
-            messageHandle = IoTHubMessage_CreateFromByteArray(message, messageLength);
-        } else {
-            messageHandle = IoTHubMessage_CreateFromString(message);
-        }
-    } else {
-        messageHandle = IoTHubMessage_CreateFromString(message);
-    }
+    messageHandle = IoTHubMessage_CreateFromByteArray(message, messageLength);
 
-    if (messageHandle == 0) {
+    if (messageHandle == NULL) {
         Log_Debug("ERROR: unable to create a new IoTHubMessage\n");
         return false;
     }
@@ -274,6 +265,8 @@ bool dx_azurePublish(const void *message, size_t messageLength,
              iothubClientHandle, messageHandle, SendMessageCallback,
              /*&callback_param*/ 0)) != IOTHUB_CLIENT_OK) {
         Log_Debug("ERROR: failed to hand over the message to IoTHubClient\n");
+    } else {
+        outstandingMessageCount++;
     }
 
     IoTHubMessage_Destroy(messageHandle);
