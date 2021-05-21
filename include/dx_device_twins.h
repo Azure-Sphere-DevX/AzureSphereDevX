@@ -8,6 +8,8 @@
 #include "dx_gpio.h"
 #include <iothub_device_client_ll.h>
 
+#define MAX_DEVICE_TWIN_PAYLOAD_SIZE 512
+
 typedef enum {
 	DX_TYPE_UNKNOWN = 0,
 	DX_TYPE_BOOL = 1,
