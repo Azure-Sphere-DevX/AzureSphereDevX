@@ -27,7 +27,8 @@ typedef enum {
 	DX_ExitCode_ButtonPressCheckHandler = 21,
 	DX_ExitCode_Led2OffHandler = 22,
 
-	DX_ExitCode_MissingRealTimeComponentId = 23,	
+	DX_ExitCode_MissingRealTimeComponentId = 23,
+    DX_ExitCode_DeviceTwinPayloadTooLong = 24,
 
 	DX_ExitCode_Validate_Hostname_Not_Defined = 30,
     DX_ExitCode_Validate_ScopeId_Not_Defined = 31,

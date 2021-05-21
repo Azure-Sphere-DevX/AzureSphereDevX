@@ -27,6 +27,8 @@
 #include <time.h>
 #include "iothub_client_core_common.h"
 
+#define MAX_DEVICE_TWIN_PAYLOAD_SIZE 512
+
 typedef struct DX_MESSAGE_PROPERTY
 {
 	const char* key;
