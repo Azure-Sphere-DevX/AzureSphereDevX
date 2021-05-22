@@ -78,7 +78,7 @@ static void IntercoreSendMessageHandler(EventLoopTimer *eventLoopTimer);
 LP_INTER_CORE_BLOCK ic_control_block_app_one = {.cmd = LP_IC_UNKNOWN, .msgId = 0, .message = {0}};
 LP_INTER_CORE_BLOCK ic_control_block_app_two = {.cmd = LP_IC_UNKNOWN, .msgId = 0, .message = {0}};
 
-INTERCORE_CONTEXT intercore_ctx_app_one = {
+DX_INTERCORE_BINDING intercore_app_one = {
     .sockFd = -1,
     .nonblocking_io = true,
     .rtAppComponentId = REAL_TIME_COMPONENT_ID_APP_ONE,
@@ -86,7 +86,7 @@ INTERCORE_CONTEXT intercore_ctx_app_one = {
     .intercore_recv_block = &ic_control_block_app_one,
     .intercore_recv_block_length = sizeof(ic_control_block_app_one)};
 
-INTERCORE_CONTEXT intercore_ctx_app_two = {
+DX_INTERCORE_BINDING intercore_app_two = {
     .sockFd = -1,
     .nonblocking_io = true,
     .rtAppComponentId = REAL_TIME_COMPONENT_ID_APP_TWO,
@@ -114,14 +114,14 @@ static void IntercoreSendMessageHandler(EventLoopTimer *eventLoopTimer)
     ic_control_block_app_one.cmd = LP_IC_ECHO;
     strcpy(ic_control_block_app_one.message, REAL_TIME_COMPONENT_ID_APP_ONE);
 
-    dx_interCoreSendMessage(&intercore_ctx_app_one, &ic_control_block_app_one,
+    dx_intercorePublish(&intercore_app_one, &ic_control_block_app_one,
                             sizeof(LP_INTER_CORE_BLOCK));
 
     // send echo message to realtime core app two
     ic_control_block_app_two.cmd = LP_IC_ECHO;
     strcpy(ic_control_block_app_two.message, REAL_TIME_COMPONENT_ID_APP_TWO);
 
-    dx_interCoreSendMessage(&intercore_ctx_app_two, &ic_control_block_app_two,
+    dx_intercorePublish(&intercore_app_two, &ic_control_block_app_two,
                             sizeof(LP_INTER_CORE_BLOCK));
 }
 
@@ -151,10 +151,10 @@ static void InitPeripheralAndHandlers(void)
     dx_timerSetStart(timerSet, NELEMS(timerSet));
 
     // Initialize Intercore Communications for core one
-    dx_interCoreCommunicationsEnable(&intercore_ctx_app_one);
+    dx_intercoreConnect(&intercore_app_one);
 
     // Initialize Intercore Communications for core two
-    dx_interCoreCommunicationsEnable(&intercore_ctx_app_two);
+    dx_intercoreConnect(&intercore_app_two);
 }
 
 /// <summary>

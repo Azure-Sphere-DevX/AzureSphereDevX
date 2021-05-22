@@ -94,21 +94,12 @@ void dx__deviceTwinCallbackHandler(DEVICE_TWIN_UPDATE_STATE updateState,
     JSON_Value *root_value = NULL;
     JSON_Object *root_object = NULL;
 
-    if (payloadSize > MAX_DEVICE_TWIN_PAYLOAD_SIZE) {
-        Log_Debug("ERROR: Device twin payload size (%u bytes) exceeds maximum (%u bytes).\n",
-                  payloadSize, MAX_DEVICE_TWIN_PAYLOAD_SIZE);
-
-        dx_terminate(DX_ExitCode_DeviceTwinPayloadTooLong);
-        return;
+    char *payLoadString = (char *)malloc(payloadSize + 1);
+    if (payLoadString == NULL) {
+        goto cleanup;
     }
 
-    //char *payLoadString = (char *)malloc(payloadSize + 1);
-    //if (payLoadString == NULL) {
-    //    goto cleanup;
-    //}
-
-    // Statically allocate this for more predictable memory use patterns
-    static char payLoadString[MAX_DEVICE_TWIN_PAYLOAD_SIZE + 1];
+    memset(payLoadString, 0x00, payloadSize + 1);
 
     memcpy(payLoadString, payload, payloadSize);
     payLoadString[payloadSize] = 0; // null terminate string
@@ -142,10 +133,10 @@ cleanup:
         json_value_free(root_value);
     }
 
-    //if (payLoadString != NULL) {
-    //    free(payLoadString);
-    //    payLoadString = NULL;
-    //}
+    if (payLoadString != NULL) {
+        free(payLoadString);
+        payLoadString = NULL;
+    }
 }
 
 /// <summary>

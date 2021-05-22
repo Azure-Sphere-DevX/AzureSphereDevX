@@ -25,7 +25,7 @@ typedef struct {
 	void (*interCoreCallback)(void*, ssize_t message_size);
 	void* intercore_recv_block;
 	size_t intercore_recv_block_length;
-} INTERCORE_CONTEXT;
+} DX_INTERCORE_BINDING;
 
-bool dx_interCoreSendMessage(INTERCORE_CONTEXT* intercore_ctx, void* control_block, size_t message_length);
-bool dx_interCoreCommunicationsEnable(INTERCORE_CONTEXT* intercore_ctx);
+bool dx_intercorePublish(DX_INTERCORE_BINDING* intercore_binding, void* control_block, size_t message_length);
+bool dx_intercoreConnect(DX_INTERCORE_BINDING* intercore_binding);
