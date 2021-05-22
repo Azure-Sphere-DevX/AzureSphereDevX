@@ -53,19 +53,6 @@ bool dx_deviceTwinAckDesiredState(DX_DEVICE_TWIN_BINDING* deviceTwinBinding, voi
 bool dx_deviceTwinReportState(DX_DEVICE_TWIN_BINDING* deviceTwinBinding, void* state);
 
 /// <summary>
-/// Close and deallocate the backing memory for the device twin.
-/// </summary>
-/// <param name="deviceTwinBinding"></param>
-// void dx_deviceTwinClose(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
-
-/// <summary>
-/// Open and initialise device twins. 
-/// On receipt of a device twin message, the array of device twins will be checked and the handler called if a match found.
-/// </summary>
-/// <param name="deviceTwinBinding"></param>
-// void dx_deviceTwinOpen(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
-
-/// <summary>
 /// Close all device twins, deallocate backing storage for each twin, and stop inbound and outbound device twin updates.
 /// </summary>
 /// <param name=""></param>
