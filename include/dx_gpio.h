@@ -27,7 +27,7 @@ typedef enum {
 	DX_GPIO_DETECT_BOTH
 } DX_GPIO_INPUT_DETECT;
 
-struct _dx_gpio
+typedef struct
 {
 	int fd;
 	int pin;
@@ -37,9 +37,7 @@ struct _dx_gpio
 	char* name;
 	DX_GPIO_DIRECTION direction;
 	bool opened;
-};
-
-typedef struct _dx_gpio DX_GPIO_BINDING;
+} DX_GPIO_BINDING;
 
 bool dx_gpioOpen(DX_GPIO_BINDING* gpio);
 bool dx_gpioStateGet(DX_GPIO_BINDING* gpio, GPIO_Value_Type* oldState);
