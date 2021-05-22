@@ -17,14 +17,14 @@ typedef enum {
 	DX_TYPE_STRING = 5
 } DX_DEVICE_TWIN_TYPE;
 
-struct _deviceTwinBinding {
+typedef struct _deviceTwinBinding {
 	const char* twinProperty;
 	void* twinState;
 	int twinVersion;
 	bool twinStateUpdated;
 	DX_DEVICE_TWIN_TYPE twinType;
 	void (*handler)(struct _deviceTwinBinding* deviceTwinBinding);
-};
+} DX_DEVICE_TWIN_BINDING;
 
 typedef enum
 {
@@ -33,7 +33,7 @@ typedef enum
 	DX_DEVICE_TWIN_INVALID = 404
 } DX_DEVICE_TWIN_RESPONSE_CODE;
 
-typedef struct _deviceTwinBinding DX_DEVICE_TWIN_BINDING;
+//typedef struct _deviceTwinBinding DX_DEVICE_TWIN_BINDING;
 
 /// <summary>
 /// Acknowledge receipt of a device twin message with new state and status code.
