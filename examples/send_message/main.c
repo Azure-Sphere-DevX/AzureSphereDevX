@@ -92,12 +92,15 @@ static void publish_message_handler(EventLoopTimer *eventLoopTimer)
         dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
         return;
     }
-    // Create JSON message
-    if (snprintf(msgBuffer, sizeof(msgBuffer), msgTemplate, 30.0, 60.0, 1010.0) > 0) {
-        Log_Debug("%s\n", msgBuffer);
 
-        dx_azurePublish(msgBuffer, strlen(msgBuffer), messageProperties, NELEMS(messageProperties),
-                        &contentProperties);
+    if (dx_isAzureConnected()) {
+        // Create JSON message
+        if (snprintf(msgBuffer, sizeof(msgBuffer), msgTemplate, 30.0, 60.0, 1010.0) > 0) {
+            Log_Debug("%s\n", msgBuffer);
+
+            dx_azurePublish(msgBuffer, strlen(msgBuffer), messageProperties,
+                            NELEMS(messageProperties), &contentProperties);
+        }
     }
 }
 
