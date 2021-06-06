@@ -1,11 +1,11 @@
 #include "dx_azure_iot.h"
 
-static bool SetUpAzureIoTHubClientWithDaaDpsPnP(void);
 static bool SetupAzureClient(void);
 static bool SetUpAzureIoTHubClientWithDaa(void);
+static bool SetUpAzureIoTHubClientWithDaaDpsPnP(void);
 static const char *GetMessageResultReasonString(IOTHUB_MESSAGE_RESULT reason);
 static const char *GetReasonString(IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason);
-static void AzureCloudToDeviceHandler(EventLoopTimer *);
+static void AzureConnectionHandler(EventLoopTimer *eventLoopTimer);
 static void HubConnectionStatusCallback(IOTHUB_CLIENT_CONNECTION_STATUS,
                                         IOTHUB_CLIENT_CONNECTION_STATUS_REASON, void *);
 static void SendMessageCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT, void *);
@@ -57,22 +57,22 @@ static IoTHubClientAuthenticationState iotHubClientAuthenticationState =
 
 static PROV_DEVICE_RESULT dpsRegisterStatus = PROV_DEVICE_RESULT_INVALID_STATE;
 
-static DX_TIMER_BINDING cloudToDeviceTimer = {.period = {0, 0}, // one-shot timer
-                                      .name = "Cloud2DeviceDoWork",
-                                      .handler = &AzureCloudToDeviceHandler};
+static DX_TIMER_BINDING azureConnectionTimer = {.period = {0, 0}, // one-shot timer
+                                      .name = "azureConnectionTimer",
+                                      .handler = &AzureConnectionHandler};
 
 static void dx_azureToDeviceStart(void)
 {
-    if (cloudToDeviceTimer.eventLoopTimer == NULL) {
-        dx_timerStart(&cloudToDeviceTimer);
-        dx_timerOneShotSet(&cloudToDeviceTimer, &(struct timespec){1, 0});
+    if (azureConnectionTimer.eventLoopTimer == NULL) {
+        dx_timerStart(&azureConnectionTimer);
+        dx_timerOneShotSet(&azureConnectionTimer, &(struct timespec){1, 0});
     }
 }
 
 void dx_azureToDeviceStop(void)
 {
-    if (cloudToDeviceTimer.eventLoopTimer != NULL) {
-        dx_timerStop(&cloudToDeviceTimer);
+    if (azureConnectionTimer.eventLoopTimer != NULL) {
+        dx_timerStop(&azureConnectionTimer);
     }
 }
 
@@ -164,9 +164,9 @@ static void SendMessageCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT result, void *
 /// <summary>
 ///     Azure IoT Hub DoWork Handler with back off up to 5 seconds for network disconnect
 /// </summary>
-static void AzureCloudToDeviceHandler(EventLoopTimer *eventLoopTimer)
+static void AzureConnectionHandler(EventLoopTimer *eventLoopTimer)
 {
-    static int period = 1; //  initialize period to 1 second
+    struct timespec nextEventPeriod = {0, 0};
 
     if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
         dx_terminate(DX_ExitCode_AzureCloudToDeviceHandler);
@@ -183,19 +183,24 @@ static void AzureCloudToDeviceHandler(EventLoopTimer *eventLoopTimer)
     switch (iotHubClientAuthenticationState) {
     case IoTHubClientAuthenticationState_NotAuthenticated:
         SetupAzureClient();
+        nextEventPeriod = (struct timespec){1, 0};
         break;
     case IoTHubClientAuthenticationState_AuthenticationInitiated:
+        IoTHubDeviceClient_LL_DoWork(iothubClientHandle);
+        nextEventPeriod = (struct timespec){1, 0};
+        break;
     case IoTHubClientAuthenticationState_Authenticated:
         IoTHubDeviceClient_LL_DoWork(iothubClientHandle);
-        period = 1;
+        nextEventPeriod = (struct timespec){0, 100000000};
         break;
     case IoTHubClientAuthenticationState_Device_Disbled:
         iotHubClientAuthenticationState = IoTHubClientAuthenticationState_NotAuthenticated;
         deviceConnectionState = DEVICE_NOT_CONNECTED;
+        nextEventPeriod = (struct timespec){1, 0};
         break;
     }
 
-    dx_timerOneShotSet(&cloudToDeviceTimer, &(struct timespec){period, 0});
+    dx_timerOneShotSet(&azureConnectionTimer, &nextEventPeriod);
 }
 
 bool dx_azurePublish(const void *message, size_t messageLength,
@@ -271,7 +276,7 @@ bool dx_azurePublish(const void *message, size_t messageLength,
 
     IoTHubMessage_Destroy(messageHandle);
 
-    IoTHubDeviceClient_LL_DoWork(iothubClientHandle);
+    //IoTHubDeviceClient_LL_DoWork(iothubClientHandle);
 
     return result == IOTHUB_CLIENT_OK;
 }
