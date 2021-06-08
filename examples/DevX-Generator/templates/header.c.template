@@ -1,0 +1,51 @@
+#include "dx_azure_iot.h"
+#include "dx_config.h"
+#include "dx_exit_codes.h"
+#include "dx_gpio.h"
+#include "dx_terminate.h"
+#include "dx_timer.h"
+#include "dx_version.h"
+
+#include "applibs_versions.h"
+#include <applibs/gpio.h>
+#include <applibs/log.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <time.h>
+
+#define APPLICATION_VERSION "1.0"
+#define PNP_MODEL_ID "dtmi:com:example:application;1"
+#define NETWORK_INTERFACE "wlan0"
+#define OneMS 1000000		// used to simplify timer defn.
+
+/****************************************************************************************
+ * Watchdog support
+ ****************************************************************************************/
+const struct itimerspec watchdogInterval = { { 60, 0 },{ 60, 0 } };
+timer_t watchdogTimer;
+
+/****************************************************************************************
+ * Telemetry message templates and property sets
+ ****************************************************************************************/
+
+DX_USER_CONFIG dx_config;   // cmd args from app_manifest.json
+
+// Number of bytes to allocate for the JSON telemetry message for IoT Hub/Central
+#define JSON_MESSAGE_BYTES 256
+static char msgBuffer[JSON_MESSAGE_BYTES] = {0};
+
+static const char *msgTemplate =
+    "{ \"Temperature\":%3.2f, \"Humidity\":%3.1f, \"Pressure\":%3.1f }";
+
+static DX_MESSAGE_PROPERTY *messageProperties[] = {
+    &(DX_MESSAGE_PROPERTY){.key = "appid", .value = "hvac"},
+    &(DX_MESSAGE_PROPERTY){.key = "type", .value = "telemetry"},
+    &(DX_MESSAGE_PROPERTY){.key = "schema", .value = "1"}};
+
+static DX_MESSAGE_CONTENT_PROPERTIES contentProperties = {.contentEncoding = "utf-8", .contentType = "application/json"};
+
+
+/****************************************************************************************
+ * Forward declarations
+ ****************************************************************************************/
+static void publish_message_handler(EventLoopTimer *eventLoopTimer);

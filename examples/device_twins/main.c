@@ -71,7 +71,7 @@ static DX_TIMER_BINDING report_now_timer = {
 DX_TIMER_BINDING *timerSet[] = {&report_now_timer};
 
 /****************************************************************************************
- * Azure IoT Direct Method Bindings
+ * Azure IoT Device Twin Bindings
  ****************************************************************************************/
 static DX_DEVICE_TWIN_BINDING dt_desired_sample_rate = {.twinProperty = "DesiredSampleRate",
                                                         .twinType = DX_TYPE_INT,
