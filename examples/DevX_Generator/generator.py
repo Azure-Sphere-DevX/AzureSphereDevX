@@ -1,38 +1,18 @@
 import json
+import pathlib
 
+# declare dictionaries
 signatures = {}
 device_twin_block = {}
 direct_method_block = {}
 timer_block = {}
 gpio_block = {}
-
-handler_templates = {}
-
-with open("templates/device_twin_handler.c.template", "r") as t:
-    handler_templates.update({"device_twin": t.read()})
-
-with open("templates/direct_method_handler.c.template", "r") as t:
-    handler_templates.update({"direct_method": t.read()})
-
-with open("templates/timer_periodic_handler.c.template", "r") as t:
-    handler_templates.update({"timer_periodic": t.read()})
-
-with open("templates/timer_oneshot_handler.c.template", "r") as t:
-    handler_templates.update({"timer_oneshot": t.read()})
-
-with open("templates/gpio_input.template", "r") as t:
-    handler_templates.update({"gpio_input": t.read()})
-
-with open("templates/watchdog.template", "r") as t:
-    handler_templates.update({"watchdog": t.read()})
-
-with open("templates/publish.template", "r") as t:
-    handler_templates.update({"publish": t.read()})
+templates = {}
 
 open_bracket = '{'
 close_bracket = '}'
 
-set_template = {
+binding_set_templates = {
     "device_twins": {
         "template": "static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = {open_bracket}{variables} {close_bracket};",
         "block": "Azure IoT Device Twin Bindings",
@@ -44,12 +24,12 @@ set_template = {
     "timers": {
         "template": "static DX_TIMER_BINDING *timer_bindings[] = {open_bracket}{variables} {close_bracket};",
         "block": "Timer Bindings",
-        "set": "\n// All timers referenced in timers with be opened in the InitPeripheralsAndHandlers function\n"
+        "set": "\n// All timers referenced in timer_bindings with be opened in the InitPeripheralsAndHandlers function\n"
     },
     "gpios": {
         "template": "static DX_GPIO_BINDING *gpio_bindings[] = {open_bracket}{variables} {close_bracket};",
         "block": "GPIO Bindings",
-        "set": "\n// All GPIOs referenced in gpio_set with be opened in the InitPeripheralsAndHandlers function\n"
+        "set": "\n// All GPIOs referenced in gpio_bindings with be opened in the InitPeripheralsAndHandlers function\n"
     }
 }
 
@@ -74,9 +54,8 @@ gpio_init = {"low": "GPIO_Value_Low", "high": "GPIO_Value_High"}
 gpio_direction = {"input": "DX_INPUT",
                   "output": "DX_OUTPUT", "unknown": "DX_DIRECTION_UNKNOWN"}
 
-f = open('app.json',)
-
-data = json.load(f)
+with open('app.json', 'r') as j:
+    data = json.load(j)
 
 devicetwins = (
     elem for elem in data if elem['binding'] == 'DEVICE_TWIN_BINDING')
@@ -86,12 +65,13 @@ timers = (elem for elem in data if elem['binding'] == 'TIMER_BINDING')
 gpios = (elem for elem in data if elem['binding'] == 'GPIO_BINDING')
 
 
-# def load_templates():
-#     for path in pathlib.Path("templates").iterdir():
-#         if path.is_file():
-#             current_file = open(path, "r")
-#             print(current_file.read())
-#             current_file.close()
+def load_templates():
+    for path in pathlib.Path("templates").iterdir():
+        if path.is_file():
+            template_key = path.name.split(".")[0]
+            with open(path, "r") as tf:
+                templates.update({template_key: tf.read()})
+
 
 def gen_gpios():
     for item in gpios:
@@ -106,8 +86,6 @@ def gen_gpios():
                 invert = ", .invertPin = false "
         else:
             invert = ""
-
-        initialState = "" if properties.get('initialState') is not None else ""
 
         key = "gpio_{name}".format(name=name)
 
@@ -260,18 +238,18 @@ def write_variables_template(f, list, set_template):
 def write_variables(f):
 
     write_variables_template(f, device_twin_block,
-                             set_template["device_twins"])
+                             binding_set_templates["device_twins"])
     write_variables_template(
-        f, direct_method_block, set_template["direct_methods"])
-    write_variables_template(f, timer_block, set_template["timers"])
-    write_variables_template(f, gpio_block, set_template["gpios"])
+        f, direct_method_block, binding_set_templates["direct_methods"])
+    write_variables_template(f, timer_block, binding_set_templates["timers"])
+    write_variables_template(f, gpio_block, binding_set_templates["gpios"])
 
 
 def write_handler_template(f, binding_key):
     for item in sorted(signatures):
         if signatures[item] is not None and signatures[item]["binding"] == binding_key:
             template_key = signatures[item]["properties"]["template"]
-            template = handler_templates[template_key]
+            template = templates[template_key]
             if template_key == "gpio_input":
                 value = signatures[item]
                 gpio_name = signatures[item]["properties"]["name"]
@@ -308,22 +286,17 @@ def write_handlers(f):
 
 
 def write_main():
-    with open("templates/header.c.template", "r") as f:
-        data = f.read()
+        with open("main.c", "w") as main_c:
+            main_c.write(templates["header"])
 
-    with open("main.c", "w") as f:
-        f.write(data)
+            write_signatures(main_c)
+            write_variables(main_c)
+            write_handlers(main_c)
 
-        write_signatures(f)
-        write_variables(f)
-        write_handlers(f)
+            main_c.write(templates["footer"])
 
-        with open("templates/footer.c.template", "r") as footer:
-            f.write(footer.read())
 
 # This is for two special case handlers - Watchdog and PublishTelemetry
-
-
 def bind_templated_handlers():
     # Add in watchdog
     sig = "static void Watchdog_handler(EventLoopTimer *eventLoopTimer)"
@@ -352,6 +325,7 @@ def bind_templated_handlers():
     timer_block.update({key: value})
 
 
+load_templates()
 generate_twins()
 gen_direct_method()
 gen_timers()

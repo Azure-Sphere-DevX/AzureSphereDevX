@@ -45,7 +45,9 @@ static void ClosePeripheralAndHandlers(void) {
 	dx_timerEventLoopStop();
 }
 
-// -------------------- main() --------------------
+/// <summary>
+///  Main event loop for the app
+/// </summary>
 int main(int argc, char* argv[]) {
 	dx_registerTerminationHandler();
 
