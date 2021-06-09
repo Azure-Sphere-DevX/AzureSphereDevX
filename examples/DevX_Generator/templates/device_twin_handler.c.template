@@ -6,24 +6,7 @@
     Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
     Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
 
-    switch (deviceTwinBinding->twinType)
-    {open_bracket}
-    case DX_TYPE_INT:
-        Log_Debug("%d\n", *(int*)deviceTwinBinding->twinState)
-        break;    
-    default:
-        break;
-    {close_bracket}
-
-    /*	
-        Casting device twin state examples    
-
-        float value = *(float*)deviceTwinBinding->twinState;        // DX_TYPE_FLOAT
-        double value = *(double*)deviceTwinBinding->twinState;      // DX_TYPE_DOUBLE
-        int value = *(int*)deviceTwinBinding->twinState;            // DX_TYPE_INT
-        bool value = *(bool*)deviceTwinBinding->twinState;          // DX_TYPE_FLOAT
-        char* value = (char*)deviceTwinBinding->twinState;          // DX_TYPE_STRING
-    */
+    Log_Debug({twin_state});
 
     dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
     // dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);

@@ -1,34 +1,4 @@
-/// <summary>
-/// Publish environment sensor telemetry to IoT Hub/Central
-/// </summary>
-/// <param name="eventLoopTimer"></param>
-static void PublishTelemetry_handler(EventLoopTimer *eventLoopTimer)
-{
-    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
-        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
-        return;
-    }
 
-    if (dx_isAzureConnected()) {
-        // Create JSON telemetry message
-        if (snprintf(msgBuffer, sizeof(msgBuffer), msgTemplate, 30.0, 60.0, 1010.0) > 0) {
-            Log_Debug("%s\n", msgBuffer);
-            dx_azurePublish(msgBuffer, strlen(msgBuffer), messageProperties, NELEMS(messageProperties), &contentProperties);
-        }
-    }
-}
-
-/// <summary>
-/// This timer extends the app level lease watchdog timer
-/// </summary>
-/// <param name="eventLoopTimer"></param>
-static void Watchdog_handler(EventLoopTimer* eventLoopTimer) {
-	if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
-		dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
-		return;
-	}
-	timer_settime(watchdogTimer, 0, &watchdogInterval, NULL);
-}
 
 /// <summary>
 /// Set up watchdog timer - the lease is extended via the Watchdog_handler function
@@ -51,13 +21,15 @@ void StartWatchdog(void) {
 ///  Initialize gpios, device twins, direct methods, timers.
 /// </summary>
 static void InitPeripheralAndHandlers(void) {
+	dx_Log_Debug_Init(Log_Debug_buffer, sizeof(Log_Debug_buffer));
 	dx_azureConnect(&dx_config, NETWORK_INTERFACE, PNP_MODEL_ID);
 	dx_gpioSetOpen(gpio_bindings, NELEMS(gpio_bindings));
 	dx_deviceTwinSubscribe(device_twin_bindings, NELEMS(device_twin_bindings));
 	dx_directMethodSubscribe(direct_method_bindings, NELEMS(direct_method_bindings));
 	dx_timerSetStart(timer_bindings, NELEMS(timer_bindings));
 	
-	StartWatchdog();
+	// Uncomment the StartWatchdog when ready for production
+	// StartWatchdog();
 }
 
 /// <summary>

@@ -1,4 +1,4 @@
-// Direct method name = LightControl, json payload = {open_bracket}"Duration":2{close_bracket}:
+// Direct method JSON payload example {open_bracket}"Duration":2{close_bracket}:
 {name} {open_bracket}
     char duration_str[] = "Duration";
     int requested_duration_seconds;
@@ -9,7 +9,7 @@
     {close_bracket}
 
     // check JSON properties sent through are the correct type
-    if (!json_object_has_value_of_type(jsonObject, duration_str, JSONNumber) {open_bracket}
+    if (!json_object_has_value_of_type(jsonObject, duration_str, JSONNumber)) {open_bracket}
         return DX_METHOD_FAILED;
     {close_bracket}
 

@@ -1,7 +1,7 @@
 /// <summary>
 /// Implement your timer function
 /// </summary>
-static void {name} {open_bracket}
+{name} {open_bracket}
     if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {open_bracket}
         dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
         return;

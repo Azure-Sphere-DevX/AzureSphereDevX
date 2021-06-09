@@ -1,19 +1,15 @@
 [
     {
         "binding": "DEVICE_TWIN_BINDING",
-        "properties": { "name": "DesiredChannelId", "type": "integer", "cloud2device": true }
+        "properties": { "name": "DesiredTemperature", "type": "float", "cloud2device": true }
     },
     {
         "binding": "DEVICE_TWIN_BINDING",
-        "properties": { "name": "DiskCacheHits", "type": "integer", "cloud2device": true }
+        "properties": { "name": "ReportedTemperature", "type": "float"}
     },
     {
         "binding": "DEVICE_TWIN_BINDING", 
-        "properties": { "name": "DiskCacheMisses", "type": "integer", "cloud2device": true }
-    },
-    {
-        "binding": "DEVICE_TWIN_BINDING",
-        "properties": { "name": "DiskTotalErrors", "type": "double" }
+        "properties": { "name": "ReportedDeviceStartTime", "type": "string" }
     },
     {
         "binding": "TIMER_BINDING",
@@ -21,22 +17,22 @@
     },
     {
         "binding": "TIMER_BINDING",
-        "properties": { "name": "MeasureCO2" }
+        "properties": { "name": "MeasureCarbonMonoxide" }
     },
     {
         "binding": "DIRECT_METHOD_BINDING",
-        "properties": { "name": "RestartDevice", "handler": "RestartDeviceHandler" }
+        "properties": { "name": "LightControl" }
     },
     {
         "binding": "GPIO_BINDING",
-        "properties": { "pin": "8", "name": "GreenLed", "direction": "OUTPUT", "detect": "LOW", "initialState" : "low", "invertPin": false }
+        "properties": { "pin": "NETWORK_CONNECTED_LED", "name": "AzureIotConnectedLed", "direction": "output", "initialState" : "low", "invertPin": true }
     },
     {
         "binding": "GPIO_BINDING",
-        "properties": { "pin": "9", "name": "RedLed", "direction": "OUTPUT", "detect": "LOW", "initialState" : "high" }
+        "properties": { "pin": "ALERT_LED", "name": "AlertLed", "direction": "output", "initialState" : "low", "invertPin": true }
     },
     {
         "binding": "GPIO_BINDING",
-        "properties": { "pin": "0", "name": "PortIn1", "direction": "OUTPUT", "detect": "BOTH", "initialState" : "low" }
+        "properties": { "pin": "BUTTON_A", "name": "ButtonA", "direction": "input", "detect": "both" }
     }
 ]

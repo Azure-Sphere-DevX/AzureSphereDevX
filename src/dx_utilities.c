@@ -119,13 +119,13 @@ bool dx_startThreadDetached(void *(daemon)(void *), void *arg, char *daemon_name
     return true;
 }
 
-void Log_Debug_Time_Init(const char *buffer, size_t buffer_size)
+void dx_Log_Debug_Init(const char *buffer, size_t buffer_size)
 {
     _log_debug_buffer = (char *)buffer;
     _log_debug_buffer_size = buffer_size;
 }
 
-void Log_Debug_Time(char *fmt, ...)
+void dx_Log_Debug(char *fmt, ...)
 {
     if (_log_debug_buffer == NULL) {
         Log_Debug("log_debug_buffer is NULL. Call Log_Debug_Time_Init first");

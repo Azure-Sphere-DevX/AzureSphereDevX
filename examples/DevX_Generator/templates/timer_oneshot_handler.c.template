@@ -1,11 +1,14 @@
 /// <summary>
-/// Implement your timer function
+/// Implement your oneshot timer function
 /// </summary>
-static void {name} {open_bracket}
+{name} {open_bracket}
     if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {open_bracket}
         dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
         return;
     {close_bracket}
     
     // Implement your timer function
+
+    // reload the oneshot timer
+    dx_timerOneShotSet(&tmr_{property_name}, &(struct timespec){open_bracket}5, 0{close_bracket});
 {close_bracket}
