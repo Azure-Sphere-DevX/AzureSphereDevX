@@ -73,7 +73,7 @@ def load_templates():
                 templates.update({template_key: tf.read()})
 
 
-def gen_gpios():
+def generate_gpios():
     for item in gpios:
         properties = item.get('properties')
         name = properties['name']
@@ -125,7 +125,7 @@ def gen_gpios():
             # TODO Generate timer to associate current output gpio
 
 
-def gen_timers():
+def generate_timers():
     for item in timers:
         properties = item.get('properties')
 
@@ -153,7 +153,7 @@ def gen_timers():
             signatures.update({sig: item})
 
 
-def gen_direct_method():
+def generate_direct_method():
     for item in directmethods:
         properties = item.get('properties')
         name = properties['name']
@@ -172,7 +172,7 @@ def gen_direct_method():
         direct_method_block.update({key: value})
 
 
-def gen_twin_handler(item):
+def generate_twin_handler(item):
     properties = item.get('properties')
 
     sig = "static void {name}_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding)".format(
@@ -189,7 +189,7 @@ def generate_twins():
         if (properties.get('cloud2device')) is not None and properties.get('cloud2device'):
             handler = ', .handler = {name}_handler'.format(
                 name=properties['name'])
-            gen_twin_handler(item)
+            generate_twin_handler(item)
         else:
             handler = ""
 
@@ -333,9 +333,9 @@ def bind_templated_handlers():
 
 load_templates()
 generate_twins()
-gen_direct_method()
-gen_timers()
-gen_gpios()
+generate_direct_method()
+generate_timers()
+generate_gpios()
 bind_templated_handlers()
 
 write_main()

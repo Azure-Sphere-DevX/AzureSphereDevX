@@ -124,7 +124,7 @@ static DX_TIMER_BINDING tmr_MeasureTemperature = {.period = {5, 0}, .name = "Mea
 static DX_TIMER_BINDING tmr_PublishTelemetry = {.period = {5, 0}, .name = "PublishTelemetry", .handler = PublishTelemetry_handler};
 static DX_TIMER_BINDING tmr_Watchdog = {.period = {15, 0}, .name = "Watchdog", .handler = Watchdog_handler};
 
-// All timers referenced in timers with be opened in the InitPeripheralsAndHandlers function
+// All timers referenced in timer_bindings with be opened in the InitPeripheralsAndHandlers function
 static DX_TIMER_BINDING *timer_bindings[] = {&tmr_ButtonA, &tmr_MeasureCarbonMonoxide, &tmr_MeasureTemperature, &tmr_PublishTelemetry,
                                              &tmr_Watchdog};
 
@@ -140,7 +140,7 @@ static DX_GPIO_BINDING gpio_AzureIotConnectedLed = {.pin = NETWORK_CONNECTED_LED
                                                     .invertPin = true};
 static DX_GPIO_BINDING gpio_ButtonA = {.pin = BUTTON_A, .name = "ButtonA", .direction = DX_INPUT};
 
-// All GPIOs referenced in gpio_set with be opened in the InitPeripheralsAndHandlers function
+// All GPIOs referenced in gpio_bindings with be opened in the InitPeripheralsAndHandlers function
 static DX_GPIO_BINDING *gpio_bindings[] = {&gpio_AlertLed, &gpio_AzureIotConnectedLed, &gpio_ButtonA};
 
 /****************************************************************************************
@@ -237,6 +237,8 @@ static void Watchdog_handler(EventLoopTimer *eventLoopTimer)
 static void DesiredTemperature_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
 {
     Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
+
+    // Checking the twinStateUpdated here will always be true. But it's useful property for other area
     Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
 
     Log_Debug("%f\n", *(float *)deviceTwinBinding->twinState);
@@ -326,7 +328,9 @@ static void ClosePeripheralAndHandlers(void)
     dx_timerEventLoopStop();
 }
 
-// -------------------- main() --------------------
+/// <summary>
+///  Main event loop for the app
+/// </summary>
 int main(int argc, char *argv[])
 {
     dx_registerTerminationHandler();
