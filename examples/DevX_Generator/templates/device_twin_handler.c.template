@@ -4,6 +4,8 @@
 /// <param name="deviceTwinBinding"></param>
 {name} {open_bracket}
     Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
+
+    // Checking the twinStateUpdated here will always be true. But it's useful property for other area
     Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
 
     Log_Debug({twin_state});

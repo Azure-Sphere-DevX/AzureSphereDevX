@@ -86,6 +86,13 @@ timers = (elem for elem in data if elem['binding'] == 'TIMER_BINDING')
 gpios = (elem for elem in data if elem['binding'] == 'GPIO_BINDING')
 
 
+# def load_templates():
+#     for path in pathlib.Path("templates").iterdir():
+#         if path.is_file():
+#             current_file = open(path, "r")
+#             print(current_file.read())
+#             current_file.close()
+
 def gen_gpios():
     for item in gpios:
         properties = item.get('properties')
