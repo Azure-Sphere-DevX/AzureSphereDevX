@@ -95,6 +95,8 @@ def gen_gpios():
 
             gpio_block.update({key: value})
 
+            # start generate a timer and associate current input gpio
+
             key = "tmr_{name}".format(name=properties['name'])
             value = timer_binding_template.format(
                 name=properties['name'], period='.period = {0, 200000000}, ', open_bracket=open_bracket, close_bracket=close_bracket)
@@ -103,10 +105,13 @@ def gen_gpios():
 
             sig = "static void {name}_handler(EventLoopTimer *eventLoopTimer)".format(
                 name=properties['name'])
+
             item = {'binding': 'TIMER_BINDING', 'properties': {
                 'period': '.period = {0, 200000000}, ', 'template': 'gpio_input', 'name': '{name}'.format(name=name)}}
 
             signatures.update({sig: item})
+
+            # finish generating a timer and associate current input gpio
 
             return
 
@@ -116,6 +121,8 @@ def gen_gpios():
                                                         initialState=gpio_init.get(properties['initialState']), invert=invert, open_bracket=open_bracket, close_bracket=close_bracket)
 
             gpio_block.update({key: value})
+
+            # TODO Generate timer to associate current output gpio
 
 
 def gen_timers():
@@ -200,7 +207,6 @@ def write_comment_block(f, msg):
 
 
 def write_signatures(f):
-    # Write Device Twin Signatures
     if len(signatures) > 0:
         for item in sorted(signatures):
             f.write(item)
@@ -286,14 +292,14 @@ def write_handlers(f):
 
 
 def write_main():
-        with open("main.c", "w") as main_c:
-            main_c.write(templates["header"])
+    with open("main.c", "w") as main_c:
+        main_c.write(templates["header"])
 
-            write_signatures(main_c)
-            write_variables(main_c)
-            write_handlers(main_c)
+        write_signatures(main_c)
+        write_variables(main_c)
+        write_handlers(main_c)
 
-            main_c.write(templates["footer"])
+        main_c.write(templates["footer"])
 
 
 # This is for two special case handlers - Watchdog and PublishTelemetry
