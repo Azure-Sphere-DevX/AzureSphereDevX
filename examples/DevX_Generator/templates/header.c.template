@@ -48,4 +48,3 @@ static DX_MESSAGE_CONTENT_PROPERTIES contentProperties = {.contentEncoding = "ut
 /****************************************************************************************
  * Forward declarations
  ****************************************************************************************/
-static void publish_message_handler(EventLoopTimer *eventLoopTimer);

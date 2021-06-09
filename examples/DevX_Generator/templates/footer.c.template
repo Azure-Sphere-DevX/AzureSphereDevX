@@ -31,7 +31,7 @@ static void Watchdog_handler(EventLoopTimer* eventLoopTimer) {
 }
 
 /// <summary>
-/// Set up watchdog timer - the lease is extended via the WatchdogMonitorTimerHandler function
+/// Set up watchdog timer - the lease is extended via the Watchdog_handler function
 /// </summary>
 /// <param name=""></param>
 void StartWatchdog(void) {
@@ -48,7 +48,7 @@ void StartWatchdog(void) {
 }
 
 /// <summary>
-///  Initialize PeripheralGpios, device twins, direct methods, timers.
+///  Initialize gpios, device twins, direct methods, timers.
 /// </summary>
 static void InitPeripheralAndHandlers(void) {
 	dx_azureConnect(&dx_config, NETWORK_INTERFACE, PNP_MODEL_ID);
