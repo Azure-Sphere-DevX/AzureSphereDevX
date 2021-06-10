@@ -5,12 +5,10 @@
  *
  *   The DevX library supports the Azure Sphere Developer Learning Path:
  *
- *	   1. are built from the Azure Sphere SDK Samples at
- *          https://github.com/Azure/azure-sphere-samples
+ *	   1. are built from the Azure Sphere SDK Samples at https://github.com/Azure/azure-sphere-samples
  *	   2. are not intended as a substitute for understanding the Azure Sphere SDK Samples.
  *	   3. aim to follow best practices as demonstrated by the Azure Sphere SDK Samples.
- *	   4. are provided as is and as a convenience to aid the Azure Sphere Developer Learning
- *          experience.
+ *	   4. are provided as is and as a convenience to aid the Azure Sphere Developer Learning experience.
  *
  *   DEVELOPER BOARD SELECTION
  *
@@ -86,10 +84,10 @@ static DX_MESSAGE_PROPERTY *messageProperties[] = {
 
 static DX_MESSAGE_CONTENT_PROPERTIES contentProperties = {.contentEncoding = "utf-8", .contentType = "application/json"};
 
-
 /****************************************************************************************
  * Forward declarations
  ****************************************************************************************/
+static void DesiredMeasurementRate_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
 static void DesiredTemperature_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
 static void PublishTelemetry_handler(EventLoopTimer *eventLoopTimer);
 static void Watchdog_handler(EventLoopTimer *eventLoopTimer);
@@ -97,10 +95,13 @@ static void Watchdog_handler(EventLoopTimer *eventLoopTimer);
 /****************************************************************************************
 * Azure IoT Device Twin Bindings
 ****************************************************************************************/
+static DX_DEVICE_TWIN_BINDING dt_DesiredMeasurementRate = { .twinProperty = "DesiredMeasurementRate", .twinType = DX_TYPE_DOUBLE, .handler = DesiredMeasurementRate_handler};
 static DX_DEVICE_TWIN_BINDING dt_DesiredTemperature = { .twinProperty = "DesiredTemperature", .twinType = DX_TYPE_FLOAT, .handler = DesiredTemperature_handler};
+static DX_DEVICE_TWIN_BINDING dt_ReportedDeviceStartTime = { .twinProperty = "ReportedDeviceStartTime", .twinType = DX_TYPE_STRING};
+static DX_DEVICE_TWIN_BINDING dt_ReportedTemperature = { .twinProperty = "ReportedTemperature", .twinType = DX_TYPE_FLOAT};
 
 // All device twins listed in device_twin_bindings will be subscribed to in the InitPeripheralsAndHandlers function
-static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = { &dt_DesiredTemperature };
+static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = { &dt_DesiredMeasurementRate, &dt_DesiredTemperature, &dt_ReportedDeviceStartTime, &dt_ReportedTemperature };
 
 /****************************************************************************************
 * Timer Bindings
@@ -112,45 +113,31 @@ static DX_TIMER_BINDING  tmr_Watchdog = {.period = {15, 0}, .name = "Watchdog", 
 static DX_TIMER_BINDING *timer_bindings[] = { &tmr_PublishTelemetry, &tmr_Watchdog };
 
 
-/****************************************************************************************
-* Implement your timer code
-****************************************************************************************/
-
-
-/// <summary>
-/// Publish environment sensor telemetry to IoT Hub/Central
-/// </summary>
-/// <param name="eventLoopTimer"></param>
-static void PublishTelemetry_handler(EventLoopTimer *eventLoopTimer) {
-    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
-        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
-        return;
-    }
-
-    if (dx_isAzureConnected()) {
-        // Create JSON telemetry message
-        if (snprintf(msgBuffer, sizeof(msgBuffer), msgTemplate, 30.0, 60.0, 1010.0) > 0) {
-            Log_Debug("%s\n", msgBuffer);
-            dx_azurePublish(msgBuffer, strlen(msgBuffer), messageProperties, NELEMS(messageProperties), &contentProperties);
-        }
-    }
-}
-
-/// <summary>
-/// This timer extends the app level lease watchdog timer
-/// </summary>
-/// <param name="eventLoopTimer"></param>
-static void Watchdog_handler(EventLoopTimer *eventLoopTimer) {
-    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
-        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
-        return;
-    }
-    timer_settime(watchdogTimer, 0, &watchdogInterval, NULL);
-}
 
 /****************************************************************************************
 * Implement your device twins code
 ****************************************************************************************/
+
+/// <summary>
+/// What is the purpose of this device twin handler function
+/// </summary>
+/// <param name="deviceTwinBinding"></param>
+static void DesiredMeasurementRate_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {
+    Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
+
+    // Checking the twinStateUpdated here will always be true. 
+    // But it's useful property for other areas of your code
+    Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
+
+    double device_twin_value = *(double*)deviceTwinBinding->twinState;
+    
+    if (device_twin_value > 0.0 && device_twin_value < 100.0){
+        Log_Debug("Device twin value: %f\n", device_twin_value);
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
+    } else {
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
+    }
+}
 
 /// <summary>
 /// What is the purpose of this device twin handler function
@@ -173,11 +160,53 @@ static void DesiredTemperature_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding
     }
 }
 
-
 /****************************************************************************************
-* Implement your direct method code
+* Implement your timer code
 ****************************************************************************************/
 
+
+/// <summary>
+/// Publish environment sensor telemetry to IoT Hub/Central
+/// </summary>
+/// <param name="eventLoopTimer"></param>
+static void PublishTelemetry_handler(EventLoopTimer *eventLoopTimer) {
+
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+
+    float DesiredTemperature_value = 10.0f;
+    double DesiredMeasurementRate_value = 10.0;
+    float ReportedTemperature_value = 10.0f;
+    char ReportedDeviceStartTime_value[] = "hello, world";
+
+    if (dx_isAzureConnected()) {
+        // Create JSON telemetry message
+        if (snprintf(msgBuffer, sizeof(msgBuffer), msgTemplate, 30.0, 60.0, 1010.0) > 0) {
+            Log_Debug("%s\n", msgBuffer);
+            dx_azurePublish(msgBuffer, strlen(msgBuffer), messageProperties, NELEMS(messageProperties), &contentProperties);
+        }
+
+        dx_deviceTwinReportState(&dt_DesiredTemperature, &DesiredTemperature_value);
+        dx_deviceTwinReportState(&dt_DesiredMeasurementRate, &DesiredMeasurementRate_value);
+        dx_deviceTwinReportState(&dt_ReportedTemperature, &ReportedTemperature_value);
+        dx_deviceTwinReportState(&dt_ReportedDeviceStartTime, ReportedDeviceStartTime_value);
+
+    }
+}
+
+/// <summary>
+/// This timer extends the app level lease watchdog timer
+/// </summary>
+/// <param name="eventLoopTimer"></param>
+static void Watchdog_handler(EventLoopTimer *eventLoopTimer) {
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+    timer_settime(watchdogTimer, 0, &watchdogInterval, NULL);
+}
 
 
 /// <summary>
@@ -202,10 +231,10 @@ void StartWatchdog(void) {
 /// </summary>
 static void InitPeripheralAndHandlers(void) {
 	dx_Log_Debug_Init(Log_Debug_buffer, sizeof(Log_Debug_buffer));
-	dx_azureConnect(&dx_config, NETWORK_INTERFACE, PNP_MODEL_ID);
-	dx_gpioSetOpen(gpio_bindings, NELEMS(gpio_bindings));
+	dx_azureConnect(&dx_config, NETWORK_INTERFACE, PNP_MODEL_ID);	
+	
 	dx_deviceTwinSubscribe(device_twin_bindings, NELEMS(device_twin_bindings));
-	dx_directMethodSubscribe(direct_method_bindings, NELEMS(direct_method_bindings));
+	
 	dx_timerSetStart(timer_bindings, NELEMS(timer_bindings));
 	
 	// Uncomment the StartWatchdog when ready for production
@@ -216,12 +245,11 @@ static void InitPeripheralAndHandlers(void) {
 ///     Close Timers, GPIOs, Device Twins, Direct Methods
 /// </summary>
 static void ClosePeripheralAndHandlers(void) {
-	Log_Debug("Closing file descriptors\n");
 	dx_timerSetStop(timer_bindings, NELEMS(timer_bindings));
 	dx_azureToDeviceStop();
-	dx_gpioSetClose(gpio_bindings, NELEMS(gpio_bindings));
+	
 	dx_deviceTwinUnsubscribe();
-	dx_directMethodUnsubscribe();
+	
 	dx_timerEventLoopStop();
 }
 

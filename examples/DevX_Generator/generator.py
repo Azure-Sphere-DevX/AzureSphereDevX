@@ -33,7 +33,6 @@ templates.update({
         "set_comment": "\n// All GPIOs referenced in gpio_bindings with be opened in the InitPeripheralsAndHandlers function\n"
     }})
 
-
 # add templates for the generation of a binding declarations
 templates.update({
     'gpio_output_binding_template': 'static DX_GPIO_BINDING gpio_{name} = {open_bracket} .pin = {pin}, .name = "{name}", .direction = {direction}, .initialState = {initialState}{invert}{close_bracket};',
@@ -51,10 +50,13 @@ gpio_init = {"low": "GPIO_Value_Low", "high": "GPIO_Value_High"}
 gpio_direction = {"input": "DX_INPUT",
                   "output": "DX_OUTPUT", "unknown": "DX_DIRECTION_UNKNOWN"}
 
+device_twins_updates = None
+device_twin_variables = None
+
 with open('app.json', 'r') as j:
     data = json.load(j)
 
-devicetwins = (
+devicetwins = list(
     elem for elem in data if elem['binding'] == 'DEVICE_TWIN_BINDING' and elem.get('active', True) == True)
 directmethods = (
     elem for elem in data if elem['binding'] == 'DIRECT_METHOD_BINDING' and elem.get('active', True) == True)
@@ -268,6 +270,33 @@ def write_variables(f):
     if len(gpio_block) > 0:
         write_variables_template(f, gpio_block, templates["gpio_block"])
 
+def generate_device_twin_updates():
+    global device_twins_updates, device_twin_variables
+    device_twins_updates = ''
+    device_twin_variables = ''
+
+    for item in devicetwins:
+        properties = item.get('properties')
+        property_name = properties["name"]
+        property_type = properties.get("type", None)
+
+        if property_type == 'integer':
+            device_twin_variables += '    int {property_name}_value = 10;\n'.format(property_name=property_name)
+            device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);\n'.format(property_name=property_name)
+        elif property_type == 'float':
+            device_twin_variables += '    float {property_name}_value = 10.0f;\n'.format(property_name=property_name)
+            device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);\n'.format(property_name=property_name)
+        elif property_type == 'double':
+            device_twin_variables += '    double {property_name}_value = 10.0;\n'.format(property_name=property_name)
+            device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);\n'.format(property_name=property_name)
+        elif property_type == 'boolean':
+            device_twin_variables += '    bool {property_name}_value = true;\n'.format(property_name=property_name)
+            device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);\n'.format(property_name=property_name)
+        elif property_type == 'string':
+            device_twin_variables += '    char {property_name}_value[] = "hello, world";\n'.format(property_name=property_name)
+            device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, {property_name}_value);\n'.format(property_name=property_name)
+
+        
 
 def write_handler_template(f, binding_key):
     for item in sorted(signatures):
@@ -288,6 +317,8 @@ def write_handler_template(f, binding_key):
 
             f.write(template.format(name=item, gpio_name=property_name, twin_state_usage=twin_state_usage,
                                     property_name=property_name,
+                                    update_device_twins=device_twins_updates,
+                                    device_twin_variables=device_twin_variables,
                                     open_bracket=open_bracket, close_bracket=close_bracket))
 
             f.write("\n")
@@ -296,30 +327,56 @@ def write_handler_template(f, binding_key):
 def write_handlers(f):
     f.write("\n")
 
-    write_comment_block(f, "Implement your timer code")
-    f.write("\n")
-    write_handler_template(f, "TIMER_BINDING")
+    if len(device_twin_block) > 0:
+        f.write("\n")
+        write_comment_block(f, "Implement your device twins code")
+        f.write("\n")
+        write_handler_template(f, "DEVICE_TWIN_BINDING")
 
-    f.write("\n")
-    write_comment_block(f, "Implement your device twins code")
-    f.write("\n")
-    write_handler_template(f, "DEVICE_TWIN_BINDING")
+    if len(direct_method_block) > 0:
+        f.write("\n")
+        write_comment_block(f, "Implement your direct method code")
+        f.write("\n")
+        write_handler_template(f, "DIRECT_METHOD_BINDING")
 
-    f.write("\n")
-    write_comment_block(f, "Implement your direct method code")
-    f.write("\n")
-    write_handler_template(f, "DIRECT_METHOD_BINDING")
+    if len(timer_block) > 0:
+        write_comment_block(f, "Implement your timer code")
+        f.write("\n")
+        write_handler_template(f, "TIMER_BINDING")
 
 
 def write_main():
-    with open("main.c", "w") as main_c:
-        main_c.write(templates["header"])
+    with open('declarations.h', 'w') as df:
+        with open("main.c", "w") as main_c:
 
-        write_signatures(main_c)
-        write_variables(main_c)
-        write_handlers(main_c)
+            main_c.write(templates["header"])
 
-        main_c.write(templates["footer"])
+            write_signatures(main_c)
+            write_variables(main_c)
+            generate_device_twin_updates()
+            write_handlers(main_c)
+
+            device_twins_subscribe = 'dx_deviceTwinSubscribe(device_twin_bindings, NELEMS(device_twin_bindings));' if len(device_twin_block) > 0 else ''
+            direct_method_subscribe = 'dx_directMethodSubscribe(direct_method_bindings, NELEMS(direct_method_bindings));' if len(direct_method_block) > 0 else ''
+            timer_start = 'dx_timerSetStart(timer_bindings, NELEMS(timer_bindings));' if len(timer_block) > 0 else ''
+            gpio_bindings_open = 'dx_gpioSetOpen(gpio_bindings, NELEMS(gpio_bindings));' if len(gpio_block) > 0 else ''
+
+            device_twins_unsubscribe = 'dx_deviceTwinUnsubscribe();' if len(device_twin_block) > 0 else ''
+            direct_method_unsubscribe = 'dx_directMethodUnsubscribe();' if len(direct_method_block) > 0 else ''
+            timer_stop = 'dx_timerSetStop(timer_bindings, NELEMS(timer_bindings));' if len(timer_block) > 0 else ''
+            gpio_bindings_close = 'dx_gpioSetClose(gpio_bindings, NELEMS(gpio_bindings));' if len(gpio_block) > 0 else ''
+
+
+            main_c.write(templates["footer"].format(
+                gpio_bindings_open=gpio_bindings_open,
+                device_twins_subscribe=device_twins_subscribe,
+                direct_method_subscribe=direct_method_subscribe,
+                timer_start=timer_start,
+                device_twins_unsubscribe=device_twins_unsubscribe,
+                direct_method_unsubscribe=direct_method_unsubscribe,
+                timer_stop=timer_stop,
+                gpio_bindings_close=gpio_bindings_close,
+                open_bracket=open_bracket, close_bracket=close_bracket))
 
 
 # This is for two special case handlers - Watchdog and PublishTelemetry

@@ -5,12 +5,10 @@
  *
  *   The DevX library supports the Azure Sphere Developer Learning Path:
  *
- *	   1. are built from the Azure Sphere SDK Samples at
- *          https://github.com/Azure/azure-sphere-samples
+ *	   1. are built from the Azure Sphere SDK Samples at https://github.com/Azure/azure-sphere-samples
  *	   2. are not intended as a substitute for understanding the Azure Sphere SDK Samples.
  *	   3. aim to follow best practices as demonstrated by the Azure Sphere SDK Samples.
- *	   4. are provided as is and as a convenience to aid the Azure Sphere Developer Learning
- *          experience.
+ *	   4. are provided as is and as a convenience to aid the Azure Sphere Developer Learning experience.
  *
  *   DEVELOPER BOARD SELECTION
  *
@@ -85,7 +83,6 @@ static DX_MESSAGE_PROPERTY *messageProperties[] = {
     &(DX_MESSAGE_PROPERTY){.key = "schema", .value = "1"}};
 
 static DX_MESSAGE_CONTENT_PROPERTIES contentProperties = {.contentEncoding = "utf-8", .contentType = "application/json"};
-
 
 /****************************************************************************************
  * Forward declarations

@@ -4,16 +4,20 @@
 /// </summary>
 /// <param name="eventLoopTimer"></param>
 static void PublishTelemetry_handler(EventLoopTimer *eventLoopTimer) {open_bracket}
+
     if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {open_bracket}
         dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
         return;
     {close_bracket}
 
+{device_twin_variables}
     if (dx_isAzureConnected()) {open_bracket}
         // Create JSON telemetry message
         if (snprintf(msgBuffer, sizeof(msgBuffer), msgTemplate, 30.0, 60.0, 1010.0) > 0) {open_bracket}
             Log_Debug("%s\n", msgBuffer);
             dx_azurePublish(msgBuffer, strlen(msgBuffer), messageProperties, NELEMS(messageProperties), &contentProperties);
         {close_bracket}
+
+{update_device_twins}
     {close_bracket}
 {close_bracket}

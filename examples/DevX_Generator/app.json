@@ -6,17 +6,17 @@
     },
     {
         "binding": "DEVICE_TWIN_BINDING",
-        "active": false,
-        "properties": { "name": "DesiredMeasurementRate", "type": "float", "cloud2device": true }
+        "active": true,
+        "properties": { "name": "DesiredMeasurementRate", "type": "double", "cloud2device": true }
     },
     {
         "binding": "DEVICE_TWIN_BINDING",
-        "active": false,
+        "active": true,
         "properties": { "name": "ReportedTemperature", "type": "float"}
     },
     {
         "binding": "DEVICE_TWIN_BINDING", 
-        "active": false,
+        "active": true,
         "properties": { "name": "ReportedDeviceStartTime", "type": "string" }
     },
     {
