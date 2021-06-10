@@ -55,11 +55,11 @@ with open('app.json', 'r') as j:
     data = json.load(j)
 
 devicetwins = (
-    elem for elem in data if elem['binding'] == 'DEVICE_TWIN_BINDING')
+    elem for elem in data if elem['binding'] == 'DEVICE_TWIN_BINDING' and elem.get('active', True) == True)
 directmethods = (
-    elem for elem in data if elem['binding'] == 'DIRECT_METHOD_BINDING')
-timers = (elem for elem in data if elem['binding'] == 'TIMER_BINDING')
-gpios = (elem for elem in data if elem['binding'] == 'GPIO_BINDING')
+    elem for elem in data if elem['binding'] == 'DIRECT_METHOD_BINDING' and elem.get('active', True) == True)
+timers = (elem for elem in data if elem['binding'] == 'TIMER_BINDING' and elem.get('active', True) == True)
+gpios = (elem for elem in data if elem['binding'] == 'GPIO_BINDING' and elem.get('active', True) == True)
 
 
 def load_templates():
@@ -119,7 +119,23 @@ def generate_gpios():
 
             gpio_block.update({key: value})
 
-            # TODO Generate timer to associate current output gpio
+            # start generate a timer and associate current input gpio
+
+            key = "tmr_{name}".format(name=properties['name'])
+            value = templates['timer_binding_template'].format(
+                name=properties['name'], period='.period = {4, 0}, ', open_bracket=open_bracket, close_bracket=close_bracket)
+
+            timer_block.update({key: value})
+
+            sig = "static void {name}_handler(EventLoopTimer *eventLoopTimer)".format(
+                name=properties['name'])
+
+            item = {'binding': 'TIMER_BINDING', 'properties': {
+                'period': '.period = {4, 0}, ', 'template': 'gpio_output', 'name': '{name}'.format(name=name)}}
+
+            signatures.update({sig: item})
+
+            # finish generating a timer and associate current input gpio
 
 
 def generate_timers():
@@ -240,12 +256,17 @@ def write_variables_template(f, list, set_template):
 
 def write_variables(f):
 
-    write_variables_template(f, device_twin_block,
-                             templates["device_twin_block"])
-    write_variables_template(f, direct_method_block,
-                             templates["direct_method_block"])
-    write_variables_template(f, timer_block, templates["timer_block"])
-    write_variables_template(f, gpio_block, templates["gpio_block"])
+    if len(device_twin_block) > 0:
+        write_variables_template(f, device_twin_block, templates["device_twin_block"])
+
+    if len(direct_method_block) > 0:
+        write_variables_template(f, direct_method_block, templates["direct_method_block"])
+
+    if len(timer_block) > 0:
+        write_variables_template(f, timer_block, templates["timer_block"])
+
+    if len(gpio_block) > 0:
+        write_variables_template(f, gpio_block, templates["gpio_block"])
 
 
 def write_handler_template(f, binding_key):
@@ -269,19 +290,6 @@ def write_handler_template(f, binding_key):
                                     property_name=property_name,
                                     open_bracket=open_bracket, close_bracket=close_bracket))
 
-            # if template_key == "gpio_input":
-            #     gpio_name = signatures[item]["properties"]["name"]
-            #     f.write(template.format(name=item, gpio_name=gpio_name,
-            #                             open_bracket=open_bracket, close_bracket=close_bracket))
-            # elif template_key == "device_twin":
-            #     twin_state = device_twin_state[signatures[item]
-            #                                    ["properties"]["type"]]
-            #     f.write(template.format(name=item, twin_state=twin_state,
-            #                             open_bracket=open_bracket, close_bracket=close_bracket))
-            # else:
-            #     property_name = signatures[item]["properties"]["name"]
-            #     f.write(template.format(
-            #         name=item, property_name=property_name, open_bracket=open_bracket, close_bracket=close_bracket))
             f.write("\n")
 
 

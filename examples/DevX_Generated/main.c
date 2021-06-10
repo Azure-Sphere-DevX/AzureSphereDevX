@@ -89,6 +89,8 @@ static DX_MESSAGE_CONTENT_PROPERTIES contentProperties = {.contentEncoding = "ut
  ****************************************************************************************/
 static DX_DIRECT_METHOD_RESPONSE_CODE LightControl_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding,
                                                            char **responseMsg);
+static void AlertLed_handler(EventLoopTimer *eventLoopTimer);
+static void AzureIotConnectedLed_handler(EventLoopTimer *eventLoopTimer);
 static void ButtonA_handler(EventLoopTimer *eventLoopTimer);
 static void DesiredMeasurementRate_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
 static void DesiredTemperature_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
@@ -122,6 +124,9 @@ static DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = {&dm_LightControl};
 /****************************************************************************************
  * Timer Bindings
  ****************************************************************************************/
+static DX_TIMER_BINDING tmr_AlertLed = {.period = {4, 0}, .name = "AlertLed", .handler = AlertLed_handler};
+static DX_TIMER_BINDING tmr_AzureIotConnectedLed = {
+    .period = {4, 0}, .name = "AzureIotConnectedLed", .handler = AzureIotConnectedLed_handler};
 static DX_TIMER_BINDING tmr_ButtonA = {.period = {0, 200000000}, .name = "ButtonA", .handler = ButtonA_handler};
 static DX_TIMER_BINDING tmr_MeasureCarbonMonoxide = {.name = "MeasureCarbonMonoxide", .handler = MeasureCarbonMonoxide_handler};
 static DX_TIMER_BINDING tmr_MeasureTemperature = {.period = {5, 0}, .name = "MeasureTemperature", .handler = MeasureTemperature_handler};
@@ -129,8 +134,8 @@ static DX_TIMER_BINDING tmr_PublishTelemetry = {.period = {5, 0}, .name = "Publi
 static DX_TIMER_BINDING tmr_Watchdog = {.period = {15, 0}, .name = "Watchdog", .handler = Watchdog_handler};
 
 // All timers referenced in timer_bindings with be opened in the InitPeripheralsAndHandlers function
-static DX_TIMER_BINDING *timer_bindings[] = {&tmr_ButtonA, &tmr_MeasureCarbonMonoxide, &tmr_MeasureTemperature, &tmr_PublishTelemetry,
-                                             &tmr_Watchdog};
+static DX_TIMER_BINDING *timer_bindings[] = {&tmr_AlertLed,           &tmr_AzureIotConnectedLed, &tmr_ButtonA, &tmr_MeasureCarbonMonoxide,
+                                             &tmr_MeasureTemperature, &tmr_PublishTelemetry,     &tmr_Watchdog};
 
 /****************************************************************************************
  * GPIO Bindings
@@ -150,6 +155,33 @@ static DX_GPIO_BINDING *gpio_bindings[] = {&gpio_AlertLed, &gpio_AzureIotConnect
 /****************************************************************************************
  * Implement your timer code
  ****************************************************************************************/
+
+/// <summary>
+/// Implement your timer function
+/// </summary>
+static void AlertLed_handler(EventLoopTimer *eventLoopTimer)
+{
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+    static bool gpio_state = true;
+    dx_gpioStateSet(&gpio_AlertLed, gpio_state);
+    gpio_state = !gpio_state;
+}
+
+/// <summary>
+/// Implement your timer function
+/// </summary>
+static void AzureIotConnectedLed_handler(EventLoopTimer *eventLoopTimer)
+{
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+    static bool gpio_state = true;
+    dx_gpioStateSet(&gpio_AzureIotConnectedLed, gpio_state = !gpio_state);
+}
 
 /// <summary>
 /// Implement your GPIO input timer function
