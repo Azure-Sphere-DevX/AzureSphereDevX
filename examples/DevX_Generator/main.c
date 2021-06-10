@@ -92,6 +92,7 @@ static DX_MESSAGE_CONTENT_PROPERTIES contentProperties = {.contentEncoding = "ut
  ****************************************************************************************/
 static DX_DIRECT_METHOD_RESPONSE_CODE LightControl_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);
 static void ButtonA_handler(EventLoopTimer *eventLoopTimer);
+static void DesiredMeasurementRate_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
 static void DesiredTemperature_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
 static void MeasureCarbonMonoxide_handler(EventLoopTimer *eventLoopTimer);
 static void MeasureTemperature_handler(EventLoopTimer *eventLoopTimer);
@@ -101,12 +102,13 @@ static void Watchdog_handler(EventLoopTimer *eventLoopTimer);
 /****************************************************************************************
 * Azure IoT Device Twin Bindings
 ****************************************************************************************/
+static DX_DEVICE_TWIN_BINDING dt_DesiredMeasurementRate = { .twinProperty = "DesiredMeasurementRate", .twinType = DX_TYPE_FLOAT, .handler = DesiredMeasurementRate_handler};
 static DX_DEVICE_TWIN_BINDING dt_DesiredTemperature = { .twinProperty = "DesiredTemperature", .twinType = DX_TYPE_FLOAT, .handler = DesiredTemperature_handler};
 static DX_DEVICE_TWIN_BINDING dt_ReportedDeviceStartTime = { .twinProperty = "ReportedDeviceStartTime", .twinType = DX_TYPE_STRING};
 static DX_DEVICE_TWIN_BINDING dt_ReportedTemperature = { .twinProperty = "ReportedTemperature", .twinType = DX_TYPE_FLOAT};
 
 // All device twins listed in device_twin_bindings will be subscribed to in the InitPeripheralsAndHandlers function
-static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = { &dt_DesiredTemperature, &dt_ReportedDeviceStartTime, &dt_ReportedTemperature };
+static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = { &dt_DesiredMeasurementRate, &dt_DesiredTemperature, &dt_ReportedDeviceStartTime, &dt_ReportedTemperature };
 
 /****************************************************************************************
 * Azure IoT Direct Method Bindings
@@ -226,16 +228,42 @@ static void Watchdog_handler(EventLoopTimer *eventLoopTimer) {
 /// What is the purpose of this device twin handler function
 /// </summary>
 /// <param name="deviceTwinBinding"></param>
+static void DesiredMeasurementRate_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {
+    Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
+
+    // Checking the twinStateUpdated here will always be true. 
+    // But it's useful property for other areas of your code
+    Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
+
+    float device_twin_value = *(float*)deviceTwinBinding->twinState;
+    
+    if (device_twin_value > 0.0f && device_twin_value < 100.0f){
+        Log_Debug("Device twin value: %f\n", device_twin_value);
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
+    } else {
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
+    }
+}
+
+/// <summary>
+/// What is the purpose of this device twin handler function
+/// </summary>
+/// <param name="deviceTwinBinding"></param>
 static void DesiredTemperature_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {
     Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
 
-    // Checking the twinStateUpdated here will always be true. But it's useful property for other area
+    // Checking the twinStateUpdated here will always be true. 
+    // But it's useful property for other areas of your code
     Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
 
-    Log_Debug("%f\n", *(float*)deviceTwinBinding->twinState);
-
-    dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
-    // dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
+    float device_twin_value = *(float*)deviceTwinBinding->twinState;
+    
+    if (device_twin_value > 0.0f && device_twin_value < 100.0f){
+        Log_Debug("Device twin value: %f\n", device_twin_value);
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
+    } else {
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
+    }
 }
 
 

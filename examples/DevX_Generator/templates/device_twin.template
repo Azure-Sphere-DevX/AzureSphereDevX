@@ -5,11 +5,9 @@
 {name} {open_bracket}
     Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
 
-    // Checking the twinStateUpdated here will always be true. But it's useful property for other area
+    // Checking the twinStateUpdated here will always be true. 
+    // But it's useful property for other areas of your code
     Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
 
-    Log_Debug({twin_state});
-
-    dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
-    // dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
+{twin_state_usage}
 {close_bracket}
