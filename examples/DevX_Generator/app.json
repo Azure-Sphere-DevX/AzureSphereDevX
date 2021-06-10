@@ -31,12 +31,17 @@
     },
     {
         "binding": "DIRECT_METHOD_BINDING",
-        "active": false,
+        "active": true,
         "properties": { "name": "LightControl" }
     },
     {
+        "binding": "DIRECT_METHOD_BINDING",
+        "active": true,
+        "properties": { "name": "FanControl" }
+    },
+    {
         "binding": "GPIO_BINDING",
-        "active": false,
+        "active": true,
         "properties": { "pin": "NETWORK_CONNECTED_LED", "name": "AzureIotConnectedLed", "direction": "output", "initialState" : "low", "invertPin": true }
     },
     {

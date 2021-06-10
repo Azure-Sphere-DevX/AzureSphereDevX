@@ -87,6 +87,9 @@ static DX_MESSAGE_CONTENT_PROPERTIES contentProperties = {.contentEncoding = "ut
 /****************************************************************************************
  * Forward declarations
  ****************************************************************************************/
+static DX_DIRECT_METHOD_RESPONSE_CODE FanControl_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);
+static DX_DIRECT_METHOD_RESPONSE_CODE LightControl_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);
+static void AzureIotConnectedLed_handler(EventLoopTimer *eventLoopTimer);
 static void DesiredMeasurementRate_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
 static void DesiredTemperature_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
 static void PublishTelemetry_handler(EventLoopTimer *eventLoopTimer);
@@ -104,13 +107,31 @@ static DX_DEVICE_TWIN_BINDING dt_ReportedTemperature = { .twinProperty = "Report
 static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = { &dt_DesiredMeasurementRate, &dt_DesiredTemperature, &dt_ReportedDeviceStartTime, &dt_ReportedTemperature };
 
 /****************************************************************************************
+* Azure IoT Direct Method Bindings
+****************************************************************************************/
+static DX_DIRECT_METHOD_BINDING dm_FanControl = { .methodName = "FanControl", .handler = FanControl_handler };
+static DX_DIRECT_METHOD_BINDING dm_LightControl = { .methodName = "LightControl", .handler = LightControl_handler };
+
+// All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
+static DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = { &dm_FanControl, &dm_LightControl };
+
+/****************************************************************************************
 * Timer Bindings
 ****************************************************************************************/
+static DX_TIMER_BINDING  tmr_AzureIotConnectedLed = {.period = {4, 0},  .name = "AzureIotConnectedLed", .handler = AzureIotConnectedLed_handler };
 static DX_TIMER_BINDING  tmr_PublishTelemetry = {.period = {5, 0}, .name = "PublishTelemetry", .handler = PublishTelemetry_handler };
 static DX_TIMER_BINDING  tmr_Watchdog = {.period = {15, 0}, .name = "Watchdog", .handler = Watchdog_handler };
 
 // All timers referenced in timer_bindings with be opened in the InitPeripheralsAndHandlers function
-static DX_TIMER_BINDING *timer_bindings[] = { &tmr_PublishTelemetry, &tmr_Watchdog };
+static DX_TIMER_BINDING *timer_bindings[] = { &tmr_AzureIotConnectedLed, &tmr_PublishTelemetry, &tmr_Watchdog };
+
+/****************************************************************************************
+* GPIO Bindings
+****************************************************************************************/
+static DX_GPIO_BINDING gpio_AzureIotConnectedLed = { .pin = NETWORK_CONNECTED_LED, .name = "AzureIotConnectedLed", .direction = DX_OUTPUT, .initialState = GPIO_Value_Low, .invertPin = true };
+
+// All GPIOs referenced in gpio_bindings with be opened in the InitPeripheralsAndHandlers function
+static DX_GPIO_BINDING *gpio_bindings[] = { &gpio_AzureIotConnectedLed };
 
 
 
@@ -160,9 +181,85 @@ static void DesiredTemperature_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding
     }
 }
 
+
+/****************************************************************************************
+* Implement your direct method code
+****************************************************************************************/
+
+// Direct method JSON payload example {"Duration":2}:
+static DX_DIRECT_METHOD_RESPONSE_CODE FanControl_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {
+    char duration_str[] = "Duration";
+    int requested_duration_seconds;
+
+    JSON_Object *jsonObject = json_value_get_object(json);
+    if (jsonObject == NULL) {
+        return DX_METHOD_FAILED;
+    }
+
+    // check JSON properties sent through are the correct type
+    if (!json_object_has_value_of_type(jsonObject, duration_str, JSONNumber)) {
+        return DX_METHOD_FAILED;
+    }
+
+    requested_duration_seconds = (int)json_object_get_number(jsonObject, duration_str);
+    Log_Debug("Duration %d \n", requested_duration_seconds);
+
+    if (requested_duration_seconds < 0 || requested_duration_seconds > 120 ) {
+        return DX_METHOD_FAILED;
+    }
+
+    // Action the duration request
+
+    return DX_METHOD_SUCCEEDED;
+    
+}
+
+// Direct method JSON payload example {"Duration":2}:
+static DX_DIRECT_METHOD_RESPONSE_CODE LightControl_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {
+    char duration_str[] = "Duration";
+    int requested_duration_seconds;
+
+    JSON_Object *jsonObject = json_value_get_object(json);
+    if (jsonObject == NULL) {
+        return DX_METHOD_FAILED;
+    }
+
+    // check JSON properties sent through are the correct type
+    if (!json_object_has_value_of_type(jsonObject, duration_str, JSONNumber)) {
+        return DX_METHOD_FAILED;
+    }
+
+    requested_duration_seconds = (int)json_object_get_number(jsonObject, duration_str);
+    Log_Debug("Duration %d \n", requested_duration_seconds);
+
+    if (requested_duration_seconds < 0 || requested_duration_seconds > 120 ) {
+        return DX_METHOD_FAILED;
+    }
+
+    // Action the duration request
+
+    return DX_METHOD_SUCCEEDED;
+    
+}
+
 /****************************************************************************************
 * Implement your timer code
 ****************************************************************************************/
+
+/// <summary>
+/// Implement your timer function
+/// </summary>
+static void AzureIotConnectedLed_handler(EventLoopTimer *eventLoopTimer) {
+    static bool gpio_state = true;
+
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }
+    
+    dx_gpioStateSet(&gpio_AzureIotConnectedLed, gpio_state);    
+    gpio_state = !gpio_state;
+}
 
 
 /// <summary>
@@ -232,9 +329,9 @@ void StartWatchdog(void) {
 static void InitPeripheralAndHandlers(void) {
 	dx_Log_Debug_Init(Log_Debug_buffer, sizeof(Log_Debug_buffer));
 	dx_azureConnect(&dx_config, NETWORK_INTERFACE, PNP_MODEL_ID);	
-	
+	dx_gpioSetOpen(gpio_bindings, NELEMS(gpio_bindings));
 	dx_deviceTwinSubscribe(device_twin_bindings, NELEMS(device_twin_bindings));
-	
+	dx_directMethodSubscribe(direct_method_bindings, NELEMS(direct_method_bindings));
 	dx_timerSetStart(timer_bindings, NELEMS(timer_bindings));
 	
 	// Uncomment the StartWatchdog when ready for production
@@ -247,9 +344,9 @@ static void InitPeripheralAndHandlers(void) {
 static void ClosePeripheralAndHandlers(void) {
 	dx_timerSetStop(timer_bindings, NELEMS(timer_bindings));
 	dx_azureToDeviceStop();
-	
+	dx_gpioSetClose(gpio_bindings, NELEMS(gpio_bindings));
 	dx_deviceTwinUnsubscribe();
-	
+	dx_directMethodUnsubscribe();
 	dx_timerEventLoopStop();
 }
 

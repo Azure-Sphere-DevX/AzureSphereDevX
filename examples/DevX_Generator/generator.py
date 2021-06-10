@@ -58,10 +58,12 @@ with open('app.json', 'r') as j:
 
 devicetwins = list(
     elem for elem in data if elem['binding'] == 'DEVICE_TWIN_BINDING' and elem.get('active', True) == True)
-directmethods = (
+directmethods = list(
     elem for elem in data if elem['binding'] == 'DIRECT_METHOD_BINDING' and elem.get('active', True) == True)
-timers = (elem for elem in data if elem['binding'] == 'TIMER_BINDING' and elem.get('active', True) == True)
-gpios = (elem for elem in data if elem['binding'] == 'GPIO_BINDING' and elem.get('active', True) == True)
+timers = list(elem for elem in data if elem['binding'] == 'TIMER_BINDING' and elem.get(
+    'active', True) == True)
+gpios = list(elem for elem in data if elem['binding'] == 'GPIO_BINDING' and elem.get(
+    'active', True) == True)
 
 
 def load_templates():
@@ -259,16 +261,19 @@ def write_variables_template(f, list, set_template):
 def write_variables(f):
 
     if len(device_twin_block) > 0:
-        write_variables_template(f, device_twin_block, templates["device_twin_block"])
+        write_variables_template(f, device_twin_block,
+                                 templates["device_twin_block"])
 
     if len(direct_method_block) > 0:
-        write_variables_template(f, direct_method_block, templates["direct_method_block"])
+        write_variables_template(
+            f, direct_method_block, templates["direct_method_block"])
 
     if len(timer_block) > 0:
         write_variables_template(f, timer_block, templates["timer_block"])
 
     if len(gpio_block) > 0:
         write_variables_template(f, gpio_block, templates["gpio_block"])
+
 
 def generate_device_twin_updates():
     global device_twins_updates, device_twin_variables
@@ -281,22 +286,31 @@ def generate_device_twin_updates():
         property_type = properties.get("type", None)
 
         if property_type == 'integer':
-            device_twin_variables += '    int {property_name}_value = 10;\n'.format(property_name=property_name)
-            device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);\n'.format(property_name=property_name)
+            device_twin_variables += '    int {property_name}_value = 10;\n'.format(
+                property_name=property_name)
+            device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);\n'.format(
+                property_name=property_name)
         elif property_type == 'float':
-            device_twin_variables += '    float {property_name}_value = 10.0f;\n'.format(property_name=property_name)
-            device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);\n'.format(property_name=property_name)
+            device_twin_variables += '    float {property_name}_value = 10.0f;\n'.format(
+                property_name=property_name)
+            device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);\n'.format(
+                property_name=property_name)
         elif property_type == 'double':
-            device_twin_variables += '    double {property_name}_value = 10.0;\n'.format(property_name=property_name)
-            device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);\n'.format(property_name=property_name)
+            device_twin_variables += '    double {property_name}_value = 10.0;\n'.format(
+                property_name=property_name)
+            device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);\n'.format(
+                property_name=property_name)
         elif property_type == 'boolean':
-            device_twin_variables += '    bool {property_name}_value = true;\n'.format(property_name=property_name)
-            device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);\n'.format(property_name=property_name)
+            device_twin_variables += '    bool {property_name}_value = true;\n'.format(
+                property_name=property_name)
+            device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);\n'.format(
+                property_name=property_name)
         elif property_type == 'string':
-            device_twin_variables += '    char {property_name}_value[] = "hello, world";\n'.format(property_name=property_name)
-            device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, {property_name}_value);\n'.format(property_name=property_name)
+            device_twin_variables += '    char {property_name}_value[] = "hello, world";\n'.format(
+                property_name=property_name)
+            device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, {property_name}_value);\n'.format(
+                property_name=property_name)
 
-        
 
 def write_handler_template(f, binding_key):
     for item in sorted(signatures):
@@ -309,11 +323,13 @@ def write_handler_template(f, binding_key):
 
             property_name = properties["name"]
             property_type = properties.get("type", None)
-            twin_state_usage_key = "device_twin_usage_"+property_type if property_type is not None else None
+            twin_state_usage_key = "device_twin_usage_" + \
+                property_type if property_type is not None else None
             twin_state_usage = templates[twin_state_usage_key] if property_type is not None else None
 
             # Now map property type to DevX type eg integer -> DX_TYPE_INT
-            property_type = device_twin_types[properties["type"]] if properties.get("type") is not None else None
+            property_type = device_twin_types[properties["type"]] if properties.get(
+                "type") is not None else None
 
             f.write(template.format(name=item, gpio_name=property_name, twin_state_usage=twin_state_usage,
                                     property_name=property_name,
@@ -356,16 +372,23 @@ def write_main():
             generate_device_twin_updates()
             write_handlers(main_c)
 
-            device_twins_subscribe = 'dx_deviceTwinSubscribe(device_twin_bindings, NELEMS(device_twin_bindings));' if len(device_twin_block) > 0 else ''
-            direct_method_subscribe = 'dx_directMethodSubscribe(direct_method_bindings, NELEMS(direct_method_bindings));' if len(direct_method_block) > 0 else ''
-            timer_start = 'dx_timerSetStart(timer_bindings, NELEMS(timer_bindings));' if len(timer_block) > 0 else ''
-            gpio_bindings_open = 'dx_gpioSetOpen(gpio_bindings, NELEMS(gpio_bindings));' if len(gpio_block) > 0 else ''
+            device_twins_subscribe = 'dx_deviceTwinSubscribe(device_twin_bindings, NELEMS(device_twin_bindings));' if len(
+                device_twin_block) > 0 else ''
+            direct_method_subscribe = 'dx_directMethodSubscribe(direct_method_bindings, NELEMS(direct_method_bindings));' if len(
+                direct_method_block) > 0 else ''
+            timer_start = 'dx_timerSetStart(timer_bindings, NELEMS(timer_bindings));' if len(
+                timer_block) > 0 else ''
+            gpio_bindings_open = 'dx_gpioSetOpen(gpio_bindings, NELEMS(gpio_bindings));' if len(
+                gpio_block) > 0 else ''
 
-            device_twins_unsubscribe = 'dx_deviceTwinUnsubscribe();' if len(device_twin_block) > 0 else ''
-            direct_method_unsubscribe = 'dx_directMethodUnsubscribe();' if len(direct_method_block) > 0 else ''
-            timer_stop = 'dx_timerSetStop(timer_bindings, NELEMS(timer_bindings));' if len(timer_block) > 0 else ''
-            gpio_bindings_close = 'dx_gpioSetClose(gpio_bindings, NELEMS(gpio_bindings));' if len(gpio_block) > 0 else ''
-
+            device_twins_unsubscribe = 'dx_deviceTwinUnsubscribe();' if len(
+                device_twin_block) > 0 else ''
+            direct_method_unsubscribe = 'dx_directMethodUnsubscribe();' if len(
+                direct_method_block) > 0 else ''
+            timer_stop = 'dx_timerSetStop(timer_bindings, NELEMS(timer_bindings));' if len(
+                timer_block) > 0 else ''
+            gpio_bindings_close = 'dx_gpioSetClose(gpio_bindings, NELEMS(gpio_bindings));' if len(
+                gpio_block) > 0 else ''
 
             main_c.write(templates["footer"].format(
                 gpio_bindings_open=gpio_bindings_open,
