@@ -21,12 +21,12 @@
     },
     {
         "binding": "TIMER_BINDING",
-        "active": false,
+        "active": true,
         "properties": { "period": "5, 0", "name": "MeasureTemperature" }
     },
     {
         "binding": "TIMER_BINDING",
-        "active": false,
+        "active": true,
         "properties": { "name": "MeasureCarbonMonoxide" }
     },
     {
@@ -46,12 +46,12 @@
     },
     {
         "binding": "GPIO_BINDING",
-        "active": false,
+        "active": true,
         "properties": { "pin": "ALERT_LED", "name": "AlertLed", "direction": "output", "initialState" : "low", "invertPin": true }
     },
     {
         "binding": "GPIO_BINDING",
-        "active": false,
+        "active": true,
         "properties": { "pin": "BUTTON_A", "name": "ButtonA", "direction": "input", "detect": "both" }
     }
 ]

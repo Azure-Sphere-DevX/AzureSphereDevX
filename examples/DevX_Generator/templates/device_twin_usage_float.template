@@ -1,8 +1,0 @@
-    float device_twin_value = *(float*)deviceTwinBinding->twinState;
-    
-    if (device_twin_value > 0.0f && device_twin_value < 100.0f){
-        Log_Debug("Device twin value: %f\n", device_twin_value);
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
-    } else {
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
-    }

@@ -3,10 +3,10 @@
 /// This timer extends the app level lease watchdog timer
 /// </summary>
 /// <param name="eventLoopTimer"></param>
-static void Watchdog_handler(EventLoopTimer *eventLoopTimer) {open_bracket}
-    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {open_bracket}
+static void Watchdog_handler(EventLoopTimer *eventLoopTimer) {{
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {{
         dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
         return;
-    {close_bracket}
+    }}
     timer_settime(watchdogTimer, 0, &watchdogInterval, NULL);
-{close_bracket}
+}}

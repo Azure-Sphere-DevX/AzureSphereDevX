@@ -1,8 +1,0 @@
-    int device_twin_value = *(int*)deviceTwinBinding->twinState;
-    
-    if (device_twin_value > 0 && device_twin_value < 100){
-        Log_Debug("Device twin value: %d\n", device_twin_value);
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
-    } else {
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
-    }

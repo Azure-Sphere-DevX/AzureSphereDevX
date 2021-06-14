@@ -1,0 +1,1 @@
+All GPIOs referenced in gpio_bindings with be opened in the InitPeripheralsAndHandlers function

@@ -1,0 +1,1 @@
+static DX_GPIO_BINDING *gpio_bindings[] = {{ {variables} }};

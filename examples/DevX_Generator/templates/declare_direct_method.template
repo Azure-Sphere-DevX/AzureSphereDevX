@@ -1,0 +1,1 @@
+static DX_DIRECT_METHOD_BINDING dm_{name} = {{ .methodName = "{name}", .handler = {name}_handler }};

@@ -1,0 +1,21 @@
+/// <summary>
+/// What is the purpose of this device twin handler function
+/// </summary>
+/// <param name="deviceTwinBinding"></param>
+static void {name}_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {{
+    Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
+
+    // Checking the twinStateUpdated here will always be true.
+    // But it's useful property for other areas of your code
+    Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
+
+    double device_twin_value = *(double*)deviceTwinBinding->twinState;
+
+    if (device_twin_value > 0.0 && device_twin_value < 100.0){{
+        Log_Debug("Device twin value: %f\n", device_twin_value);
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
+    }} else {{
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
+    }}
+
+}}

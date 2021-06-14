@@ -1,0 +1,1 @@
+static void {name}_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);

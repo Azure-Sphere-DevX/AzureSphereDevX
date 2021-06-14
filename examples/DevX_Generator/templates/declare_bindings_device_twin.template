@@ -1,0 +1,1 @@
+static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = {{ {variables} }};

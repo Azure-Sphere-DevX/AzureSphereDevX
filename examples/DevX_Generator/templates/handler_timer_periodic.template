@@ -1,11 +1,11 @@
 /// <summary>
 /// Implement your timer function
 /// </summary>
-{name} {open_bracket}
-    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {open_bracket}
+static void {name}_handler(EventLoopTimer *eventLoopTimer) {{
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {{
         dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
         return;
-    {close_bracket}
+    }}
     
     // Implement your timer function
-{close_bracket}
+}}

@@ -1,14 +1,14 @@
 /// <summary>
 /// Implement your timer function
 /// </summary>
-{name} {open_bracket}
+static void {name}_handler(EventLoopTimer *eventLoopTimer) {{
     static bool gpio_state = true;
 
-    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {open_bracket}
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {{
         dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
         return;
-    {close_bracket}
+    }}
     
-    dx_gpioStateSet(&gpio_{gpio_name}, gpio_state);    
+    dx_gpioStateSet(&gpio_{name}, gpio_state);    
     gpio_state = !gpio_state;
-{close_bracket}
+}}

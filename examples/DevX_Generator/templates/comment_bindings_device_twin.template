@@ -1,0 +1,1 @@
+All device twins listed in device_twin_bindings will be subscribed to in the InitPeripheralsAndHandlers function

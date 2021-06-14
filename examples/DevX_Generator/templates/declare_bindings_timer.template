@@ -1,0 +1,1 @@
+static DX_TIMER_BINDING *timer_bindings[] = {{ {variables} }};

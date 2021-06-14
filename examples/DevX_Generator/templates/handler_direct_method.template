@@ -1,27 +1,26 @@
-// Direct method JSON payload example {open_bracket}"Duration":2{close_bracket}:
-{name} {open_bracket}
+// Direct method JSON payload example {{"Duration":2}}:
+static DX_DIRECT_METHOD_BINDING dm_{name} = {{ .methodName = "{name}", .handler = {name}_handler }} {{
     char duration_str[] = "Duration";
     int requested_duration_seconds;
 
     JSON_Object *jsonObject = json_value_get_object(json);
-    if (jsonObject == NULL) {open_bracket}
+    if (jsonObject == NULL) {{
         return DX_METHOD_FAILED;
-    {close_bracket}
+    }}
 
     // check JSON properties sent through are the correct type
-    if (!json_object_has_value_of_type(jsonObject, duration_str, JSONNumber)) {open_bracket}
+    if (!json_object_has_value_of_type(jsonObject, duration_str, JSONNumber)) {{
         return DX_METHOD_FAILED;
-    {close_bracket}
+    }}
 
     requested_duration_seconds = (int)json_object_get_number(jsonObject, duration_str);
     Log_Debug("Duration %d \n", requested_duration_seconds);
 
-    if (requested_duration_seconds < 0 || requested_duration_seconds > 120 ) {open_bracket}
+    if (requested_duration_seconds < 0 || requested_duration_seconds > 120 ) {{
         return DX_METHOD_FAILED;
-    {close_bracket}
+    }}
 
     // Action the duration request
 
     return DX_METHOD_SUCCEEDED;
-    
-{close_bracket}
+}}
