@@ -1,57 +1,57 @@
 [
     {
         "binding": "DEVICE_TWIN_BINDING",
-        "active": true,
+        "enabled": false,
         "properties": { "name": "DesiredTemperature", "type": "float", "cloud2device": true }
     },
     {
         "binding": "DEVICE_TWIN_BINDING",
-        "active": true,
+        "enabled": false,
         "properties": { "name": "DesiredMeasurementRate", "type": "double", "cloud2device": true }
     },
     {
         "binding": "DEVICE_TWIN_BINDING",
-        "active": true,
+        "enabled": false,
         "properties": { "name": "ReportedTemperature", "type": "float"}
     },
     {
         "binding": "DEVICE_TWIN_BINDING", 
-        "active": true,
+        "enabled": false,
         "properties": { "name": "ReportedDeviceStartTime", "type": "string" }
     },
     {
         "binding": "TIMER_BINDING",
-        "active": true,
+        "enabled": false,
         "properties": { "period": "5, 0", "name": "MeasureTemperature" }
     },
     {
         "binding": "TIMER_BINDING",
-        "active": true,
+        "enabled": false,
         "properties": { "name": "MeasureCarbonMonoxide" }
     },
     {
         "binding": "DIRECT_METHOD_BINDING",
-        "active": true,
+        "enabled": false,
         "properties": { "name": "LightControl" }
     },
     {
         "binding": "DIRECT_METHOD_BINDING",
-        "active": true,
+        "enabled": false,
         "properties": { "name": "FanControl" }
     },
     {
         "binding": "GPIO_BINDING",
-        "active": true,
-        "properties": { "pin": "NETWORK_CONNECTED_LED", "name": "AzureIotConnectedLed", "direction": "output", "initialState" : "low", "invertPin": true }
+        "enabled": true,
+        "properties": { "pin": "NETWORK_CONNECTED_LED", "name": "AzureIotConnectedLed", "direction": "output", "initialState" : "low", "invertPin": true, "period": "4,0" }
     },
     {
         "binding": "GPIO_BINDING",
-        "active": true,
+        "enabled": false,
         "properties": { "pin": "ALERT_LED", "name": "AlertLed", "direction": "output", "initialState" : "low", "invertPin": true }
     },
     {
         "binding": "GPIO_BINDING",
-        "active": true,
-        "properties": { "pin": "BUTTON_A", "name": "ButtonA", "direction": "input", "detect": "both" }
+        "enabled": true,
+        "properties": { "pin": "BUTTON_A", "name": "ButtonA", "direction": "input", "detect": "both", "period": "0,200000000" }
     }
 ]

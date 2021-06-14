@@ -25,7 +25,11 @@ device_twin_variables = None
 with open('app.json', 'r') as j:
     data = json.load(j)
 
-bindings = list(elem for elem in data if elem.get('active', True) == True)
+bindings = list(elem for elem in data if elem.get('enabled', True) == True)
+
+
+def get_value(properties, key):
+    return "" if properties.get(key) is None else properties.get(key)
 
 
 def write_comment_block(f, msg):
@@ -35,8 +39,7 @@ def write_comment_block(f, msg):
 
 
 def build_device_twin(binding, key):
-    binding['properties'].update(
-        {'twin_type': device_twin_types[binding['properties']['type']]})
+    binding['properties'].update({'twin_type': device_twin_types[binding['properties']['type']]})
     if binding['properties'].get("cloud2device") == True:
 
         binding.update({"sig_template": 'sig_device_twin'})
@@ -67,28 +70,32 @@ def build_direct_method(binding, key):
 def build_gpio(binding, key):
     binding.update({"sig_template": 'sig_timer'})
     signatures.update({key: binding})
+    properties = binding['properties']
+    properties.update({"initialState": gpio_init.get(get_value(properties, 'initialState')) if get_value(properties, 'initialState') != "" else "" })
 
     direction = binding['properties'].get('direction', "output")
     if direction == 'input':
         binding.update({"var_template": 'declare_gpio_input'})
         variables_block.update({key: binding})
 
-        binding.update({"timer_template": 'declare_timer_periodic'})
-        binding['properties'].update({"period": '4, 0'})
-        timer_block.update({key: binding})
+        if get_value(properties, 'period') != "":
+            binding.update({"timer_template": 'declare_timer_periodic'})
+            properties.update({"period": "{" + get_value(properties, 'period') + "}"})
+            timer_block.update({key: binding})
 
-        binding.update({"handler_template": 'handler_gpio_input'})
-        handlers_block.update({key: binding})
+            binding.update({"handler_template": 'handler_gpio_input'})
+            handlers_block.update({key: binding})
     else:
         binding.update({"var_template": 'declare_gpio_output'})
         variables_block.update({key: binding})
 
-        binding.update({"timer_template": 'declare_timer_periodic'})
-        binding['properties'].update({"period": '0, 200000000'})
-        timer_block.update({key: binding})
+        if get_value(properties, 'period') != "":
+            binding.update({"timer_template": 'declare_timer_periodic'})
+            properties.update({"period": "{" + get_value(properties, 'period') + "}"})
+            timer_block.update({key: binding})
 
-        binding.update({"handler_template": 'handler_gpio_output'})
-        handlers_block.update({key: binding})
+            binding.update({"handler_template": 'handler_gpio_output'})
+            handlers_block.update({key: binding})
 
 
 def build_timer(binding, key):
@@ -143,10 +150,6 @@ def build_signatures(f):
         f.write(templates[template_key].format(name=name))
 
 
-def get_value(properties, key):
-    return "" if properties.get(key) is None else properties.get(key)
-
-
 def build_timer_block(f):
     variables_list = ""
     write_comment_block(f, templates['comment_block_timer'])
@@ -181,7 +184,7 @@ def build_variable_block(f, key_binding, key_block):
 
                 pin = get_value(properties, 'pin')
                 initialState = get_value(properties, 'initialState')
-                invert = get_value(properties, 'invertPin')
+                invert = "true" if get_value(properties, 'invertPin') else "false"
                 twin_type = get_value(properties, 'twin_type')
 
                 template_key = var.get('var_template')
@@ -205,6 +208,8 @@ def build_handler_block(f, key_binding, block_comment):
         var = handlers_block.get(item)
         binding = var['binding']
 
+        # if var.get('handler_template') is not None:
+
         if binding is not None and binding == key_binding:
             if first:
                 first = False
@@ -217,6 +222,7 @@ def build_handler_block(f, key_binding, block_comment):
                 name = properties.get('name')
                 template_key = var.get('handler_template')
                 f.write(templates[template_key].format(name=name))
+                f.write("\n")
 
 
 def write_main():
@@ -230,6 +236,7 @@ def write_main():
             build_variable_block(main_c, "DEVICE_TWIN_BINDING", "device_twin")
             build_variable_block(main_c, "DIRECT_METHOD_BINDING", "direct_method")
             build_variable_block(main_c, "GPIO_BINDING", "gpio")
+            build_handler_block(main_c, "GPIO_BINDING", "Implement your gpio code")
             build_handler_block(main_c, "DEVICE_TWIN_BINDING", "Implement your device twins code")
             build_handler_block(main_c, "DIRECT_METHOD_BINDING", "Implement your direct method code")
             build_handler_block(main_c, "TIMER_BINDING", "Implement your timer code")
