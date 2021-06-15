@@ -1,1 +1,4 @@
+
+// All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
+#define DECLARE_DX_DIRECT_METHOD_BINDINGS
 static DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = {{ {variables} }};

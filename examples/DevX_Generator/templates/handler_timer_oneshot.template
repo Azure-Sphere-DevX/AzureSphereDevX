@@ -7,7 +7,9 @@ static void {name}_handler(EventLoopTimer *eventLoopTimer) {{
         return;
     }}
     
+    Log_Debug("Oneshot timer {name}_handler called\n");
     // Implement your timer function
+
 
     // reload the oneshot timer
     dx_timerOneShotSet(&tmr_{name}, &(struct timespec){{5, 0}});

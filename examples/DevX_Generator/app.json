@@ -1,12 +1,12 @@
 [
     {
         "binding": "DEVICE_TWIN_BINDING",
-        "enabled": false,
+        "enabled": true,
         "properties": { "name": "DesiredTemperature", "type": "float", "cloud2device": true }
     },
     {
         "binding": "DEVICE_TWIN_BINDING",
-        "enabled": false,
+        "enabled": true,
         "properties": { "name": "DesiredMeasurementRate", "type": "double", "cloud2device": true }
     },
     {
@@ -21,7 +21,7 @@
     },
     {
         "binding": "TIMER_BINDING",
-        "enabled": false,
+        "enabled": true,
         "properties": { "period": "5, 0", "name": "MeasureTemperature" }
     },
     {
@@ -31,7 +31,7 @@
     },
     {
         "binding": "DIRECT_METHOD_BINDING",
-        "enabled": false,
+        "enabled": true,
         "properties": { "name": "LightControl" }
     },
     {
@@ -47,11 +47,24 @@
     {
         "binding": "GPIO_BINDING",
         "enabled": false,
-        "properties": { "pin": "ALERT_LED", "name": "AlertLed", "direction": "output", "initialState" : "low", "invertPin": true }
+        "properties": { "pin": "ALERT_LED", "name": "AlertLed", "direction": "output", "initialState" : "low", "invertPin": true, "period": "0,200000000" }
     },
     {
         "binding": "GPIO_BINDING",
         "enabled": true,
         "properties": { "pin": "BUTTON_A", "name": "ButtonA", "direction": "input", "detect": "both", "period": "0,200000000" }
+    },
+    {
+        "binding": "GENERAL_BINDING",
+        "enabled": true,
+        "properties": { "name": "PublishTelemetry", "period": "15,0" },
+        "handler_template": "publish",
+        "var_template": "declare_publish"
+    },
+    {
+        "binding": "GENERAL_BINDING",
+        "enabled": true,
+        "properties": { "name": "Watchdog", "period": "30, 0" },
+        "handler_template": "watchdog"
     }
 ]

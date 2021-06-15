@@ -1,1 +1,4 @@
+
+// All GPIOs referenced in gpio_bindings with be opened in the InitPeripheralsAndHandlers function
+#define DECLARE_DX_GPIO_BINDINGS
 static DX_GPIO_BINDING *gpio_bindings[] = {{ {variables} }};

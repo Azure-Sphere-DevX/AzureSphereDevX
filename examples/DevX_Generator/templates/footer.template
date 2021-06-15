@@ -1,70 +1,44 @@
 
-
-/// <summary>
-/// Set up watchdog timer - the lease is extended via the Watchdog_handler function
-/// </summary>
-/// <param name=""></param>
-void StartWatchdog(void) {open_bracket}
-	struct sigevent alarmEvent;
-	alarmEvent.sigev_notify = SIGEV_SIGNAL;
-	alarmEvent.sigev_signo = SIGALRM;
-	alarmEvent.sigev_value.sival_ptr = &watchdogTimer;
-
-	if (timer_create(CLOCK_MONOTONIC, &alarmEvent, &watchdogTimer) == 0) {open_bracket}
-		if (timer_settime(watchdogTimer, 0, &watchdogInterval, NULL) == -1) {open_bracket}
-			Log_Debug("Issue setting watchdog timer. %s %d\n", strerror(errno), errno);
-		{close_bracket}
-	{close_bracket}
-{close_bracket}
-
 /// <summary>
 ///  Initialize gpios, device twins, direct methods, timers.
 /// </summary>
-static void InitPeripheralAndHandlers(void) {open_bracket}
+static void InitPeripheralAndHandlers(void) {{
 	dx_Log_Debug_Init(Log_Debug_buffer, sizeof(Log_Debug_buffer));
-	dx_azureConnect(&dx_config, NETWORK_INTERFACE, PNP_MODEL_ID);	
-	{gpio_bindings_open}
-	{device_twins_subscribe}
-	{direct_method_subscribe}
-	{timer_start}
-	
+	dx_initPeripheralAndHandlers();
+
 	// Uncomment the StartWatchdog when ready for production
 	// StartWatchdog();
-{close_bracket}
+}}
 
 /// <summary>
 ///     Close Timers, GPIOs, Device Twins, Direct Methods
 /// </summary>
-static void ClosePeripheralAndHandlers(void) {open_bracket}
-	{timer_stop}
+static void ClosePeripheralAndHandlers(void) {{
 	dx_azureToDeviceStop();
-	{gpio_bindings_close}
-	{device_twins_unsubscribe}
-	{direct_method_unsubscribe}
+	dx_closePeripheralAndHandlers();
 	dx_timerEventLoopStop();
-{close_bracket}
+}}
 
 /// <summary>
 ///  Main event loop for the app
 /// </summary>
-int main(int argc, char* argv[]) {open_bracket}
+int main(int argc, char* argv[]) {{
 	dx_registerTerminationHandler();
-
-	if (!dx_configParseCmdLineArguments(argc, argv, &dx_config)) {open_bracket}
+	if (!dx_configParseCmdLineArguments(argc, argv, &dx_config)) {{
 		return dx_getTerminationExitCode();
-	{close_bracket}
+	}}
 
 	InitPeripheralAndHandlers();
 
 	// Main loop
-	while (!dx_isTerminationRequired()) {open_bracket}
+	while (!dx_isTerminationRequired()) {{
 		int result = EventLoop_Run(dx_timerGetEventLoop(), -1, true);
 		// Continue if interrupted by signal, e.g. due to breakpoint being set.
-		if (result == -1 && errno != EINTR) {open_bracket}
+		if (result == -1 && errno != EINTR) {{
 			dx_terminate(DX_ExitCode_Main_EventLoopFail);
-		{close_bracket}
-	{close_bracket}
+		}}
+	}}
 
 	ClosePeripheralAndHandlers();
 	return dx_getTerminationExitCode();
-{close_bracket}
+}}

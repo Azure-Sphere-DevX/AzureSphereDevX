@@ -1,0 +1,18 @@
+/****************************************************************************************
+ * Telemetry message templates and property sets
+ ****************************************************************************************/
+#define DX_PUBLISH_TELEMETRY TRUE
+
+// Number of bytes to allocate for the JSON telemetry message for IoT Hub/Central
+#define JSON_MESSAGE_BYTES 256
+static char msgBuffer[JSON_MESSAGE_BYTES] = {{0}};
+
+static const char *msgTemplate =
+    "{{ \"Temperature\":%3.2f, \"Humidity\":%3.1f, \"Pressure\":%3.1f }}";
+
+static DX_MESSAGE_PROPERTY *messageProperties[] = {{
+    &(DX_MESSAGE_PROPERTY){{.key = "appid", .value = "hvac"}},
+    &(DX_MESSAGE_PROPERTY){{.key = "type", .value = "telemetry"}},
+    &(DX_MESSAGE_PROPERTY){{.key = "schema", .value = "1"}}}};
+
+static DX_MESSAGE_CONTENT_PROPERTIES contentProperties = {{.contentEncoding = "utf-8", .contentType = "application/json"}};

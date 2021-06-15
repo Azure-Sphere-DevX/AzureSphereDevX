@@ -1,23 +1,24 @@
-
 /// <summary>
 /// Publish environment sensor telemetry to IoT Hub/Central
 /// </summary>
 /// <param name="eventLoopTimer"></param>
-static void PublishTelemetry_handler(EventLoopTimer *eventLoopTimer) {open_bracket}
+static void PublishTelemetry_handler(EventLoopTimer *eventLoopTimer) {{
 
-    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {open_bracket}
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {{
         dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
         return;
-    {close_bracket}
+    }}
+
+    float temperature = 30.0;
+    float humidity = 60.0;
+    float pressure = 1010.0;
 
 {device_twin_variables}
-    if (dx_isAzureConnected()) {open_bracket}
+    if (dx_isAzureConnected()) {{
         // Create JSON telemetry message
-        if (snprintf(msgBuffer, sizeof(msgBuffer), msgTemplate, 30.0, 60.0, 1010.0) > 0) {open_bracket}
+        if (snprintf(msgBuffer, sizeof(msgBuffer), msgTemplate, temperature, humidity, pressure) > 0) {{
             Log_Debug("%s\n", msgBuffer);
             dx_azurePublish(msgBuffer, strlen(msgBuffer), messageProperties, NELEMS(messageProperties), &contentProperties);
-        {close_bracket}
-
-{update_device_twins}
-    {close_bracket}
-{close_bracket}
+        }}
+{device_twins_updates}    }}
+}}
