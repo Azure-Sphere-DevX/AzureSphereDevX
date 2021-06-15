@@ -5,6 +5,7 @@
   "EntryPoint": "/bin/app",
   "CmdArgs": ["--ScopeID", "REPLACE_WITH_YOUR_ID_SCOPE"],
   "Capabilities": {
+    "Gpio": [ "$NETWORK_CONNECTED_LED" ],
     "AllowedConnections": [
       "global.azure-devices-provisioning.net",
       "REPLACE_WITH_YOUR_IOT_HUB_ENDPOINT_URL"

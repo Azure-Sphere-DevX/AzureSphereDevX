@@ -142,9 +142,11 @@ def build_gpio(binding, key):
 def build_timer(binding, key):
     binding.update({"sig_template": 'sig_timer'})
     signatures.update({key: binding})
-
-    period = binding['properties'].get('period')
-    if period is None:
+    properties = binding['properties']
+    
+    period = properties.get('period')
+    if period is not None:
+        properties.update({'period': '{ ' + period + ' }'})
         binding.update({"timer_template": 'declare_timer_periodic'})
         timer_block.update({key: binding})
 

@@ -36,7 +36,6 @@
 #include "declarations.h"
 
 #include "applibs_versions.h"
-#include <applibs/gpio.h>
 #include <applibs/log.h>
 #include <stdbool.h>
 #include <stdio.h>

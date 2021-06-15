@@ -15,7 +15,7 @@ DX_USER_CONFIG dx_config;   // cmd args from app_manifest.json
 extern const char PNP_MODEL_ID[];
 extern const char NETWORK_INTERFACE[];
 
-#define OneMS 1000000		// used to simplify timer defn.
+#define ONE_MS 1000000		// used to simplify timer defn.
 #define Log_Debug(f_, ...) dx_Log_Debug((f_), ##__VA_ARGS__)
 static char Log_Debug_buffer[128];
 

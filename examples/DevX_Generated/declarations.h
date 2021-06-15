@@ -15,7 +15,7 @@ DX_USER_CONFIG dx_config;   // cmd args from app_manifest.json
 extern const char PNP_MODEL_ID[];
 extern const char NETWORK_INTERFACE[];
 
-#define OneMS 1000000		// used to simplify timer defn.
+#define ONE_MS 1000000		// used to simplify timer defn.
 #define Log_Debug(f_, ...) dx_Log_Debug((f_), ##__VA_ARGS__)
 static char Log_Debug_buffer[128];
 
@@ -28,16 +28,6 @@ timer_t watchdogTimer;
 /****************************************************************************************
  * Forward declarations
  ****************************************************************************************/
-static void DesiredTemperature_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
-
-/****************************************************************************************
-* Azure IoT Device Twin Bindings
-****************************************************************************************/
-static DX_DEVICE_TWIN_BINDING dt_DesiredTemperature = { .twinProperty = "DesiredTemperature", .twinType = DX_TYPE_FLOAT, .handler = DesiredTemperature_handler };
-
-// All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
-#define DECLARE_DX_DEVICE_TWIN_BINDINGS
-static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = {  &dt_DesiredTemperature };
 
 
 /****************************************************************************************

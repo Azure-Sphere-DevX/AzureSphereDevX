@@ -9,6 +9,5 @@ static void {name}_handler(EventLoopTimer *eventLoopTimer) {{
         return;
     }}
 
-    dx_gpioStateSet(&gpio_{name}, gpio_state);
-    gpio_state = !gpio_state;
+    dx_gpioStateSet(&gpio_{name}, gpio_state = !gpio_state);
 }}

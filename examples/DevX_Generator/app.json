@@ -1,7 +1,7 @@
 [
     {
         "binding": "DEVICE_TWIN_BINDING",
-        "enabled": true,
+        "enabled": false,
         "properties": { "name": "DesiredTemperature", "type": "float", "cloud2device": true }
     },
     {
@@ -47,12 +47,7 @@
     {
         "binding": "GPIO_BINDING",
         "enabled": false,
-        "properties": { "pin": "NETWORK_CONNECTED_LED", "name": "AzureIotConnectedLed", "direction": "output", "initialState" : "low", "invertPin": true, "period": "4,0" }
-    },
-    {
-        "binding": "GPIO_BINDING",
-        "enabled": false,
-        "properties": { "pin": "ALERT_LED", "name": "AlertLed", "direction": "output", "initialState" : "low", "invertPin": true, "period": "0,200000000" }
+        "properties": { "pin": "NETWORK_CONNECTED_LED", "name": "AzureIotConnectedLed", "direction": "output", "initialState" : "low", "invertPin": true, "period": "0,250 * ONE_MS" }
     },
     {
         "binding": "GPIO_BINDING",
