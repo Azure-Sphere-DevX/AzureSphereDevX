@@ -28,16 +28,6 @@ timer_t watchdogTimer;
 /****************************************************************************************
  * Forward declarations
  ****************************************************************************************/
-static void DesiredTemperature_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
-
-/****************************************************************************************
-* Azure IoT Device Twin Bindings
-****************************************************************************************/
-static DX_DEVICE_TWIN_BINDING dt_DesiredTemperature = { .twinProperty = "DesiredTemperature", .twinType = DX_TYPE_FLOAT, .handler = DesiredTemperature_handler };
-
-// All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
-#define DECLARE_DX_DEVICE_TWIN_BINDINGS
-static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = {  &dt_DesiredTemperature };
 
 
 /****************************************************************************************
@@ -66,7 +56,7 @@ static void dx_initPeripheralAndHandlers(void)
 static void dx_closePeripheralAndHandlers(void){
 #if defined(DECLARE_DX_TIMER_BINDINGS)
 	dx_timerSetStop(timer_bindings, NELEMS(timer_bindings));
-#endif	
+#endif
 #if defined(DECLARE_DX_GPIO_BINDINGS)
 	dx_gpioSetClose(gpio_bindings, NELEMS(gpio_bindings));
 #endif
