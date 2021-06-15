@@ -26,7 +26,7 @@ static void dx_initPeripheralAndHandlers(void)
 static void dx_closePeripheralAndHandlers(void){
 #if defined(DECLARE_DX_TIMER_BINDINGS)
 	dx_timerSetStop(timer_bindings, NELEMS(timer_bindings));
-#endif	
+#endif
 #if defined(DECLARE_DX_GPIO_BINDINGS)
 	dx_gpioSetClose(gpio_bindings, NELEMS(gpio_bindings));
 #endif

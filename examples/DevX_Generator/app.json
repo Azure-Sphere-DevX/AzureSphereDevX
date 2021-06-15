@@ -6,22 +6,27 @@
     },
     {
         "binding": "DEVICE_TWIN_BINDING",
-        "enabled": true,
+        "enabled": false,
         "properties": { "name": "DesiredMeasurementRate", "type": "double", "cloud2device": true }
     },
     {
         "binding": "DEVICE_TWIN_BINDING",
         "enabled": false,
-        "properties": { "name": "ReportedTemperature", "type": "float"}
+        "properties": { "name": "ReportedTemperature", "type": "boolean"}
     },
     {
-        "binding": "DEVICE_TWIN_BINDING", 
+        "binding": "DEVICE_TWIN_BINDING",
         "enabled": false,
         "properties": { "name": "ReportedDeviceStartTime", "type": "string" }
     },
     {
+        "binding": "DEVICE_TWIN_BINDING",
+        "enabled": false,
+        "properties": { "name": "DesiredCO2AlertLevel", "type": "integer" }
+    },
+    {
         "binding": "TIMER_BINDING",
-        "enabled": true,
+        "enabled": false,
         "properties": { "period": "5, 0", "name": "MeasureTemperature" }
     },
     {
@@ -31,7 +36,7 @@
     },
     {
         "binding": "DIRECT_METHOD_BINDING",
-        "enabled": true,
+        "enabled": false,
         "properties": { "name": "LightControl" }
     },
     {
@@ -41,7 +46,7 @@
     },
     {
         "binding": "GPIO_BINDING",
-        "enabled": true,
+        "enabled": false,
         "properties": { "pin": "NETWORK_CONNECTED_LED", "name": "AzureIotConnectedLed", "direction": "output", "initialState" : "low", "invertPin": true, "period": "4,0" }
     },
     {
@@ -51,19 +56,19 @@
     },
     {
         "binding": "GPIO_BINDING",
-        "enabled": true,
+        "enabled": false,
         "properties": { "pin": "BUTTON_A", "name": "ButtonA", "direction": "input", "detect": "both", "period": "0,200000000" }
     },
     {
         "binding": "GENERAL_BINDING",
-        "enabled": true,
+        "enabled": false,
         "properties": { "name": "PublishTelemetry", "period": "15,0" },
         "handler_template": "publish",
         "var_template": "declare_publish"
     },
     {
         "binding": "GENERAL_BINDING",
-        "enabled": true,
+        "enabled": false,
         "properties": { "name": "Watchdog", "period": "30, 0" },
         "handler_template": "watchdog"
     }

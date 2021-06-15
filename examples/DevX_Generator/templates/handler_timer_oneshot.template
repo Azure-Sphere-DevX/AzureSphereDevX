@@ -6,7 +6,7 @@ static void {name}_handler(EventLoopTimer *eventLoopTimer) {{
         dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
         return;
     }}
-    
+
     Log_Debug("Oneshot timer {name}_handler called\n");
     // Implement your timer function
 

@@ -8,6 +8,6 @@ static void {name}_handler(EventLoopTimer *eventLoopTimer) {{
     }}
 
     Log_Debug("Periodic timer {name}_handler called\n");
-    
+
     // Implement your timer function
 }}

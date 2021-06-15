@@ -9,9 +9,9 @@ static void PublishTelemetry_handler(EventLoopTimer *eventLoopTimer) {{
         return;
     }}
 
-    float temperature = 30.0;
-    float humidity = 60.0;
-    float pressure = 1010.0;
+    float temperature = 30.0f;
+    float humidity = 60.0f;
+    float pressure = 1010.0f;
 
 {device_twin_variables}
     if (dx_isAzureConnected()) {{

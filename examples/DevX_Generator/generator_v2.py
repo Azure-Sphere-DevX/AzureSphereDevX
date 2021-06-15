@@ -201,27 +201,27 @@ def build_publish_device_twins():
             if property_type == 'integer':
                 device_twin_variables += '    int {property_name}_value = 10;\n'.format(
                     property_name=property_name)
-                device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);\n'.format(
+                device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);     // DX_TYPE_INT\n'.format(
                     property_name=property_name)
             elif property_type == 'float':
-                device_twin_variables += '    float {property_name}_value = 10.0f;\n'.format(
+                device_twin_variables += '    float {property_name}_value = 30.0f;\n'.format(
                     property_name=property_name)
-                device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);\n'.format(
+                device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);     // DX_TYPE_FLOAT\n'.format(
                     property_name=property_name)
             elif property_type == 'double':
                 device_twin_variables += '    double {property_name}_value = 10.0;\n'.format(
                     property_name=property_name)
-                device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);\n'.format(
+                device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);     // DX_TYPE_DOUBLE\n'.format(
                     property_name=property_name)
             elif property_type == 'boolean':
                 device_twin_variables += '    bool {property_name}_value = true;\n'.format(
                     property_name=property_name)
-                device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);\n'.format(
+                device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, &{property_name}_value);     // DX_TYPE_BOOL\n'.format(
                     property_name=property_name)
             elif property_type == 'string':
                 device_twin_variables += '    char {property_name}_value[] = "hello, world";\n'.format(
                     property_name=property_name)
-                device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, {property_name}_value);\n'.format(
+                device_twins_updates += '        dx_deviceTwinReportState(&dt_{property_name}, {property_name}_value);     // DX_TYPE_STRING\n'.format(
                     property_name=property_name)
 
 

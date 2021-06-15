@@ -8,7 +8,7 @@ static void {name}_handler(EventLoopTimer *eventLoopTimer) {{
         dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
         return;
     }}
-    
-    dx_gpioStateSet(&gpio_{name}, gpio_state);    
+
+    dx_gpioStateSet(&gpio_{name}, gpio_state);
     gpio_state = !gpio_state;
 }}
