@@ -1,3 +1,6 @@
+/// <summary>
+/// What is the purpose of this direct method handler function?
+/// </summary>
 // Direct method JSON payload example {{"Duration":2}}:
 static DX_DIRECT_METHOD_RESPONSE_CODE {name}_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) {{
     char duration_str[] = "Duration";

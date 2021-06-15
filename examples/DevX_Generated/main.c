@@ -47,6 +47,33 @@ const char PNP_MODEL_ID[] = "dtmi:com:example:application;1";
 const char NETWORK_INTERFACE[] = "wlan0";
 
 
+
+/****************************************************************************************
+* Implement your device twins code
+****************************************************************************************/
+
+/// <summary>
+/// What is the purpose of this device twin handler function
+/// </summary>
+/// <param name="deviceTwinBinding"></param>
+static void DesiredTemperature_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {
+    Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
+
+    // Checking the twinStateUpdated here will always be true.
+    // But it's useful property for other areas of your code.
+    Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
+
+    float device_twin_value = *(float*)deviceTwinBinding->twinState;
+
+    if (device_twin_value > 0.0f && device_twin_value < 100.0f){
+        Log_Debug("Device twin value: %f\n", device_twin_value);
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_COMPLETED);
+    } else {
+        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_ERROR);
+    }
+}
+
+
 /// <summary>
 ///  Initialize gpios, device twins, direct methods, timers.
 /// </summary>

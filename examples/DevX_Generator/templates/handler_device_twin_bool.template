@@ -1,12 +1,12 @@
 /// <summary>
-/// What is the purpose of this device twin handler function
+/// What is the purpose of this device twin handler function?
 /// </summary>
 /// <param name="deviceTwinBinding"></param>
 static void {name}_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding) {{
     Log_Debug("Device Twin Property Name: %s\n", deviceTwinBinding->twinProperty);
 
     // Checking the twinStateUpdated here will always be true.
-    // But it's useful property for other areas of your code
+    // But it's useful property for other areas of your code.
     Log_Debug("Device Twin state updated %s\n", deviceTwinBinding->twinStateUpdated ? "true" : "false");
 
     bool device_twin_value = *(bool*)deviceTwinBinding->twinState;

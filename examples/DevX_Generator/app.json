@@ -1,7 +1,7 @@
 [
     {
         "binding": "DEVICE_TWIN_BINDING",
-        "enabled": false,
+        "enabled": true,
         "properties": { "name": "DesiredTemperature", "type": "float", "cloud2device": true }
     },
     {
