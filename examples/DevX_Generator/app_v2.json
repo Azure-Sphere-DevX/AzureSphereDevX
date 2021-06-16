@@ -83,7 +83,7 @@
                 "var_template": "declare_publish"
             },
             {
-                "enabled": false,
+                "enabled": true,
                 "properties": {
                     "name": "Watchdog",
                     "period": "30, 0"
