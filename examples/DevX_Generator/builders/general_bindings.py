@@ -12,7 +12,7 @@ class Builder():
 
     def build(self):
         for binding in self.bindings:
-
+            binding.update({'binding': 'GENERAL_BINDING'})
             properties = binding.get('properties')
             key = properties.get('name')
 

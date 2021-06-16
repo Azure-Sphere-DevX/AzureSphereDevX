@@ -14,7 +14,7 @@ class Builder():
 
     def build(self):
         for binding in self.bindings:
-
+            binding.update({'binding': 'GPIO_BINDING'})
             properties = binding.get('properties')
             key = properties.get('name')
 

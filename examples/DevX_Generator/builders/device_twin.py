@@ -15,14 +15,15 @@ class Builder():
                                      "double": "handler_device_twin_double", "boolean": "handler_device_twin_bool",
                                      "string": "handler_device_twin_string"}
 
-        print(self.bindings)
 
     def build(self):
         for binding in self.bindings:
+            binding.update({'binding': 'DEVICE_TWIN_BINDING'})
             properties = binding.get('properties')
             key = properties.get('name')
 
             properties.update({'twin_type': self.device_twin_types[properties.get('type')]})
+
             if properties.get("cloud2device") == True:
 
                 binding.update({"sig_template": 'sig_device_twin'})

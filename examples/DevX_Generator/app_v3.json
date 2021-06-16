@@ -2,7 +2,7 @@
     "bindings": {
         "device_twins": [
             {
-                "enabled": true,
+                "enabled": false,
                 "properties": {
                     "cloud2device": true,
                     "name": "DesiredTemperature",
@@ -10,7 +10,7 @@
                 }
             },
             {
-                "enabled": true,
+                "enabled": false,
                 "properties": {
                     "name": "ReportedTemperature",
                     "type": "double"
@@ -19,13 +19,13 @@
         ],
         "direct_methods": [
             {
-                "enabled": true,
+                "enabled": false,
                 "properties": {
                     "name": "LightControl"
                 }
             },
             {
-                "enabled": true,
+                "enabled": false,
                 "properties": {
                     "name": "FanControl"
                 }
@@ -33,7 +33,7 @@
         ],
         "timers": [
             {
-                "enabled": true,
+                "enabled": false,
                 "properties": {
                     "period": "5, 0",
                     "name": "MeasureTemperature",
@@ -51,7 +51,7 @@
         ],
         "gpio_outputs": [
             {
-                "enabled": true,
+                "enabled": false,
                 "properties": {
                     "pin": "NETWORK_CONNECTED_LED",
                     "name": "AzureIotConnectedLed",
@@ -63,7 +63,7 @@
         ],
         "gpio_inputs": [
             {
-                "enabled": true,
+                "enabled": false,
                 "properties": {
                     "pin": "BUTTON_A",
                     "name": "ButtonA",
@@ -74,7 +74,7 @@
         ],
         "general": [
             {
-                "enabled": true,
+                "enabled": false,
                 "properties": {
                     "name": "PublishTelemetry",
                     "period": "15,0"
@@ -83,7 +83,7 @@
                 "var_template": "declare_publish"
             },
             {
-                "enabled": true,
+                "enabled": false,
                 "properties": {
                     "name": "Watchdog",
                     "period": "30, 0"

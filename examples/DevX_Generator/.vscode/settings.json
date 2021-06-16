@@ -5,7 +5,7 @@
     "json.schemas": [
         {
             "fileMatch": [
-                "/app_v2.json"
+                "/app_v3.json"
             ],
             "url": "./app.schema.json"
         }

@@ -8,7 +8,7 @@ class Builder():
 
     def build(self):
         for binding in self.bindings:
-
+            binding.update({'binding': 'DIRECT_METHOD_BINDING'})
             properties = binding.get('properties')
             key = properties.get('name')
 

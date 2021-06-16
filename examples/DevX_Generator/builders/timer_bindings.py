@@ -9,7 +9,7 @@ class Builder():
 
     def build(self):
         for binding in self.bindings:
-
+            binding.update({'binding': 'TIMER_BINDING'})
             properties = binding.get('properties')
             key = properties.get('name')
 

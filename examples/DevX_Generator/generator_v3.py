@@ -38,7 +38,6 @@ ACTIONS = {1: "Created", 2: "Deleted", 3: "Updated", 4: "Renamed from something"
 bindings_init = None
 device_twins_updates = None
 device_twin_variables = None
-bindings = None
 
 dt = None
 
@@ -46,7 +45,7 @@ builders = None
 
 
 def load_bindings():
-    global bindings, signatures, timer_block, variables_block, handlers_block, templates, bindings_init, builders, dt
+    global signatures, timer_block, variables_block, handlers_block, templates, bindings_init, builders, dt
 
     signatures = {}
     timer_block = {}
@@ -57,7 +56,7 @@ def load_bindings():
     bindings_init = {"tmr": False, "dm": False, "dt": False, "gpio": False}
 
     time.sleep(0.5)
-    with open('app_v2.json', 'r') as j:
+    with open('app_v3.json', 'r') as j:
         data = json.load(j)
     j.close()
 
@@ -192,6 +191,7 @@ def render_handler_block(f, key_binding, block_comment):
 
 
 def write_main():
+    global device_twins_updates, device_twin_variables
     with open('../DevX_Generated/declarations.h', 'w') as df:
         with open("../DevX_Generated/main.c", "w") as main_c:
 
@@ -200,6 +200,10 @@ def write_main():
             df.write(templates["declarations"])
 
             render_signatures(df)
+            result = dt.build_publish_device_twins()
+            device_twins_updates = result[0]
+            device_twin_variables = result[1]
+
             render_variable_block(df, "GENERAL_BINDING", "general", "gen")
             render_timer_block(df)
 
@@ -227,7 +231,7 @@ def process_update():
     load_bindings()
     load_templates()
     build_buckets()
-    result = dt.build_publish_device_twins()
+    
     # bind_templated_handlers()
 
     write_main()
