@@ -1,5 +1,13 @@
 {
     "files.associations": {
         "*.template": "c"
-    }
+    },
+    "json.schemas": [
+        {
+            "fileMatch": [
+                "/app_v2.json"
+            ],
+            "url": "./app.schema.json"
+        }
+    ]
 }

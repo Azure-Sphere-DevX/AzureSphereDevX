@@ -1,0 +1,1028 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": {},
+    "examples": [
+        {
+            "bindings": {
+                "device_twins": [
+                    {
+                        "enabled": true,
+                        "properties": {
+                            "cloud2device": true,
+                            "name": "DesiredTemperature",
+                            "type": "float"
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "properties": {
+                            "name": "ReportedTemperature",
+                            "type": "float"
+                        }
+                    }
+                ],
+                "direct_methods": [
+                    {
+                        "enabled": true,
+                        "properties": {
+                            "name": "LightControl"
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "properties": {
+                            "name": "FanControl"
+                        }
+                    }
+                ],
+                "timers": [
+                    {
+                        "enabled": true,
+                        "properties": {
+                            "period": "5, 0",
+                            "name": "MeasureTemperature",
+                            "type": "oneshot"
+                        }
+                    },
+                    {
+                        "enabled": true,
+                        "properties": {
+                            "period": "5, 0",
+                            "name": "MeasureCarbonMonoxide",
+                            "type": "periodic"
+                        }
+                    }
+                ],
+                "gpio_outputs": [
+                    {
+                        "enabled": true,
+                        "properties": {
+                            "pin": "NETWORK_CONNECTED_LED",
+                            "name": "AzureIotConnectedLed",
+                            "direction": "output",
+                            "initialState": "low",
+                            "invertPin": true,
+                            "period": "0,250 * ONE_MS"
+                        }
+                    }
+                ],
+                "gpio_inputs": [
+                    {
+                        "enabled": true,
+                        "properties": {
+                            "pin": "BUTTON_A",
+                            "name": "ButtonA",
+                            "direction": "input",
+                            "detect": "low",
+                            "period": "0,200000000"
+                        }
+                    }
+                ],
+                "general": [
+                    {
+                        "enabled": true,
+                        "properties": {
+                            "name": "PublishTelemetry",
+                            "period": "15, 0"
+                        },
+                        "handler_template": "publish",
+                        "var_template": "declare_publish"
+                    },
+                    {
+                        "enabled": false,
+                        "properties": {
+                            "name": "Watchdog",
+                            "period": "30, 0"
+                        },
+                        "handler_template": "watchdog"
+                    }
+                ]
+            }
+        }
+    ],
+    "required": [
+        "bindings"
+    ],
+    "properties": {
+        "bindings": {
+            "$id": "#/properties/bindings",
+            "type": "object",
+            "title": "The bindings schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": {},
+            "examples": [
+                {
+                    "device_twins": [
+                        {
+                            "enabled": false,
+                            "properties": {
+                                "cloud2device": true,
+                                "name": "DesiredTemperature",
+                                "type": "float"
+                            }
+                        },
+                        {
+                            "enabled": true,
+                            "properties": {
+                                "name": "ReportedTemperature",
+                                "type": "float"
+                            }
+                        }
+                    ],
+                    "direct_methods": [
+                        {
+                            "enabled": true,
+                            "properties": {
+                                "name": "LightControl"
+                            }
+                        },
+                        {
+                            "enabled": true,
+                            "properties": {
+                                "name": "FanControl"
+                            }
+                        }
+                    ],
+                    "timers": [
+                        {
+                            "enabled": true,
+                            "properties": {
+                                "period": "5, 0",
+                                "name": "MeasureTemperature",
+                                "type": "oneshot"
+                            }
+                        },
+                        {
+                            "enabled": true,
+                            "properties": {
+                                "period": "5, 0",
+                                "name": "MeasureCarbonMonoxide",
+                                "type": "periodic"
+                            }
+                        }
+                    ],
+                    "gpio_outputs": [
+                        {
+                            "enabled": true,
+                            "properties": {
+                                "pin": "NETWORK_CONNECTED_LED",
+                                "name": "AzureIotConnectedLed",
+                                "direction": "output",
+                                "initialState": "low",
+                                "invertPin": true,
+                                "period": "0,250 * ONE_MS"
+                            }
+                        }
+                    ],
+                    "gpio_inputs": [
+                        {
+                            "enabled": true,
+                            "properties": {
+                                "pin": "BUTTON_A",
+                                "name": "ButtonA",
+                                "direction": "input",
+                                "detect": "both",
+                                "period": "0,200000000"
+                            }
+                        }
+                    ],
+                    "general": [
+                        {
+                            "enabled": true,
+                            "properties": {
+                                "name": "PublishTelemetry",
+                                "period": "15,0"
+                            },
+                            "handler_template": "publish",
+                            "var_template": "declare_publish"
+                        },
+                        {
+                            "enabled": false,
+                            "properties": {
+                                "name": "Watchdog",
+                                "period": "30, 0"
+                            },
+                            "handler_template": "watchdog"
+                        }
+                    ]
+                }
+            ],
+            "required": [
+            ],
+            "properties": {
+                "device_twins": {
+                    "$id": "#/properties/bindings/properties/device_twins",
+                    "type": "array",
+                    "title": "The device_twins schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": [],
+                    "examples": [
+                        [
+                            {
+                                "enabled": false,
+                                "properties": {
+                                    "cloud2device": true,
+                                    "name": "DesiredTemperature",
+                                    "type": "float"
+                                }
+                            },
+                            {
+                                "enabled": true,
+                                "properties": {
+                                    "name": "ReportedTemperature",
+                                    "type": "float"
+                                }
+                            }
+                        ]
+                    ],
+                    "additionalItems": true,
+                    "items": {
+                        "$id": "#/properties/bindings/properties/device_twins/items",
+                        "anyOf": [
+                            {
+                                "$id": "#/properties/bindings/properties/device_twins/items/anyOf/0",
+                                "type": "object",
+                                "title": "The first anyOf schema",
+                                "description": "An explanation about the purpose of this instance.",
+                                "default": {},
+                                "examples": [
+                                    {
+                                        "enabled": false,
+                                        "properties": {
+                                            "cloud2device": true,
+                                            "name": "DesiredTemperature",
+                                            "type": "float"
+                                        }
+                                    }
+                                ],
+                                "required": [
+                                    "enabled",
+                                    "properties"
+                                ],
+                                "properties": {
+                                    "enabled": {
+                                        "$id": "#/properties/bindings/properties/device_twins/items/anyOf/0/properties/enabled",
+                                        "type": "boolean",
+                                        "title": "The enabled schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": true,
+                                        "examples": [
+                                            true, false
+                                        ]
+                                    },
+                                    "properties": {
+                                        "$id": "#/properties/bindings/properties/device_twins/items/anyOf/0/properties/properties",
+                                        "type": "object",
+                                        "title": "The properties schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": {},
+                                        "examples": [
+                                            {
+                                                "cloud2device": true,
+                                                "name": "DesiredTemperature",
+                                                "type": "float"
+                                            }
+                                        ],
+                                        "required": [
+                                            "name",
+                                            "type"
+                                        ],
+                                        "properties": {
+                                            "cloud2device": {
+                                                "$id": "#/properties/bindings/properties/device_twins/items/anyOf/0/properties/properties/properties/cloud2device",
+                                                "type": "boolean",
+                                                "title": "The cloud2device schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": true,
+                                                "examples": [
+                                                    true, false
+                                                ]
+                                            },
+                                            "name": {
+                                                "$id": "#/properties/bindings/properties/device_twins/items/anyOf/0/properties/properties/properties/name",
+                                                "type": "string",
+                                                "title": "The name schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": "",
+                                                "examples": [
+                                                    "DesiredTemperature"
+                                                ]
+                                            },
+                                            "type": {
+                                                "$id": "#/properties/bindings/properties/device_twins/items/anyOf/0/properties/properties/properties/type",
+                                                "type": "string",
+                                                "title": "The type schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": "",
+                                                "examples": [
+                                                    "float", "integer", "double", "string", "boolean"
+                                                ]
+                                            }
+                                        },
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "additionalProperties": true
+                            }
+                        ]
+                    }
+                },
+                "direct_methods": {
+                    "$id": "#/properties/bindings/properties/direct_methods",
+                    "type": "array",
+                    "title": "The direct_methods schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": [],
+                    "examples": [
+                        [
+                            {
+                                "enabled": true,
+                                "properties": {
+                                    "name": "LightControl"
+                                }
+                            },
+                            {
+                                "enabled": true,
+                                "properties": {
+                                    "name": "FanControl"
+                                }
+                            }
+                        ]
+                    ],
+                    "additionalItems": true,
+                    "items": {
+                        "$id": "#/properties/bindings/properties/direct_methods/items",
+                        "anyOf": [
+                            {
+                                "$id": "#/properties/bindings/properties/direct_methods/items/anyOf/0",
+                                "type": "object",
+                                "title": "The first anyOf schema",
+                                "description": "An explanation about the purpose of this instance.",
+                                "default": {},
+                                "examples": [
+                                    {
+                                        "enabled": true,
+                                        "properties": {
+                                            "name": "LightControl"
+                                        }
+                                    }
+                                ],
+                                "required": [
+                                    "enabled",
+                                    "properties"
+                                ],
+                                "properties": {
+                                    "enabled": {
+                                        "$id": "#/properties/bindings/properties/direct_methods/items/anyOf/0/properties/enabled",
+                                        "type": "boolean",
+                                        "title": "The enabled schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": true,
+                                        "examples": [
+                                            true, false
+                                        ]
+                                    },
+                                    "properties": {
+                                        "$id": "#/properties/bindings/properties/direct_methods/items/anyOf/0/properties/properties",
+                                        "type": "object",
+                                        "title": "The properties schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": {},
+                                        "examples": [
+                                            {
+                                                "name": "LightControl"
+                                            }
+                                        ],
+                                        "required": [
+                                            "name"
+                                        ],
+                                        "properties": {
+                                            "name": {
+                                                "$id": "#/properties/bindings/properties/direct_methods/items/anyOf/0/properties/properties/properties/name",
+                                                "type": "string",
+                                                "title": "The name schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": "",
+                                                "examples": [
+                                                    "LightControl"
+                                                ]
+                                            }
+                                        },
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "additionalProperties": true
+                            }
+                        ]
+                    }
+                },
+                "timers": {
+                    "$id": "#/properties/bindings/properties/timers",
+                    "type": "array",
+                    "title": "The timers schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": [],
+                    "examples": [
+                        [
+                            {
+                                "enabled": true,
+                                "properties": {
+                                    "period": "5, 0",
+                                    "name": "MeasureTemperature",
+                                    "type": "oneshot"
+                                }
+                            },
+                            {
+                                "enabled": true,
+                                "properties": {
+                                    "period": "5, 0",
+                                    "name": "MeasureCarbonMonoxide",
+                                    "type": "periodic"
+                                }
+                            }
+                        ]
+                    ],
+                    "additionalItems": true,
+                    "items": {
+                        "$id": "#/properties/bindings/properties/timers/items",
+                        "anyOf": [
+                            {
+                                "$id": "#/properties/bindings/properties/timers/items/anyOf/0",
+                                "type": "object",
+                                "title": "The first anyOf schema",
+                                "description": "An explanation about the purpose of this instance.",
+                                "default": {},
+                                "examples": [
+                                    {
+                                        "enabled": true,
+                                        "properties": {
+                                            "period": "5, 0",
+                                            "name": "MeasureTemperature",
+                                            "type": "oneshot"
+                                        }
+                                    }
+                                ],
+                                "required": [
+                                    "enabled",
+                                    "properties"
+                                ],
+                                "properties": {
+                                    "enabled": {
+                                        "$id": "#/properties/bindings/properties/timers/items/anyOf/0/properties/enabled",
+                                        "type": "boolean",
+                                        "title": "The enabled schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": true,
+                                        "examples": [
+                                            true, false
+                                        ]
+                                    },
+                                    "properties": {
+                                        "$id": "#/properties/bindings/properties/timers/items/anyOf/0/properties/properties",
+                                        "type": "object",
+                                        "title": "The properties schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": {},
+                                        "examples": [
+                                            {
+                                                "period": "5, 0",
+                                                "name": "MeasureTemperature",
+                                                "type": "oneshot"
+                                            }
+                                        ],
+                                        "required": [
+                                            "period",
+                                            "name",
+                                            "type"
+                                        ],
+                                        "properties": {
+                                            "period": {
+                                                "$id": "#/properties/bindings/properties/timers/items/anyOf/0/properties/properties/properties/period",
+                                                "type": "string",
+                                                "title": "The period schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": "",
+                                                "examples": [
+                                                    "5, 0"
+                                                ]
+                                            },
+                                            "name": {
+                                                "$id": "#/properties/bindings/properties/timers/items/anyOf/0/properties/properties/properties/name",
+                                                "type": "string",
+                                                "title": "The name schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": "",
+                                                "examples": [
+                                                    "MeasureTemperature"
+                                                ]
+                                            },
+                                            "type": {
+                                                "$id": "#/properties/bindings/properties/timers/items/anyOf/0/properties/properties/properties/type",
+                                                "type": "string",
+                                                "title": "The type schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": "periodic",
+                                                "examples": [
+                                                    "oneshot", "periodic"
+                                                ]
+                                            }
+                                        },
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "additionalProperties": true
+                            }
+                        ]
+                    }
+                },
+                "gpio_outputs": {
+                    "$id": "#/properties/bindings/properties/gpio_outputs",
+                    "type": "array",
+                    "title": "The gpio_outputs schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": [],
+                    "examples": [
+                        [
+                            {
+                                "enabled": true,
+                                "properties": {
+                                    "pin": "NETWORK_CONNECTED_LED",
+                                    "name": "AzureIotConnectedLed",
+                                    "direction": "output",
+                                    "initialState": "low",
+                                    "invertPin": true,
+                                    "period": "0,250 * ONE_MS"
+                                }
+                            }
+                        ]
+                    ],
+                    "additionalItems": true,
+                    "items": {
+                        "$id": "#/properties/bindings/properties/gpio_outputs/items",
+                        "anyOf": [
+                            {
+                                "$id": "#/properties/bindings/properties/gpio_outputs/items/anyOf/0",
+                                "type": "object",
+                                "title": "The first anyOf schema",
+                                "description": "An explanation about the purpose of this instance.",
+                                "default": {},
+                                "examples": [
+                                    {
+                                        "enabled": true,
+                                        "properties": {
+                                            "pin": "NETWORK_CONNECTED_LED",
+                                            "name": "AzureIotConnectedLed",
+                                            "initialState": "low",
+                                            "invertPin": true,
+                                            "period": "0,250 * ONE_MS"
+                                        }
+                                    }
+                                ],
+                                "required": [
+                                    "enabled",
+                                    "properties"
+                                ],
+                                "properties": {
+                                    "enabled": {
+                                        "$id": "#/properties/bindings/properties/gpio_outputs/items/anyOf/0/properties/enabled",
+                                        "type": "boolean",
+                                        "title": "The enabled schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": true,
+                                        "examples": [
+                                            true, false
+                                        ]
+                                    },
+                                    "properties": {
+                                        "$id": "#/properties/bindings/properties/gpio_outputs/items/anyOf/0/properties/properties",
+                                        "type": "object",
+                                        "title": "The properties schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": {},
+                                        "examples": [
+                                            {
+                                                "pin": "NETWORK_CONNECTED_LED",
+                                                "name": "AzureIotConnectedLed",
+                                                "initialState": "low",
+                                                "invertPin": true,
+                                                "period": "0,250 * ONE_MS"
+                                            }
+                                        ],
+                                        "required": [
+                                            "pin",
+                                            "name",
+                                            "initialState",
+                                            "invertPin",
+                                            "period"
+                                        ],
+                                        "properties": {
+                                            "pin": {
+                                                "$id": "#/properties/bindings/properties/gpio_outputs/items/anyOf/0/properties/properties/properties/pin",
+                                                "type": "string",
+                                                "title": "The pin schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": "",
+                                                "examples": [
+                                                    "NETWORK_CONNECTED_LED"
+                                                ]
+                                            },
+                                            "name": {
+                                                "$id": "#/properties/bindings/properties/gpio_outputs/items/anyOf/0/properties/properties/properties/name",
+                                                "type": "string",
+                                                "title": "The name schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": "",
+                                                "examples": [
+                                                    "AzureIotConnectedLed"
+                                                ]
+                                            },
+                                            "initialState": {
+                                                "$id": "#/properties/bindings/properties/gpio_outputs/items/anyOf/0/properties/properties/properties/initialState",
+                                                "type": "string",
+                                                "title": "The initialState schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": "low",
+                                                "examples": [
+                                                    "low", "high"
+                                                ]
+                                            },
+                                            "invertPin": {
+                                                "$id": "#/properties/bindings/properties/gpio_outputs/items/anyOf/0/properties/properties/properties/invertPin",
+                                                "type": "boolean",
+                                                "title": "The invertPin schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": false,
+                                                "examples": [
+                                                    true
+                                                ]
+                                            },
+                                            "period": {
+                                                "$id": "#/properties/bindings/properties/gpio_outputs/items/anyOf/0/properties/properties/properties/period",
+                                                "type": "string",
+                                                "title": "The period schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": "",
+                                                "examples": [
+                                                    "0,250 * ONE_MS"
+                                                ]
+                                            }
+                                        },
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "additionalProperties": true
+                            }
+                        ]
+                    }
+                },
+                "gpio_inputs": {
+                    "$id": "#/properties/bindings/properties/gpio_inputs",
+                    "type": "array",
+                    "title": "The gpio_inputs schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": [],
+                    "examples": [
+                        [
+                            {
+                                "enabled": true,
+                                "properties": {
+                                    "pin": "BUTTON_A",
+                                    "name": "ButtonA",
+                                    "detect": "both",
+                                    "period": "0,200000000"
+                                }
+                            }
+                        ]
+                    ],
+                    "additionalItems": true,
+                    "items": {
+                        "$id": "#/properties/bindings/properties/gpio_inputs/items",
+                        "anyOf": [
+                            {
+                                "$id": "#/properties/bindings/properties/gpio_inputs/items/anyOf/0",
+                                "type": "object",
+                                "title": "The first anyOf schema",
+                                "description": "An explanation about the purpose of this instance.",
+                                "default": {},
+                                "examples": [
+                                    {
+                                        "enabled": true,
+                                        "properties": {
+                                            "pin": "BUTTON_A",
+                                            "name": "ButtonA",
+                                            "detect": "both",
+                                            "period": "0,200000000"
+                                        }
+                                    }
+                                ],
+                                "required": [
+                                    "enabled",
+                                    "properties"
+                                ],
+                                "properties": {
+                                    "enabled": {
+                                        "$id": "#/properties/bindings/properties/gpio_inputs/items/anyOf/0/properties/enabled",
+                                        "type": "boolean",
+                                        "title": "The enabled schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": false,
+                                        "examples": [
+                                            true
+                                        ]
+                                    },
+                                    "properties": {
+                                        "$id": "#/properties/bindings/properties/gpio_inputs/items/anyOf/0/properties/properties",
+                                        "type": "object",
+                                        "title": "The properties schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": {},
+                                        "examples": [
+                                            {
+                                                "pin": "BUTTON_A",
+                                                "name": "ButtonA",
+                                                "detect": "both",
+                                                "period": "0,200000000"
+                                            }
+                                        ],
+                                        "required": [
+                                            "pin",
+                                            "name",
+                                            "detect",
+                                            "period"
+                                        ],
+                                        "properties": {
+                                            "pin": {
+                                                "$id": "#/properties/bindings/properties/gpio_inputs/items/anyOf/0/properties/properties/properties/pin",
+                                                "type": "string",
+                                                "title": "The pin schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": "",
+                                                "examples": [
+                                                    "BUTTON_A"
+                                                ]
+                                            },
+                                            "name": {
+                                                "$id": "#/properties/bindings/properties/gpio_inputs/items/anyOf/0/properties/properties/properties/name",
+                                                "type": "string",
+                                                "title": "The name schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": "",
+                                                "examples": [
+                                                    "ButtonA"
+                                                ]
+                                            },
+                                            "detect": {
+                                                "$id": "#/properties/bindings/properties/gpio_inputs/items/anyOf/0/properties/properties/properties/detect",
+                                                "type": "string",
+                                                "title": "The detect schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": "low",
+                                                "examples": [
+                                                    "both", "low", "high"
+                                                ]
+                                            },
+                                            "period": {
+                                                "$id": "#/properties/bindings/properties/gpio_inputs/items/anyOf/0/properties/properties/properties/period",
+                                                "type": "string",
+                                                "title": "The period schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": "",
+                                                "examples": [
+                                                    "0,200000000"
+                                                ]
+                                            }
+                                        },
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "additionalProperties": true
+                            }
+                        ]
+                    }
+                },
+                "general": {
+                    "$id": "#/properties/bindings/properties/general",
+                    "type": "array",
+                    "title": "The general schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": [],
+                    "examples": [
+                        [
+                            {
+                                "enabled": true,
+                                "properties": {
+                                    "name": "PublishTelemetry",
+                                    "period": "15,0"
+                                },
+                                "handler_template": "publish",
+                                "var_template": "declare_publish"
+                            },
+                            {
+                                "enabled": false,
+                                "properties": {
+                                    "name": "Watchdog",
+                                    "period": "30, 0"
+                                },
+                                "handler_template": "watchdog"
+                            }
+                        ]
+                    ],
+                    "additionalItems": true,
+                    "items": {
+                        "$id": "#/properties/bindings/properties/general/items",
+                        "anyOf": [
+                            {
+                                "$id": "#/properties/bindings/properties/general/items/anyOf/0",
+                                "type": "object",
+                                "title": "The first anyOf schema",
+                                "description": "An explanation about the purpose of this instance.",
+                                "default": {},
+                                "examples": [
+                                    {
+                                        "enabled": true,
+                                        "properties": {
+                                            "name": "PublishTelemetry",
+                                            "period": "15,0"
+                                        },
+                                        "handler_template": "publish",
+                                        "var_template": "declare_publish"
+                                    }
+                                ],
+                                "required": [
+                                    "enabled",
+                                    "properties",
+                                    "handler_template",
+                                    "var_template"
+                                ],
+                                "properties": {
+                                    "enabled": {
+                                        "$id": "#/properties/bindings/properties/general/items/anyOf/0/properties/enabled",
+                                        "type": "boolean",
+                                        "title": "The enabled schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": false,
+                                        "examples": [
+                                            true
+                                        ]
+                                    },
+                                    "properties": {
+                                        "$id": "#/properties/bindings/properties/general/items/anyOf/0/properties/properties",
+                                        "type": "object",
+                                        "title": "The properties schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": {},
+                                        "examples": [
+                                            {
+                                                "name": "PublishTelemetry",
+                                                "period": "15,0"
+                                            }
+                                        ],
+                                        "required": [
+                                            "name",
+                                            "period"
+                                        ],
+                                        "properties": {
+                                            "name": {
+                                                "$id": "#/properties/bindings/properties/general/items/anyOf/0/properties/properties/properties/name",
+                                                "type": "string",
+                                                "title": "The name schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": "",
+                                                "examples": [
+                                                    "PublishTelemetry"
+                                                ]
+                                            },
+                                            "period": {
+                                                "$id": "#/properties/bindings/properties/general/items/anyOf/0/properties/properties/properties/period",
+                                                "type": "string",
+                                                "title": "The period schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": "",
+                                                "examples": [
+                                                    "15,0"
+                                                ]
+                                            }
+                                        },
+                                        "additionalProperties": true
+                                    },
+                                    "handler_template": {
+                                        "$id": "#/properties/bindings/properties/general/items/anyOf/0/properties/handler_template",
+                                        "type": "string",
+                                        "title": "The handler_template schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": "",
+                                        "examples": [
+                                            "publish"
+                                        ]
+                                    },
+                                    "var_template": {
+                                        "$id": "#/properties/bindings/properties/general/items/anyOf/0/properties/var_template",
+                                        "type": "string",
+                                        "title": "The var_template schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": "",
+                                        "examples": [
+                                            "declare_publish"
+                                        ]
+                                    }
+                                },
+                                "additionalProperties": true
+                            },
+                            {
+                                "$id": "#/properties/bindings/properties/general/items/anyOf/1",
+                                "type": "object",
+                                "title": "The second anyOf schema",
+                                "description": "An explanation about the purpose of this instance.",
+                                "default": {},
+                                "examples": [
+                                    {
+                                        "enabled": false,
+                                        "properties": {
+                                            "name": "Watchdog",
+                                            "period": "30, 0"
+                                        },
+                                        "handler_template": "watchdog"
+                                    }
+                                ],
+                                "required": [
+                                    "enabled",
+                                    "properties",
+                                    "handler_template"
+                                ],
+                                "properties": {
+                                    "enabled": {
+                                        "$id": "#/properties/bindings/properties/general/items/anyOf/1/properties/enabled",
+                                        "type": "boolean",
+                                        "title": "The enabled schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": false,
+                                        "examples": [
+                                            false
+                                        ]
+                                    },
+                                    "properties": {
+                                        "$id": "#/properties/bindings/properties/general/items/anyOf/1/properties/properties",
+                                        "type": "object",
+                                        "title": "The properties schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": {},
+                                        "examples": [
+                                            {
+                                                "name": "Watchdog",
+                                                "period": "30, 0"
+                                            }
+                                        ],
+                                        "required": [
+                                            "name",
+                                            "period"
+                                        ],
+                                        "properties": {
+                                            "name": {
+                                                "$id": "#/properties/bindings/properties/general/items/anyOf/1/properties/properties/properties/name",
+                                                "type": "string",
+                                                "title": "The name schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": "",
+                                                "examples": [
+                                                    "Watchdog"
+                                                ]
+                                            },
+                                            "period": {
+                                                "$id": "#/properties/bindings/properties/general/items/anyOf/1/properties/properties/properties/period",
+                                                "type": "string",
+                                                "title": "The period schema",
+                                                "description": "An explanation about the purpose of this instance.",
+                                                "default": "",
+                                                "examples": [
+                                                    "30, 0"
+                                                ]
+                                            }
+                                        },
+                                        "additionalProperties": true
+                                    },
+                                    "handler_template": {
+                                        "$id": "#/properties/bindings/properties/general/items/anyOf/1/properties/handler_template",
+                                        "type": "string",
+                                        "title": "The handler_template schema",
+                                        "description": "An explanation about the purpose of this instance.",
+                                        "default": "",
+                                        "examples": [
+                                            "watchdog"
+                                        ]
+                                    }
+                                },
+                                "additionalProperties": true
+                            }
+                        ]
+                    }
+                }
+            },
+            "additionalProperties": true
+        }
+    },
+    "additionalProperties": true
+}

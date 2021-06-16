@@ -1,0 +1,95 @@
+{
+    "bindings": {
+        "device_twins": [
+            {
+                "enabled": true,
+                "properties": {
+                    "cloud2device": true,
+                    "name": "DesiredTemperature",
+                    "type": "float"
+                }
+            },
+            {
+                "enabled": true,
+                "properties": {
+                    "name": "ReportedTemperature",
+                    "type": "double"
+                }
+            }
+        ],
+        "direct_methods": [
+            {
+                "enabled": true,
+                "properties": {
+                    "name": "LightControl"
+                }
+            },
+            {
+                "enabled": true,
+                "properties": {
+                    "name": "FanControl"
+                }
+            }
+        ],
+        "timers": [
+            {
+                "enabled": true,
+                "properties": {
+                    "period": "5, 0",
+                    "name": "MeasureTemperature",
+                    "type": "periodic"
+                }
+            },
+            {
+                "enabled": true,
+                "properties": {
+                    "period": "5, 0",
+                    "name": "MeasureCarbonMonoxide",
+                    "type": "periodic"
+                }
+            }
+        ],
+        "gpio_outputs": [
+            {
+                "enabled": true,
+                "properties": {
+                    "pin": "NETWORK_CONNECTED_LED",
+                    "name": "AzureIotConnectedLed",
+                    "initialState": "low",
+                    "invertPin": true,
+                    "period": "0,250 * ONE_MS"
+                }
+            }
+        ],
+        "gpio_inputs": [
+            {
+                "enabled": true,
+                "properties": {
+                    "pin": "BUTTON_A",
+                    "name": "ButtonA",
+                    "detect": "low",
+                    "period": "0,200000000"
+                }
+            }
+        ],
+        "general": [
+            {
+                "enabled": true,
+                "properties": {
+                    "name": "PublishTelemetry",
+                    "period": "15,0"
+                },
+                "handler_template": "publish",
+                "var_template": "declare_publish"
+            },
+            {
+                "enabled": false,
+                "properties": {
+                    "name": "Watchdog",
+                    "period": "30, 0"
+                },
+                "handler_template": "watchdog"
+            }
+        ]
+    }
+}
