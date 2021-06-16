@@ -14,6 +14,6 @@ The DevX library will help reduce the amount of code you write and improve reada
 
 The focus of the Azure Sphere DevX library is the communications and simplification of common scenarios when building Azure Sphere applications.
 
-Visit the [DevX library Wiki](https://github.com/microsoft/Azure-Sphere-DevX/wiki) page to learn more.
+Visit the [DevX library Wiki](https://github.com/gloveboxes/AzureSphereDevX/wiki) page to learn more.
 
-![Azure Sphere DevX Library](https://raw.githubusercontent.com/wiki/microsoft/Azure-Sphere-DevX/media/architecture.png)
+![Azure Sphere DevX Library](https://github.com/gloveboxes/AzureSphereDevX/wiki/media/architecture.png)
