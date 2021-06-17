@@ -3,7 +3,7 @@
     "device_twins": [
       {
         "name": "DesiredTemperature",
-        "enabled": true,
+        "enabled": false,
         "properties": {
           "cloud2device": true,
           "type": "float"
@@ -36,7 +36,7 @@
     "direct_methods": [
       {
         "name": "LightControl",
-        "enabled": true
+        "enabled": false
       },
       {
         "name": "FanOff",
@@ -64,7 +64,7 @@
     "gpio_outputs": [
       {
         "name": "CloudConnectedLed",
-        "enabled": true,
+        "enabled": false,
         "properties": {
           "pin": "NETWORK_CONNECTED_LED",
           "initialState": "low",

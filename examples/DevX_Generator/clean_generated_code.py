@@ -1,12 +1,12 @@
 import hashlib
 
+# This class will remove unmodified generated functions and associated signatures plus reference variables
+
 class Clean():
     def __init__(self, ):
         self.removed_blocks = []
         self.clean_main(filename='../DevX_Generated/main.c')
-        self.clean_declarations(filename='../DevX_Generated/declarations.h')
-
-# This code block will remove unmodified generated functions including signatures and reference variables
+        self.clean_declarations(filename='../DevX_Generated/declarations.h')    
 
     def clean_main(self, filename):
 
@@ -48,9 +48,10 @@ class Clean():
 
 
         with open(filename, 'w') as j:
-            for line in output_lines:
-                j.write(line)
+            j.writelines(output_lines)
 
+
+    # Function cleans out signatures and variables
     def clean_declarations(self, filename):
 
         output_lines = []
@@ -94,10 +95,8 @@ class Clean():
 
 
         # Finally write out the updated declarations file
-        with open(filename, 'w') as j:   
-            for line in final_lines:
-                j.write(line)
+        with open(filename, 'w') as j: 
+            j.writelines(final_lines)  
 
 
 clean = Clean()
-print('completed')

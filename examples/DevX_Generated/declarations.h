@@ -29,39 +29,6 @@ timer_t watchdogTimer;
  * Forward declarations
  ****************************************************************************************/
 
-/****************************************************************************************
-* Timer Bindings
-****************************************************************************************/
-
-// All timers referenced in timer_bindings with be opened in the InitPeripheralsAndHandlers function
-#define DECLARE_DX_TIMER_BINDINGS
-static DX_TIMER_BINDING *timer_bindings[] = {   };
-
-/****************************************************************************************
-* Azure IoT Device Twin Bindings
-****************************************************************************************/
-
-// All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
-#define DECLARE_DX_DEVICE_TWIN_BINDINGS
-static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = {   };
-
-/****************************************************************************************
-* Azure IoT Direct Method Bindings
-****************************************************************************************/
-
-// All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
-#define DECLARE_DX_DIRECT_METHOD_BINDINGS
-static DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = {   };
-
-/****************************************************************************************
-* GPIO Bindings
-****************************************************************************************/
-static DX_GPIO_BINDING gpio_CloudConnectedLed = { .pin = NETWORK_CONNECTED_LED, .name = "CloudConnectedLed", .direction = DX_OUTPUT, .initialState = GPIO_Value_Low, .invertPin = true };
-
-// All GPIOs referenced in gpio_bindings with be opened in the InitPeripheralsAndHandlers function
-#define DECLARE_DX_GPIO_BINDINGS
-static DX_GPIO_BINDING *gpio_bindings[] = {  &gpio_CloudConnectedLed };
-
 
 /****************************************************************************************
 * Initialise bindings

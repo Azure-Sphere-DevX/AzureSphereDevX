@@ -45,13 +45,6 @@
 const char PNP_MODEL_ID[] = "dtmi:com:example:application;1";
 const char NETWORK_INTERFACE[] = "wlan0";
 
-
-
-
-
-
-
-
 /// <summary>
 ///  Initialize gpios, device twins, direct methods, timers.
 /// </summary>
@@ -95,3 +88,6 @@ int main(int argc, char* argv[]) {{
 	ClosePeripheralAndHandlers();
 	return dx_getTerminationExitCode();
 }}
+
+// Main code blocks
+

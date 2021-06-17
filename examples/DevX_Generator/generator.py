@@ -215,7 +215,6 @@ def write_main():
             render_handler_block(main_c, "TIMER_BINDING", "Implement your timer code")
             render_handler_block(main_c, "GENERAL_BINDING", "Implement general code")
 
-            main_c.write(templates["footer"])
 
 
 def validate_schema():
