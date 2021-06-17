@@ -176,7 +176,6 @@ def render_handler_block(f, key_binding, block_comment):
                                                     device_twin_variables=device_twin_variables)
 
             hash_object = hashlib.md5(block_chars.encode())
-            print(hash_object.hexdigest())
 
             f.write("\n")
             f.write('/// DX_GENERATED_BEGIN_DO_NOT_REMOVE ID:{name}_handler MD5:{hash}\n'.format(name=name, hash=hash_object.hexdigest()))

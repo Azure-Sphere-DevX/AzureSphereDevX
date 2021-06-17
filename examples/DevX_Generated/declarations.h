@@ -28,6 +28,16 @@ timer_t watchdogTimer;
 /****************************************************************************************
  * Forward declarations
  ****************************************************************************************/
+static void DesiredTemperature_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
+
+/****************************************************************************************
+* Azure IoT Device Twin Bindings
+****************************************************************************************/
+static DX_DEVICE_TWIN_BINDING dt_DesiredTemperature = { .twinProperty = "DesiredTemperature", .twinType = DX_TYPE_FLOAT, .handler = DesiredTemperature_handler };
+
+// All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
+#define DECLARE_DX_DEVICE_TWIN_BINDINGS
+static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = {  &dt_DesiredTemperature };
 
 
 /****************************************************************************************
