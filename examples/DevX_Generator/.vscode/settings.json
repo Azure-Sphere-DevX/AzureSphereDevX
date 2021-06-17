@@ -5,9 +5,9 @@
     "json.schemas": [
         {
             "fileMatch": [
-                "/app_v3.json"
+                "/app_model.json"
             ],
-            "url": "./app.schema.json"
+            "url": "./app_model.schema.json"
         }
     ]
 }

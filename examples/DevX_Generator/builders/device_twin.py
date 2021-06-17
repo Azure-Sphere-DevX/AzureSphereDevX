@@ -19,8 +19,9 @@ class Builder():
     def build(self):
         for binding in self.bindings:
             binding.update({'binding': 'DEVICE_TWIN_BINDING'})
-            properties = binding.get('properties')
-            key = properties.get('name')
+            
+            key = binding.get('name')
+            properties = binding.get('properties')            
 
             properties.update({'twin_type': self.device_twin_types[properties.get('type')]})
 
@@ -47,9 +48,10 @@ class Builder():
         for item in self.variables_block:
             var = self.variables_block.get(item)
             if var.get("binding") == "DEVICE_TWIN_BINDING":
+
+                property_name = var.get("name", None)
                 properties = var.get('properties')
-                property_type = properties.get("type", None)
-                property_name = properties.get("name", None)
+                property_type = properties.get("type", None)                
 
                 if property_type == 'integer':
                     device_twin_variables += '    int {property_name}_value = 10;\n'.format(

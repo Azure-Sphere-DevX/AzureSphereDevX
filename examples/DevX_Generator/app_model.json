@@ -14,12 +14,12 @@
         "enabled": true,
         "properties": {
           "cloud2device": true,
-          "type": "double"
+          "type": "float"
         }
       },
       {
         "name": "DesiredAlertlevel",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "cloud2device": true,
           "type": "double"
@@ -27,7 +27,7 @@
       },
       {
         "name": "ReportedTemperature",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "type": "float"
         }
@@ -40,13 +40,13 @@
       },
       {
         "name": "FanOff",
-        "enabled": false
+        "enabled": true
       }
     ],
     "timers": [
       {
         "name": "MeasureTemperature",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "period": "5, 0",
           "type": "periodic"
@@ -64,7 +64,7 @@
     "gpio_outputs": [
       {
         "name": "AzureIotConnectedLed",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "pin": "NETWORK_CONNECTED_LED",
           "initialState": "low",
@@ -76,7 +76,7 @@
     "gpio_inputs": [
       {
         "name": "ButtonA",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "pin": "BUTTON_A",
           "detect": "low",
@@ -87,7 +87,7 @@
     "general": [
       {
         "name": "PublishTelemetry",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "period": "15,0"
         },
@@ -96,7 +96,7 @@
       },
       {
         "name": "Watchdog",
-        "enabled": false,
+        "enabled": true,
         "properties": {
           "period": "30, 0"
         },

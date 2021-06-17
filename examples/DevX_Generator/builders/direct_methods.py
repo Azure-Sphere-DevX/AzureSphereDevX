@@ -9,8 +9,9 @@ class Builder():
     def build(self):
         for binding in self.bindings:
             binding.update({'binding': 'DIRECT_METHOD_BINDING'})
-            properties = binding.get('properties')
-            key = properties.get('name')
+
+            key = binding.get('name')
+            properties = binding.get('properties')     
 
             binding.update({"sig_template": 'sig_direct_method'})
             self.signatures.update({key: binding})

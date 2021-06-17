@@ -20,7 +20,7 @@ handlers_block = {}
 templates = {}
 
 path_to_watch = "."  # look at the current directory
-file_to_watch = "app.json"  # look for changes to a file called test.txt
+file_to_watch = "app_model.json"  # look for changes to a file called test.txt
 
 FILE_LIST_DIRECTORY = 0x0001
 hDir = win32file.CreateFile(
@@ -56,7 +56,7 @@ def load_bindings():
     bindings_init = {"tmr": False, "dm": False, "dt": False, "gpio": False}
 
     time.sleep(0.5)
-    with open('app_v3.json', 'r') as j:
+    with open('app_model.json', 'r') as j:
         data = json.load(j)
     j.close()
 
@@ -74,6 +74,8 @@ def load_bindings():
 
 
 def get_value(properties, key):
+    if properties is None or key is None:
+        return ""
     return "" if properties.get(key) is None else properties.get(key)
 
 
@@ -100,7 +102,7 @@ def build_buckets():
 def render_signatures(f):
     for item in sorted(signatures):
         sig = signatures.get(item)
-        name = sig['properties'].get('name')
+        name = sig.get('name')
         template_key = sig.get('sig_template')
         f.write(templates[template_key].format(name=name))
 
@@ -113,9 +115,11 @@ def render_timer_block(f):
     write_comment_block(f, templates['comment_block_timer'])
     for item in sorted(timer_block):
         var = timer_block.get(item)
+
+        name = var.get('name')
         properties = var.get('properties')
+
         if properties is not None:
-            name = properties.get('name')
             variables_list += " &" + "tmr" + "_" + name + ","
             period = "{0, 0}" if get_value(properties, 'period') == "" else get_value(properties, 'period')
             template_key = var.get('timer_template')
@@ -141,24 +145,24 @@ def render_variable_block(f, key_binding, key_block, prefix):
                 write_comment_block(f, templates['comment_block_' + key_block])
                 bindings_init.update({prefix: True})
 
+            name = var.get('name')
             properties = var.get('properties')
-            if properties is not None:
-                name = properties.get('name')
-                variables_list += " &" + prefix + "_" + name + ","
 
-                pin = get_value(properties, 'pin')
-                initialState = get_value(properties, 'initialState')
-                invert = "true" if get_value(properties, 'invertPin') else "false"
-                twin_type = get_value(properties, 'twin_type')
+            variables_list += " &" + prefix + "_" + name + ","
+            template_key = var.get('var_template')
 
-                template_key = var.get('var_template')
+            # if properties is not None:
+            pin = get_value(properties, 'pin')
+            initialState = get_value(properties, 'initialState')
+            invert = "true" if get_value(properties, 'invertPin') else "false"
+            twin_type = get_value(properties, 'twin_type')
 
-                f.write(templates[template_key].format(
-                    name=name, pin=pin,
-                    initialState=initialState,
-                    invert=invert,
-                    twin_type=twin_type
-                ))
+            f.write(templates[template_key].format(
+                name=name, pin=pin,
+                initialState=initialState,
+                invert=invert,
+                twin_type=twin_type
+            ))
 
     if variables_list != "":
         f.write(templates['declare_bindings_' + key_block].format(variables=variables_list[:-1]))
@@ -180,14 +184,16 @@ def render_handler_block(f, key_binding, block_comment):
                 write_comment_block(f, block_comment)
                 f.write("\n")
 
+            name = var.get('name')
             properties = var.get('properties')
-            if properties is not None:
-                name = properties.get('name')
-                template_key = var.get('handler_template')
-                f.write(templates[template_key].format(name=name, device_twins_updates=device_twins_updates,
-                                                       device_twin_variables=device_twin_variables))
-                f.write("\n")
-                f.write("\n")
+
+            # if properties is not None:
+
+            template_key = var.get('handler_template')
+            f.write(templates[template_key].format(name=name, device_twins_updates=device_twins_updates,
+                                                    device_twin_variables=device_twin_variables))
+            f.write("\n")
+            f.write("\n")
 
 
 def write_main():
@@ -231,7 +237,7 @@ def process_update():
     load_bindings()
     load_templates()
     build_buckets()
-    
+
     # bind_templated_handlers()
 
     write_main()
@@ -240,21 +246,22 @@ process_update()
 
 
 
-# # Wait for new data and call ProcessNewData for each new chunk that's written
-# while 1:
-#     # Wait for a change to occur
-#     results = win32file.ReadDirectoryChangesW(
-#         hDir,
-#         1024,
-#         False,
-#         win32con.FILE_NOTIFY_CHANGE_LAST_WRITE,
-#         None,
-#         None
-#     )
+# Wait for new data and call ProcessNewData for each new chunk that's written
+while 1:
+    # Wait for a change to occur
+    results = win32file.ReadDirectoryChangesW(
+        hDir,
+        1024,
+        False,
+        win32con.FILE_NOTIFY_CHANGE_LAST_WRITE,
+        None,
+        None
+    )
 
-#     # For each change, check to see if it's updating the file we're interested in
-#     for action, file in results:
-#         full_filename = os.path.join(path_to_watch, file)
-#         print(ACTIONS.get(action, "Unknown"))
-#         if file == file_to_watch and action == 3:
-#             process_update()
+    # For each change, check to see if it's updating the file we're interested in
+    for action, file in results:
+        full_filename = os.path.join(path_to_watch, file)
+        print(ACTIONS.get(action, "Unknown"))
+        if file == file_to_watch and action == 3:
+            process_update()
+

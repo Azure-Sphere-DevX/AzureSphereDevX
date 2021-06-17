@@ -15,8 +15,9 @@ class Builder():
     def build(self):
         for binding in self.bindings:
             binding.update({'binding': 'GPIO_BINDING'})
-            properties = binding.get('properties')
-            key = properties.get('name')
+
+            key = binding.get('name')
+            properties = binding.get('properties')     
 
             properties.update({"initialState": self.gpio_init.get(self.get_value(properties, 'initialState')) if self.get_value(properties, 'initialState') != "" else ""})
 

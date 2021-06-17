@@ -13,8 +13,9 @@ class Builder():
     def build(self):
         for binding in self.bindings:
             binding.update({'binding': 'GPIO_BINDING'})
-            properties = binding.get('properties')
-            key = properties.get('name')
+
+            key = binding.get('name')
+            properties = binding.get('properties')     
 
             binding.update({"var_template": 'declare_gpio_input'})
             self.variables_block.update({key: binding})
