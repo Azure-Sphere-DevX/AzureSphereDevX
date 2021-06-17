@@ -2,14 +2,14 @@
 /// Implement your GPIO input timer function
 /// </summary>
 static void {name}_handler(EventLoopTimer *eventLoopTimer) {{
-	static GPIO_Value_Type gpio_{name}NewState;
+    static GPIO_Value_Type gpio_{name}NewState;
 
-	if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {{
-		dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
-		return;
-	}}
+    if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {{
+        dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent);
+        return;
+    }}
 
-	if (dx_gpioStateGet(&gpio_{name}, &gpio_{name}NewState)) {{
-		Log_Debug("gpio_{name}: %d\n", gpio_{name}NewState);
-	}}
+    if (dx_gpioStateGet(&gpio_{name}, &gpio_{name}NewState)) {{
+        Log_Debug("gpio_{name}: %d\n", gpio_{name}NewState);
+    }}
 }}

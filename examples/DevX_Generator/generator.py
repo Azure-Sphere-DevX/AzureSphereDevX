@@ -1,9 +1,8 @@
 import json
 import pathlib
-import win32file
-import win32con
-import os
 import time
+import watcher
+import hashlib
 
 from builders import device_twin
 from builders import direct_methods
@@ -18,22 +17,6 @@ timer_block = {}
 variables_block = {}
 handlers_block = {}
 templates = {}
-
-path_to_watch = "."  # look at the current directory
-file_to_watch = "app_model.json"  # look for changes to a file called test.txt
-
-FILE_LIST_DIRECTORY = 0x0001
-hDir = win32file.CreateFile(
-    path_to_watch,
-    FILE_LIST_DIRECTORY,
-    win32con.FILE_SHARE_READ | win32con.FILE_SHARE_WRITE,
-    None,
-    win32con.OPEN_EXISTING,
-    win32con.FILE_FLAG_BACKUP_SEMANTICS,
-    None
-)
-
-ACTIONS = {1: "Created", 2: "Deleted", 3: "Updated", 4: "Renamed from something", 5: "Renamed to something"}
 
 bindings_init = None
 device_twins_updates = None
@@ -58,7 +41,6 @@ def load_bindings():
     time.sleep(0.5)
     with open('app_model.json', 'r') as j:
         data = json.load(j)
-    j.close()
 
     dt = device_twin.Builder(data, signatures=signatures, variables_block=variables_block, handlers_block=handlers_block)
     dm = direct_methods.Builder(data, signatures=signatures, variables_block=variables_block, handlers_block=handlers_block)
@@ -180,9 +162,9 @@ def render_handler_block(f, key_binding, block_comment):
         if binding is not None and binding == key_binding:
             if first:
                 first = False
-                f.write("\n")
-                write_comment_block(f, block_comment)
-                f.write("\n")
+                # f.write("\n")
+                # write_comment_block(f, block_comment)
+                # f.write("\n")
 
             name = var.get('name')
             properties = var.get('properties')
@@ -190,10 +172,19 @@ def render_handler_block(f, key_binding, block_comment):
             # if properties is not None:
 
             template_key = var.get('handler_template')
+            block_chars = templates[template_key].format(name=name, device_twins_updates=device_twins_updates,
+                                                    device_twin_variables=device_twin_variables)
+
+            hash_object = hashlib.md5(block_chars.encode())
+            print(hash_object.hexdigest())
+
+            f.write("\n")
+            f.write('/// DX_GENERATED_BEGIN_DO_NOT_REMOVE ID:{name}_handler MD5:{hash}\n'.format(name=name, hash=hash_object.hexdigest()))
+            
             f.write(templates[template_key].format(name=name, device_twins_updates=device_twins_updates,
                                                     device_twin_variables=device_twin_variables))
-            f.write("\n")
-            f.write("\n")
+            f.write('\n/// DX_GENERATED_END_DO_NOT_REMOVE ID:{name}_handler'.format(name=name))
+            f.write("\n\n")
 
 
 def write_main():
@@ -206,9 +197,9 @@ def write_main():
             df.write(templates["declarations"])
 
             render_signatures(df)
-            result = dt.build_publish_device_twins()
-            device_twins_updates = result[0]
-            device_twin_variables = result[1]
+            device_twins_updates, device_twin_variables = dt.build_publish_device_twins()
+            # device_twins_updates = result[0]
+            # device_twin_variables = result[1]
 
             render_variable_block(df, "GENERAL_BINDING", "general", "gen")
             render_timer_block(df)
@@ -237,31 +228,10 @@ def process_update():
     load_bindings()
     load_templates()
     build_buckets()
-
-    # bind_templated_handlers()
-
     write_main()
 
-process_update()
+watch_file = 'app_model.json'
 
-
-
-# Wait for new data and call ProcessNewData for each new chunk that's written
-while 1:
-    # Wait for a change to occur
-    results = win32file.ReadDirectoryChangesW(
-        hDir,
-        1024,
-        False,
-        win32con.FILE_NOTIFY_CHANGE_LAST_WRITE,
-        None,
-        None
-    )
-
-    # For each change, check to see if it's updating the file we're interested in
-    for action, file in results:
-        full_filename = os.path.join(path_to_watch, file)
-        print(ACTIONS.get(action, "Unknown"))
-        if file == file_to_watch and action == 3:
-            process_update()
-
+# watcher = Watcher(watch_file)  # simple
+watcher = watcher.Watcher(watch_file, process_update)  # also call custom action function
+watcher.watch()  # start the watch going

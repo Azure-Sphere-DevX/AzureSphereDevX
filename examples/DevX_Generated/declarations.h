@@ -28,85 +28,39 @@ timer_t watchdogTimer;
 /****************************************************************************************
  * Forward declarations
  ****************************************************************************************/
-static void AzureIotConnectedLed_handler(EventLoopTimer *eventLoopTimer);
-static void ButtonA_handler(EventLoopTimer *eventLoopTimer);
-static void DesiredAlertlevel_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
-static void DesiredHumidity_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
-static void DesiredTemperature_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
-static DX_DIRECT_METHOD_RESPONSE_CODE FanOff_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);
-static DX_DIRECT_METHOD_RESPONSE_CODE LightControl_handler(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);
-static void MeasureCarbonMonoxide_handler(EventLoopTimer *eventLoopTimer);
-static void MeasureTemperature_handler(EventLoopTimer *eventLoopTimer);
-static void PublishTelemetry_handler(EventLoopTimer *eventLoopTimer);
-static void Watchdog_handler(EventLoopTimer *eventLoopTimer);
-
-/****************************************************************************************
-* General declaratons
-****************************************************************************************/
-/****************************************************************************************
- * Telemetry message templates and property sets
- ****************************************************************************************/
-#define DX_PUBLISH_TELEMETRY TRUE
-
-// Number of bytes to allocate for the JSON telemetry message for IoT Hub/Central
-#define JSON_MESSAGE_BYTES 256
-static char msgBuffer[JSON_MESSAGE_BYTES] = {0};
-
-static const char *msgTemplate =
-    "{ \"Temperature\":%3.2f, \"Humidity\":%3.1f, \"Pressure\":%3.1f }";
-
-static DX_MESSAGE_PROPERTY *messageProperties[] = {
-    &(DX_MESSAGE_PROPERTY){.key = "appid", .value = "hvac"},
-    &(DX_MESSAGE_PROPERTY){.key = "type", .value = "telemetry"},
-    &(DX_MESSAGE_PROPERTY){.key = "schema", .value = "1"}};
-
-static DX_MESSAGE_CONTENT_PROPERTIES contentProperties = {.contentEncoding = "utf-8", .contentType = "application/json"};
 
 /****************************************************************************************
 * Timer Bindings
 ****************************************************************************************/
-static DX_TIMER_BINDING  tmr_AzureIotConnectedLed = { .period = {0,250 * ONE_MS}, .name = "AzureIotConnectedLed", .handler = AzureIotConnectedLed_handler };
-static DX_TIMER_BINDING  tmr_ButtonA = { .period = {0,200000000}, .name = "ButtonA", .handler = ButtonA_handler };
-static DX_TIMER_BINDING  tmr_MeasureCarbonMonoxide = { .period = { 5, 0 }, .name = "MeasureCarbonMonoxide", .handler = MeasureCarbonMonoxide_handler };
-static DX_TIMER_BINDING  tmr_MeasureTemperature = { .period = { 5, 0 }, .name = "MeasureTemperature", .handler = MeasureTemperature_handler };
-static DX_TIMER_BINDING  tmr_PublishTelemetry = { .period = {15,0}, .name = "PublishTelemetry", .handler = PublishTelemetry_handler };
-static DX_TIMER_BINDING  tmr_Watchdog = { .period = {30, 0}, .name = "Watchdog", .handler = Watchdog_handler };
 
 // All timers referenced in timer_bindings with be opened in the InitPeripheralsAndHandlers function
 #define DECLARE_DX_TIMER_BINDINGS
-static DX_TIMER_BINDING *timer_bindings[] = {  &tmr_AzureIotConnectedLed, &tmr_ButtonA, &tmr_MeasureCarbonMonoxide, &tmr_MeasureTemperature, &tmr_PublishTelemetry, &tmr_Watchdog };
+static DX_TIMER_BINDING *timer_bindings[] = {   };
 
 /****************************************************************************************
 * Azure IoT Device Twin Bindings
 ****************************************************************************************/
-static DX_DEVICE_TWIN_BINDING dt_DesiredAlertlevel = { .twinProperty = "DesiredAlertlevel", .twinType = DX_TYPE_DOUBLE, .handler = DesiredAlertlevel_handler };
-static DX_DEVICE_TWIN_BINDING dt_DesiredHumidity = { .twinProperty = "DesiredHumidity", .twinType = DX_TYPE_FLOAT, .handler = DesiredHumidity_handler };
-static DX_DEVICE_TWIN_BINDING dt_DesiredTemperature = { .twinProperty = "DesiredTemperature", .twinType = DX_TYPE_FLOAT, .handler = DesiredTemperature_handler };
-static DX_DEVICE_TWIN_BINDING dt_ReportedTemperature = { .twinProperty = "ReportedTemperature", .twinType = DX_TYPE_FLOAT };
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
 #define DECLARE_DX_DEVICE_TWIN_BINDINGS
-static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = {  &dt_DesiredAlertlevel, &dt_DesiredHumidity, &dt_DesiredTemperature, &dt_ReportedTemperature };
+static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = {   };
 
 /****************************************************************************************
 * Azure IoT Direct Method Bindings
 ****************************************************************************************/
-static DX_DIRECT_METHOD_BINDING dm_FanOff = { .methodName = "FanOff", .handler = FanOff_handler };
-static DX_DIRECT_METHOD_BINDING dm_LightControl = { .methodName = "LightControl", .handler = LightControl_handler };
 
 // All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
 #define DECLARE_DX_DIRECT_METHOD_BINDINGS
-static DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = {  &dm_FanOff, &dm_LightControl };
+static DX_DIRECT_METHOD_BINDING *direct_method_bindings[] = {   };
 
 /****************************************************************************************
 * GPIO Bindings
 ****************************************************************************************/
-static DX_GPIO_BINDING gpio_AzureIotConnectedLed = { .pin = NETWORK_CONNECTED_LED, .name = "AzureIotConnectedLed", .direction = DX_OUTPUT, .initialState = GPIO_Value_Low, .invertPin = true };
-static DX_GPIO_BINDING gpio_ButtonA = { .pin = BUTTON_A, .name = "ButtonA", .direction = DX_INPUT };
+static DX_GPIO_BINDING gpio_CloudConnectedLed = { .pin = NETWORK_CONNECTED_LED, .name = "CloudConnectedLed", .direction = DX_OUTPUT, .initialState = GPIO_Value_Low, .invertPin = true };
 
 // All GPIOs referenced in gpio_bindings with be opened in the InitPeripheralsAndHandlers function
 #define DECLARE_DX_GPIO_BINDINGS
-static DX_GPIO_BINDING *gpio_bindings[] = {  &gpio_AzureIotConnectedLed, &gpio_ButtonA };
+static DX_GPIO_BINDING *gpio_bindings[] = {  &gpio_CloudConnectedLed };
 
 
 /****************************************************************************************
