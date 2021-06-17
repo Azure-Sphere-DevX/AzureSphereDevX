@@ -178,11 +178,11 @@ def render_handler_block(f, key_binding, block_comment):
             hash_object = hashlib.md5(block_chars.encode())
 
             f.write("\n")
-            f.write('/// DX_GENERATED_BEGIN_DO_NOT_REMOVE ID:{name}_handler MD5:{hash}\n'.format(name=name, hash=hash_object.hexdigest()))
+            f.write('/// DX_GENERATED_BEGIN_DO_NOT_REMOVE ID:{name} MD5:{hash}\n'.format(name=name, hash=hash_object.hexdigest()))
             
             f.write(templates[template_key].format(name=name, device_twins_updates=device_twins_updates,
                                                     device_twin_variables=device_twin_variables))
-            f.write('\n/// DX_GENERATED_END_DO_NOT_REMOVE ID:{name}_handler'.format(name=name))
+            f.write('\n/// DX_GENERATED_END_DO_NOT_REMOVE ID:{name}'.format(name=name))
             f.write("\n\n")
 
 

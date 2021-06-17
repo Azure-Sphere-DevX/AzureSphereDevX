@@ -65,7 +65,7 @@ class Clean():
             for line in lines:
                 found_handler_reference = False
                 for item in self.removed_blocks:
-                    name = item.split('ID:')[1].split(' ')[0]
+                    name = item.split('ID:')[1].split(' ')[0] + "_handler"
                     if name in line:
                         found_handler_reference = True
                         if name + '(' in line:   # Is this a forward signature
