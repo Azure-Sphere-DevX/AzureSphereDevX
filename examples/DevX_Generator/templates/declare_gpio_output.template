@@ -1,1 +1,0 @@
-static DX_GPIO_BINDING gpio_{name} = {{ .pin = {pin}, .name = "{name}", .direction = DX_OUTPUT, .initialState = {initialState}, .invertPin = {invert} }};

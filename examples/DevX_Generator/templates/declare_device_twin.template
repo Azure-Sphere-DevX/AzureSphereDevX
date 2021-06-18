@@ -1,1 +1,0 @@
-static DX_DEVICE_TWIN_BINDING dt_{name} = {{ .twinProperty = "{name}", .twinType = {twin_type} }};

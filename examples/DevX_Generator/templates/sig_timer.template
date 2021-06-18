@@ -1,1 +1,0 @@
-static void {name}_handler(EventLoopTimer *eventLoopTimer);
