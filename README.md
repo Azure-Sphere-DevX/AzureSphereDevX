@@ -16,4 +16,6 @@ The focus of the Azure Sphere DevX library is the communications and simplificat
 
 Visit the [DevX library Wiki](https://github.com/gloveboxes/AzureSphereDevX/wiki) page to learn more.
 
+Be sure to visit the [Azure Sphere GenX Code Generator WiKi](https://github.com/gloveboxes/AzureSphereGenX/wiki) partner project.
+
 ![Azure Sphere DevX Library](https://github.com/gloveboxes/AzureSphereDevX/wiki/media/architecture.png)
