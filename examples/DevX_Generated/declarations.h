@@ -28,16 +28,25 @@ timer_t watchdogTimer;
 /****************************************************************************************
  * Forward declarations
  ****************************************************************************************/
-static void DesiredTemperature_handler(DX_DEVICE_TWIN_BINDING* deviceTwinBinding);
+static void CloudStatusLed_handler(EventLoopTimer *eventLoopTimer);
 
 /****************************************************************************************
-* Azure IoT Device Twin Bindings
+* Timer Bindings
 ****************************************************************************************/
-static DX_DEVICE_TWIN_BINDING dt_DesiredTemperature = { .twinProperty = "DesiredTemperature", .twinType = DX_TYPE_FLOAT, .handler = DesiredTemperature_handler };
+static DX_TIMER_BINDING tmr_CloudStatusLed = { .period = {0, 250 * ONE_MS}, .name = "CloudStatusLed", .handler = CloudStatusLed_handler };
 
-// All direct methods referenced in direct_method_bindings will be subscribed to in the InitPeripheralsAndHandlers function
-#define DECLARE_DX_DEVICE_TWIN_BINDINGS
-static DX_DEVICE_TWIN_BINDING* device_twin_bindings[] = {  &dt_DesiredTemperature };
+// All timers referenced in timer_bindings will be opened in the InitPeripheralsAndHandlers function
+#define DECLARE_DX_TIMER_BINDINGS
+static DX_TIMER_BINDING *timer_bindings[] = {  &tmr_CloudStatusLed };
+
+/****************************************************************************************
+* GPIO Bindings
+****************************************************************************************/
+static DX_GPIO_BINDING gpio_CloudStatusLed = { .pin = NETWORK_CONNECTED_LED, .name = "CloudStatusLed", .direction = DX_OUTPUT, .initialState = GPIO_Value_Low, .invertPin = true };
+
+// All GPIOs referenced in gpio_bindings with be opened in the InitPeripheralsAndHandlers function
+#define DECLARE_DX_GPIO_BINDINGS
+static DX_GPIO_BINDING *gpio_bindings[] = {  &gpio_CloudStatusLed };
 
 
 /****************************************************************************************

@@ -6,4 +6,6 @@
 /out/
 /install/
 /.vs/
+/__pycache__/
+/build/
 

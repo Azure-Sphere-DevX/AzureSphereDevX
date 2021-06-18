@@ -3,10 +3,18 @@
     "device_twins": [
       {
         "name": "DesiredTemperature",
-        "enabled": true,
+        "enabled": false,
         "properties": {
           "cloud2device": true,
           "type": "float"
+        }
+      },
+      {
+        "name": "DesiredCO2AlertLevel",
+        "enabled": false,
+        "properties": {
+          "cloud2device": true,
+          "type": "double"
         }
       },
       {
@@ -63,8 +71,8 @@
     ],
     "gpio_outputs": [
       {
-        "name": "CloudConnectedLed",
-        "enabled": false,
+        "name": "CloudStatusLed",
+        "enabled": true,
         "properties": {
           "pin": "NETWORK_CONNECTED_LED",
           "initialState": "low",
