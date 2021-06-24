@@ -97,7 +97,7 @@ static void publish_message_handler(EventLoopTimer *eventLoopTimer)
     if (dx_isAzureConnected()) {
 
         // Serialize telemetry as JSON
-        bool serialization_result = dx_jsonSerialize(msgBuffer, sizeof(msgBuffer), 3, 
+        bool serialization_result = dx_jsonSerialize(msgBuffer, sizeof(msgBuffer), 4, 
             DX_JSON_INT, "MsgId", msgId++,
             DX_JSON_DOUBLE, "Temperature", temperature, 
             DX_JSON_DOUBLE, "Humidity", humidity,
