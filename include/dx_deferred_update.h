@@ -12,6 +12,6 @@
 #define DX_DEFER_UPDATE_TIME_IN_MINUTES 15
 #endif
 
-void dx_deferredUpdateRegistion(bool (*deferredUpdateCalculateCallback)(unsigned int max_deferral_time_in_minutes),
+void dx_deferredUpdateRegistration(bool (*deferredUpdateCalculateCallback)(unsigned int max_deferral_time_in_minutes),
                                 void (*deferredUpdateNotificationCallback)(SysEvent_UpdateType type, const char *typeDescription,
                                                                            SysEvent_Status status, const char *statusDescription));

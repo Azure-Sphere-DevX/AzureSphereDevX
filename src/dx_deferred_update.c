@@ -7,7 +7,7 @@ bool (*_deferred_update_calculate_callback)(unsigned int max_deferral_time_in_mi
 void (*_deferred_update_notification_callback)(SysEvent_UpdateType type, const char *typeDescription, SysEvent_Status status,
                                                const char *statusDescription) = NULL;
 
-void dx_deferredUpdateRegistion(bool (*deferredUpdateCalculateCallback)(unsigned int max_deferral_time_in_minutes),
+void dx_deferredUpdateRegistration(bool (*deferredUpdateCalculateCallback)(unsigned int max_deferral_time_in_minutes),
                                 void (*deferredUpdateNotificationCallback)(SysEvent_UpdateType type, const char *typeDescription,
                                                                            SysEvent_Status status, const char *statusDescription))
 {

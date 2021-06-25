@@ -95,7 +95,7 @@ static void DeferredUpdateNotification(SysEvent_UpdateType type, const char *typ
 /// </summary>
 static void InitPeripheralsAndHandlers(void)
 {
-    dx_deferredUpdateRegistion(DeferredUpdateCalculate, DeferredUpdateNotification);
+    dx_deferredUpdateRegistration(DeferredUpdateCalculate, DeferredUpdateNotification);
 }
 
 /// <summary>
