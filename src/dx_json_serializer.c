@@ -12,21 +12,17 @@ bool dx_jsonSerialize(char *buffer, size_t buffer_size, int key_value_pair_count
     va_list valist;
     va_start(valist, key_value_pair_count);
 
-    while (key_value_pair_count--)
-    {
+    while (key_value_pair_count--) {
         DX_JSON_TYPE type = va_arg(valist, int);
         key = va_arg(valist, char *);
 
-        switch (type)
-        {
+        switch (type) {
         case DX_JSON_INT:
             json_object_set_number(root_object, key, va_arg(valist, int));
             break;
 
+            // floats are cast to doubles for valists
         case DX_JSON_FLOAT:
-            json_object_set_number(root_object, key, va_arg(valist, double));
-            break;
-
         case DX_JSON_DOUBLE:
             json_object_set_number(root_object, key, va_arg(valist, double));
             break;
@@ -47,8 +43,7 @@ bool dx_jsonSerialize(char *buffer, size_t buffer_size, int key_value_pair_count
 
     json_string = json_serialize_to_string(root_value);
 
-    if (strlen(json_string) < buffer_size)
-    {
+    if (strlen(json_string) < buffer_size) {
         strncpy(buffer, json_string, buffer_size);
         result = true;
     }

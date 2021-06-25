@@ -3,13 +3,18 @@
 static EventRegistration *updateEventReg = NULL;
 static void UpdateCallback(SysEvent_Events event, SysEvent_Status status, const SysEvent_Info *info, void *context);
 
-bool (*_deferred_update_calculate_callback)(unsigned int max_deferral_time_in_minutes) = NULL;
+uint32_t (*_deferred_update_calculate_callback)(unsigned int max_deferral_time_in_minutes) = NULL;
 void (*_deferred_update_notification_callback)(SysEvent_UpdateType type, const char *typeDescription, SysEvent_Status status,
                                                const char *statusDescription) = NULL;
 
-void dx_deferredUpdateRegistration(bool (*deferredUpdateCalculateCallback)(unsigned int max_deferral_time_in_minutes),
-                                void (*deferredUpdateNotificationCallback)(SysEvent_UpdateType type, const char *typeDescription,
-                                                                           SysEvent_Status status, const char *statusDescription))
+/// <summary>
+/// Register for update events
+/// </summary>
+/// <param name="deferredUpdateCalculateCallback"></param>
+/// <param name="deferredUpdateNotificationCallback"></param>
+void dx_deferredUpdateRegistration(uint32_t (*deferredUpdateCalculateCallback)(uint32_t max_deferral_time_in_minutes),
+                                   void (*deferredUpdateNotificationCallback)(SysEvent_UpdateType type, const char *typeDescription,
+                                                                              SysEvent_Status status, const char *statusDescription))
 {
     _deferred_update_calculate_callback = deferredUpdateCalculateCallback;
     _deferred_update_notification_callback = deferredUpdateNotificationCallback;
@@ -77,6 +82,7 @@ static void UpdateCallback(SysEvent_Events event, SysEvent_Status status, const 
 
     SysEvent_Info_UpdateData data;
     int result = SysEvent_Info_GetUpdateData(info, &data);
+    uint32_t requested_minutes = 0;
 
     if (_deferred_update_notification_callback != NULL) {
         _deferred_update_notification_callback(data.update_type, UpdateTypeToString(data.update_type), status, EventStatusToString(status));
@@ -90,17 +96,17 @@ static void UpdateCallback(SysEvent_Events event, SysEvent_Status status, const 
     switch (status) {
     case SysEvent_Status_Pending:
         // If pending update the calculate if update should be deferred
-
-        if (_deferred_update_calculate_callback == NULL || _deferred_update_calculate_callback(data.max_deferral_time_in_minutes)) {
-            // Allowing the update
-        } else {
-            // defer for DX_DEFER_UPDATE_TIME_IN_MINUTES
-            result = SysEvent_DeferEvent(SysEvent_Events_UpdateReadyForInstall, DX_DEFER_UPDATE_TIME_IN_MINUTES);
+        if (_deferred_update_calculate_callback != NULL) {
+            requested_minutes = _deferred_update_calculate_callback(data.max_deferral_time_in_minutes);
         }
 
-        if (result == -1) {
-            dx_terminate(DX_ExitCode_UpdateCallback_DeferEvent);
+        if (requested_minutes > 0) {
+            // defer for requested_minutes
+            if (SysEvent_DeferEvent(SysEvent_Events_UpdateReadyForInstall, requested_minutes) == -1) {
+                dx_terminate(DX_ExitCode_UpdateCallback_DeferEvent);
+            }
         }
+
         break;
 
     case SysEvent_Status_Final:

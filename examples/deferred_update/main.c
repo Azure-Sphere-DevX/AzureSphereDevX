@@ -50,9 +50,9 @@
 /// <summary>
 /// Algorithm to determine if a deferred update can proceed
 /// </summary>
-/// <param name="max_deferral_time_in_minutes">The maximum number of minutes you can defer the
-/// update</param> <returns>true to start update, false to defer update</returns>
-static bool DeferredUpdateCalculate(unsigned int max_deferral_time_in_minutes)
+/// <param name="max_deferral_time_in_minutes">The maximum number of minutes you can defer</param>
+/// <returns>Return 0 to start update, return greater than zero to defer</returns>
+static uint32_t DeferredUpdateCalculate(unsigned int max_deferral_time_in_minutes)
 {
     // Make deferral update decision
     // Examples include: 
@@ -72,8 +72,12 @@ static bool DeferredUpdateCalculate(unsigned int max_deferral_time_in_minutes)
     t->tm_hour += 10;
     t->tm_hour = t->tm_hour % 24;
 
-    // Return true to allow update, false to try and defer the update
-    return (t->tm_hour >= 1 && t->tm_hour <= 5);
+    // Return zero to allow update, greater than zero to defer the update
+    if (t->tm_hour >= 1 && t->tm_hour <= 5) {
+        return 0;
+    } else {
+        return 30; // defer update for 30 minutes
+    }
 }
 
 /// <summary>
