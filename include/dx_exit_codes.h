@@ -37,6 +37,13 @@ typedef enum {
 	DX_ExitCode_Gpio_Wrong_Direction = 34,
 	DX_ExitCode_Gpio_Open_Output_Failed = 35,
 	DX_ExitCode_Gpio_Open_Input_Failed = 36,
-	DX_ExitCode_Gpio_Open_Direction_Unknown = 37
+	DX_ExitCode_Gpio_Open_Direction_Unknown = 37,
+
+	DX_ExitCode_UpdateCallback_UnexpectedEvent = 40,
+	DX_ExitCode_UpdateCallback_GetUpdateEvent = 41,
+	DX_ExitCode_UpdateCallback_DeferEvent = 42,
+	DX_ExitCode_UpdateCallback_FinalUpdate = 43,
+	DX_ExitCode_UpdateCallback_UnexpectedStatus = 44,
+	DX_ExitCode_SetUpSysEvent_RegisterEvent = 45
 
 } ExitCode;

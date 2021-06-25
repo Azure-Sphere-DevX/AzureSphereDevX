@@ -16,7 +16,8 @@ set(Source
     "./src/dx_terminate.c"
     "./src/dx_timer.c"
     "./src/dx_utilities.c"
-    "./src/dx_json_serializer.c"	
+    "./src/dx_json_serializer.c"
+    "./src/dx_deferred_update.c"	
 )
 source_group("Source" FILES ${Source})
 
