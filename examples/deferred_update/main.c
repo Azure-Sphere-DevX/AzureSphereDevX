@@ -76,7 +76,7 @@ static uint32_t DeferredUpdateCalculate(unsigned int max_deferral_time_in_minute
     if (t->tm_hour >= 1 && t->tm_hour <= 5) {
         return 0;
     } else {
-        return 30; // defer update for 30 minutes
+        return 15; // defer update for 15 minutes
     }
 }
 
