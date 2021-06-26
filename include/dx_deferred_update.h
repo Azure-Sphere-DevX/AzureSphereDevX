@@ -8,6 +8,12 @@
 #include <errno.h>
 #include <stdbool.h>
 
+
+/// <summary>
+/// register callbacks for deferred updates
+/// </summary>
+/// <param name="deferredUpdateCalculateCallback"></param>
+/// <param name="deferredUpdateNotificationCallback"></param>
 void dx_deferredUpdateRegistration(uint32_t (*deferredUpdateCalculateCallback)(uint32_t max_deferral_time_in_minutes,
                                                                                SysEvent_UpdateType type, SysEvent_Status status,
                                                                                const char *typeDescription, const char *statusDescription),

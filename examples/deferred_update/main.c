@@ -60,9 +60,6 @@ static uint32_t DeferredUpdateCalculate(uint32_t max_deferral_time_in_minutes, S
     // - Update overnight, could be as simple as UTC +10hrs
     // - Is it dark, is the device busy at the moment, orientation of the device etc...
 
-    Log_Debug("Max minutes for deferral: %i, Type: %s, Status: %s", max_deferral_time_in_minutes, typeDescription,
-              statusDescription);
-
     time_t now = time(NULL);
     struct tm *t = gmtime(&now);
 
@@ -74,12 +71,9 @@ static uint32_t DeferredUpdateCalculate(uint32_t max_deferral_time_in_minutes, S
     t->tm_hour += 10;
     t->tm_hour = t->tm_hour % 24;
 
-    // Return zero to allow update, greater than zero to defer the update
-    if (t->tm_hour >= 1 && t->tm_hour <= 5) {
-        return 0;
-    } else {
-        return 15; // defer update for 15 minutes
-    }
+    // If local time >= 1am and <= 5am then return zero minutes to allow update
+    // Otherwise request to defer for 15 minutes
+    return t->tm_hour >= 1 && t->tm_hour <= 5 ? 0 : 15;
 }
 
 /// <summary>
@@ -95,6 +89,7 @@ static void DeferredUpdateNotification(uint32_t max_deferral_time_in_minutes, Sy
 {
     Log_Debug("Max minutes for deferral: %i, Type: %s, Status: %s", max_deferral_time_in_minutes, typeDescription,
               statusDescription);
+    // Given the device is locked for cloud deployment then set a device twin to capture notification
 }
 
 /// <summary>
