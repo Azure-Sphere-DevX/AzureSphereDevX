@@ -3,18 +3,22 @@
 static EventRegistration *updateEventReg = NULL;
 static void UpdateCallback(SysEvent_Events event, SysEvent_Status status, const SysEvent_Info *info, void *context);
 
-uint32_t (*_deferred_update_calculate_callback)(unsigned int max_deferral_time_in_minutes) = NULL;
-void (*_deferred_update_notification_callback)(SysEvent_UpdateType type, const char *typeDescription, SysEvent_Status status,
-                                               const char *statusDescription) = NULL;
+uint32_t (*_deferred_update_calculate_callback)(uint32_t max_deferral_time_in_minutes, SysEvent_UpdateType type, SysEvent_Status status,
+                                                const char *typeDescription, const char *statusDescription) = NULL;
+void (*_deferred_update_notification_callback)(uint32_t max_deferral_time_in_minutes, SysEvent_UpdateType type, SysEvent_Status status,
+                                               const char *typeDescription, const char *statusDescription) = NULL;
 
 /// <summary>
 /// Register for update events
 /// </summary>
 /// <param name="deferredUpdateCalculateCallback"></param>
 /// <param name="deferredUpdateNotificationCallback"></param>
-void dx_deferredUpdateRegistration(uint32_t (*deferredUpdateCalculateCallback)(uint32_t max_deferral_time_in_minutes),
-                                   void (*deferredUpdateNotificationCallback)(SysEvent_UpdateType type, const char *typeDescription,
-                                                                              SysEvent_Status status, const char *statusDescription))
+void dx_deferredUpdateRegistration(uint32_t (*deferredUpdateCalculateCallback)(uint32_t max_deferral_time_in_minutes,
+                                                                               SysEvent_UpdateType type, SysEvent_Status status,
+                                                                               const char *typeDescription, const char *statusDescription),
+                                   void (*deferredUpdateNotificationCallback)(uint32_t max_deferral_time_in_minutes,
+                                                                              SysEvent_UpdateType type, SysEvent_Status status,
+                                                                              const char *typeDescription, const char *statusDescription))
 {
     _deferred_update_calculate_callback = deferredUpdateCalculateCallback;
     _deferred_update_notification_callback = deferredUpdateNotificationCallback;
@@ -75,17 +79,20 @@ static const char *UpdateTypeToString(SysEvent_UpdateType updateType)
 /// </summary>
 static void UpdateCallback(SysEvent_Events event, SysEvent_Status status, const SysEvent_Info *info, void *context)
 {
+    SysEvent_Info_UpdateData data;
+    int result = SysEvent_Info_GetUpdateData(info, &data);
+    uint32_t requested_minutes = 0;
+
+
     if (event != SysEvent_Events_UpdateReadyForInstall) {
         dx_terminate(DX_ExitCode_UpdateCallback_UnexpectedEvent);
         return;
     }
 
-    SysEvent_Info_UpdateData data;
-    int result = SysEvent_Info_GetUpdateData(info, &data);
-    uint32_t requested_minutes = 0;
-
     if (_deferred_update_notification_callback != NULL) {
-        _deferred_update_notification_callback(data.update_type, UpdateTypeToString(data.update_type), status, EventStatusToString(status));
+
+        _deferred_update_notification_callback(data.max_deferral_time_in_minutes, data.update_type, status,
+                                               UpdateTypeToString(data.update_type), EventStatusToString(status));
     }
 
     if (result == -1) {
@@ -97,7 +104,9 @@ static void UpdateCallback(SysEvent_Events event, SysEvent_Status status, const 
     case SysEvent_Status_Pending:
         // If pending update the calculate if update should be deferred
         if (_deferred_update_calculate_callback != NULL) {
-            requested_minutes = _deferred_update_calculate_callback(data.max_deferral_time_in_minutes);
+
+            requested_minutes = _deferred_update_calculate_callback(data.max_deferral_time_in_minutes, data.update_type, status,
+                                                                    UpdateTypeToString(data.update_type), EventStatusToString(status));
         }
 
         if (requested_minutes > 0) {

@@ -46,20 +46,22 @@
  * Implementation
  ****************************************************************************************/
 
-
 /// <summary>
 /// Algorithm to determine if a deferred update can proceed
 /// </summary>
 /// <param name="max_deferral_time_in_minutes">The maximum number of minutes you can defer</param>
 /// <returns>Return 0 to start update, return greater than zero to defer</returns>
-static uint32_t DeferredUpdateCalculate(unsigned int max_deferral_time_in_minutes)
+static uint32_t DeferredUpdateCalculate(uint32_t max_deferral_time_in_minutes, SysEvent_UpdateType type,
+                                        SysEvent_Status status, const char *typeDescription,
+                                        const char *statusDescription)
 {
     // Make deferral update decision
-    // Examples include: 
-    // - Update overnight - could be as simple as UTC +10hrs
-    // - Is it dark
-    // - Is the device busy at the moment
-    // - Orientation of the device
+    // Examples include:
+    // - Update overnight, could be as simple as UTC +10hrs
+    // - Is it dark, is the device busy at the moment, orientation of the device etc...
+
+    Log_Debug("Max minutes for deferral: %i, Type: %s, Status: %s", max_deferral_time_in_minutes, typeDescription,
+              statusDescription);
 
     time_t now = time(NULL);
     struct tm *t = gmtime(&now);
@@ -87,12 +89,13 @@ static uint32_t DeferredUpdateCalculate(unsigned int max_deferral_time_in_minute
 /// <param name="typeDescription"></param>
 /// <param name="status"></param>
 /// <param name="statusDescription"></param>
-static void DeferredUpdateNotification(SysEvent_UpdateType type, const char *typeDescription,
-                                                  SysEvent_Status status, const char *statusDescription)
+static void DeferredUpdateNotification(uint32_t max_deferral_time_in_minutes, SysEvent_UpdateType type,
+                                       SysEvent_Status status, const char *typeDescription,
+                                       const char *statusDescription)
 {
-    Log_Debug("Type: %s, Status: %s", typeDescription, statusDescription);
+    Log_Debug("Max minutes for deferral: %i, Type: %s, Status: %s", max_deferral_time_in_minutes, typeDescription,
+              statusDescription);
 }
-
 
 /// <summary>
 ///  Initialize peripherals, device twins, direct methods, timers.

@@ -8,6 +8,9 @@
 #include <errno.h>
 #include <stdbool.h>
 
-void dx_deferredUpdateRegistration(uint32_t (*deferredUpdateCalculateCallback)(uint32_t max_deferral_time_in_minutes),
-                                void (*deferredUpdateNotificationCallback)(SysEvent_UpdateType type, const char *typeDescription,
-                                                                           SysEvent_Status status, const char *statusDescription));
+void dx_deferredUpdateRegistration(uint32_t (*deferredUpdateCalculateCallback)(uint32_t max_deferral_time_in_minutes,
+                                                                               SysEvent_UpdateType type, SysEvent_Status status,
+                                                                               const char *typeDescription, const char *statusDescription),
+                                   void (*deferredUpdateNotificationCallback)(uint32_t max_deferral_time_in_minutes,
+                                                                              SysEvent_UpdateType type, SysEvent_Status status,
+                                                                              const char *typeDescription, const char *statusDescription));
