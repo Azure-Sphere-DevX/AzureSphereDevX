@@ -41,6 +41,7 @@
 #include "dx_azure_iot.h"
 #include "dx_config.h"
 #include "dx_exit_codes.h"
+#include "dx_json_serializer.h"
 #include "dx_terminate.h"
 #include "dx_timer.h"
 #include "dx_utilities.h"
@@ -53,31 +54,26 @@
 // Forward declarations
 static void publish_message_handler(EventLoopTimer *eventLoopTimer);
 
+DX_USER_CONFIG dx_config;
+
+/****************************************************************************************
+ * Telemetry message buffer property sets
+ ****************************************************************************************/
+
 // Number of bytes to allocate for the JSON telemetry message for IoT Hub/Central
 #define JSON_MESSAGE_BYTES 256
 static char msgBuffer[JSON_MESSAGE_BYTES] = {0};
 
-DX_USER_CONFIG dx_config;
+static DX_MESSAGE_PROPERTY *messageProperties[] = {&(DX_MESSAGE_PROPERTY){.key = "appid", .value = "hvac"},
+                                                   &(DX_MESSAGE_PROPERTY){.key = "type", .value = "telemetry"},
+                                                   &(DX_MESSAGE_PROPERTY){.key = "schema", .value = "1"}};
 
-/****************************************************************************************
- * Telemetry message templates and property sets
- ****************************************************************************************/
-static const char *msgTemplate =
-    "{ \"Temperature\":%3.2f, \"Humidity\":%3.1f, \"Pressure\":%3.1f }";
-
-static DX_MESSAGE_PROPERTY *messageProperties[] = {
-    &(DX_MESSAGE_PROPERTY){.key = "appid", .value = "hvac"},
-    &(DX_MESSAGE_PROPERTY){.key = "type", .value = "telemetry"},
-    &(DX_MESSAGE_PROPERTY){.key = "schema", .value = "1"}};
-
-static DX_MESSAGE_CONTENT_PROPERTIES contentProperties = {.contentEncoding = "utf-8",
-                                                          .contentType = "application/json"};
+static DX_MESSAGE_CONTENT_PROPERTIES contentProperties = {.contentEncoding = "utf-8", .contentType = "application/json"};
 
 /****************************************************************************************
  * Timer Bindings
  ****************************************************************************************/
-static DX_TIMER_BINDING publish_message = {
-    .period = {5, 0}, .name = "publish_message", .handler = publish_message_handler};
+static DX_TIMER_BINDING publish_message = {.period = {5, 0}, .name = "publish_message", .handler = publish_message_handler};
 
 // All timers referenced in timers with be opened in the InitPeripheralsAndHandlers function
 DX_TIMER_BINDING *timers[] = {&publish_message};
@@ -93,13 +89,28 @@ static void publish_message_handler(EventLoopTimer *eventLoopTimer)
         return;
     }
 
+    double temperature = 36.0;
+    double humidity = 55.0;
+    double pressure = 1100;
+    static int msgId = 0;
+
     if (dx_isAzureConnected()) {
-        // Create JSON message
-        if (snprintf(msgBuffer, sizeof(msgBuffer), msgTemplate, 30.0, 60.0, 1010.0) > 0) {
+
+        // Serialize telemetry as JSON
+        bool serialization_result = dx_jsonSerialize(msgBuffer, sizeof(msgBuffer), 4, 
+            DX_JSON_INT, "MsgId", msgId++,
+            DX_JSON_DOUBLE, "Temperature", temperature, 
+            DX_JSON_DOUBLE, "Humidity", humidity,
+            DX_JSON_DOUBLE, "Pressure", pressure);
+
+        if (serialization_result) {
+
             Log_Debug("%s\n", msgBuffer);
 
-            dx_azurePublish(msgBuffer, strlen(msgBuffer), messageProperties,
-                            NELEMS(messageProperties), &contentProperties);
+            dx_azurePublish(msgBuffer, strlen(msgBuffer), messageProperties, NELEMS(messageProperties), &contentProperties);
+
+        } else {
+            Log_Debug("JSON Serialization failed: Buffer too small\n");
         }
     }
 }
