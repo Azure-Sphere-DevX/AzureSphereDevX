@@ -14,6 +14,7 @@
 #include "dx_terminate.h"
 #include "dx_timer.h"
 #include "dx_utilities.h"
+#include "dx_avnet_iot_connect.h"
 #include "iothubtransportmqtt.h"
 #include <applibs/log.h>
 #include <azure_prov_client/iothub_security_factory.h>

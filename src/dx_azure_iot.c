@@ -614,6 +614,12 @@ static void HubConnectionStatusCallback(IOTHUB_CLIENT_CONNECTION_STATUS result,
     }
 
     iotHubClientAuthenticationState = IoTHubClientAuthenticationState_Authenticated;
+
+#define GX_AVNET_IOT_CONNECT 
+#ifdef GX_AVNET_IOT_CONNECT
+    dx_avnetIotConnectConnectedToIotHub();
+#endif 
+
 }
 
 static const char *GetMessageResultReasonString(IOTHUB_MESSAGE_RESULT reason)
