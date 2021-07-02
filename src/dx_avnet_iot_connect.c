@@ -40,7 +40,7 @@ static const char *ErrorCodeToString(int iotConnectErrorCode);
 
 static DX_TIMER_BINDING monitorAvnetConnectionTimer = {.name = "monitorAvnetConnectionTimer", .handler = MonitorAvnetConnectionHandler};
 
-static void AvnetConnectCallback(bool connected) {
+static void AvnetReconnectCallback(bool connected) {
     // Since we're going to be connecting or re-connecting to Azure
     // Set the IoT Connected flag to false
     avnetConnected = false;
@@ -66,7 +66,7 @@ void dx_avnetConnect(DX_USER_CONFIG *userConfig, const char *networkInterface)
         dx_terminate(DX_ExitCode_Init_IoTCTimer);
     }
 
-    dx_registerConnectionChangedNotification(AvnetConnectCallback);
+    dx_registerConnectionChangedNotification(AvnetReconnectCallback);
     dx_registerMessageReceivedNotification(ReceiveMessageCallback);
 
     dx_azureConnect(userConfig, networkInterface, NULL);
