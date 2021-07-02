@@ -122,11 +122,11 @@ static void dt_desired_sample_rate_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBin
         dx_timerChange(&report_now_timer,
                        &(struct timespec){*(int *)deviceTwinBinding->twinState, 0});
 
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState,
+        dx_deviceTwinAckPnPState(deviceTwinBinding, deviceTwinBinding->twinState,
                                      DX_DEVICE_TWIN_COMPLETED);
 
     } else {
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState,
+        dx_deviceTwinAckPnPState(deviceTwinBinding, deviceTwinBinding->twinState,
                                      DX_DEVICE_TWIN_ERROR);
     }
 

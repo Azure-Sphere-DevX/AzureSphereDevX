@@ -4,7 +4,7 @@
 #include "dx_device_twins.h"
 
 static bool deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, void *state,
-                                  bool deviceTwinAcknowledgment,
+                                  bool deviceTwinPnPAcknowledgment,
                                   DX_DEVICE_TWIN_RESPONSE_CODE statusCode);
 static bool deviceTwinUpdateReportedState(char *reportedPropertiesString);
 static void deviceTwinClose(DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
@@ -220,12 +220,21 @@ static void setDesiredState(JSON_Object *jsonObject, DX_DEVICE_TWIN_BINDING *dev
 }
 
 /// <summary>
-///     Sends device twin desire state acknowledgement
+///     Sends device twin desire state IoT Plug and Play acknowledgement
 /// </summary>
-bool dx_deviceTwinAckDesiredState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, void *state,
+bool dx_deviceTwinAckPnPState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, void *state,
                                   DX_DEVICE_TWIN_RESPONSE_CODE statusCode)
 {
     return deviceTwinReportState(deviceTwinBinding, state, true, statusCode);
+}
+
+/// <summary>
+///     Sends device twin desire state Key Value acknowledgement
+/// </summary>
+bool dx_deviceTwinAckKeyValueState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, void *state,
+                                  DX_DEVICE_TWIN_RESPONSE_CODE statusCode)
+{
+    return deviceTwinReportState(deviceTwinBinding, state, false, statusCode);
 }
 
 /// <summary>
@@ -240,7 +249,7 @@ bool dx_deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, void *s
 ///   Supports device twin report state and device twin ack desired state request
 /// </summary>
 static bool deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, void *state,
-                                  bool deviceTwinAcknowledgment,
+                                  bool deviceTwinPnPAcknowledgment,
                                   DX_DEVICE_TWIN_RESPONSE_CODE statusCode)
 {
     int len = 0;
@@ -265,8 +274,8 @@ static bool deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, voi
         reportLen += 40; // allow 40 chars for Int, float, double, and boolean serialization
     }
 
-    // to allow for device twin acknowlegement data
-    if (deviceTwinAcknowledgment) {
+    // to allow for device twin acknowledgement data
+    if (deviceTwinPnPAcknowledgment) {
         reportLen += 40;
     }
 
@@ -281,7 +290,7 @@ static bool deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, voi
     case DX_TYPE_INT:
         *(int *)deviceTwinBinding->twinState = *(int *)state;
 
-        if (deviceTwinAcknowledgment) {
+        if (deviceTwinPnPAcknowledgment) {
             len = snprintf(reportedPropertiesString, reportLen,
                            "{\"%s\":{\"value\":%d, \"ac\":%d, \"av\":%d}}",
                            deviceTwinBinding->twinProperty, (*(int *)deviceTwinBinding->twinState),
@@ -294,7 +303,7 @@ static bool deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, voi
     case DX_TYPE_FLOAT:
         *(float *)deviceTwinBinding->twinState = *(float *)state;
 
-        if (deviceTwinAcknowledgment) {
+        if (deviceTwinPnPAcknowledgment) {
             len =
                 snprintf(reportedPropertiesString, reportLen,
                          "{\"%s\":{\"value\":%f, \"ac\":%d, \"av\":%d}}",
@@ -309,7 +318,7 @@ static bool deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, voi
     case DX_TYPE_DOUBLE:
         *(double *)deviceTwinBinding->twinState = *(double *)state;
 
-        if (deviceTwinAcknowledgment) {
+        if (deviceTwinPnPAcknowledgment) {
             len =
                 snprintf(reportedPropertiesString, reportLen,
                          "{\"%s\":{\"value\":%lf, \"ac\":%d, \"av\":%d}}",
@@ -324,7 +333,7 @@ static bool deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, voi
     case DX_TYPE_BOOL:
         *(bool *)deviceTwinBinding->twinState = *(bool *)state;
 
-        if (deviceTwinAcknowledgment) {
+        if (deviceTwinPnPAcknowledgment) {
             len = snprintf(reportedPropertiesString, reportLen,
                            "{\"%s\":{\"value\":%s, \"ac\":%d, \"av\":%d}}",
                            deviceTwinBinding->twinProperty,
@@ -339,7 +348,7 @@ static bool deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, voi
     case DX_TYPE_STRING:
         deviceTwinBinding->twinState = NULL;
 
-        if (deviceTwinAcknowledgment) {
+        if (deviceTwinPnPAcknowledgment) {
             len = snprintf(reportedPropertiesString, reportLen,
                            "{\"%s\":{\"value\":\"%s\", \"ac\":%d, \"av\":%d}}",
                            deviceTwinBinding->twinProperty, (char *)state, (int)statusCode,

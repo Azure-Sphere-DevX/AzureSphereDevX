@@ -36,13 +36,24 @@ typedef enum
 //typedef struct _deviceTwinBinding DX_DEVICE_TWIN_BINDING;
 
 /// <summary>
-/// Acknowledge receipt of a device twin message with new state and status code.
+/// IoT Plug and Play acknowledge receipt of a device twin message with new state and status code.
 /// </summary>
 /// <param name="deviceTwinBinding"></param>
 /// <param name="state"></param>
 /// <param name="statusCode"></param>
 /// <returns></returns>
-bool dx_deviceTwinAckDesiredState(DX_DEVICE_TWIN_BINDING* deviceTwinBinding, void* state, DX_DEVICE_TWIN_RESPONSE_CODE statusCode);
+bool dx_deviceTwinAckPnPState(DX_DEVICE_TWIN_BINDING* deviceTwinBinding, void* state, DX_DEVICE_TWIN_RESPONSE_CODE statusCode);
+
+
+/// <summary>
+/// Key Value acknowledge receipt of a device twin message.
+/// </summary>
+/// <param name="deviceTwinBinding"></param>
+/// <param name="state"></param>
+/// <param name="statusCode"></param>
+/// <returns></returns>
+bool dx_deviceTwinAckKeyValueState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, void *state, DX_DEVICE_TWIN_RESPONSE_CODE statusCode);
+
 
 /// <summary>
 /// Update device twin state.
