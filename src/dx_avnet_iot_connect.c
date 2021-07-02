@@ -241,46 +241,46 @@ static void AvnetSendHelloTelemetry(void)
 }
 
 
-//// Construct a new message that contains all the required IoTConnect data and the original telemetry
-//// message. Returns false if we have not received the first response from IoTConnect, if the
-//// target buffer is not large enough, or if the incoming data is not valid JSON.
-//bool dx_avnetIotConnectJsonSerializeJson(const char *originalJsonMessage, char *modifiedJsonMessage, size_t modifiedBufferSize)
-//{
-//    // Define the Json string format for sending telemetry to IoT Connect, note that the
-//    // actual telemetry data is inserted as the last string argument
-//    static const char IoTCTelemetryJson[] = "{\"sid\":\"%s\",\"dtg\":\"%s\",\"mt\": 0,\"d\":[{\"d\":%s}]}";
-//
-//    // Verify that we've received the initial handshake response from IoTConnect, if not return
-//    // false
-//    if (!avnetConnected) {
-//        Log_Debug(
-//            "[AVT IoTConnect] Can't construct IoTConnect Telemetry message because application has not completed the "
-//            "initial IoTConnect handshake\n");
-//        return false;
-//    }
-//
-//    // Determine the largest message size needed.  We'll use this to validate the incoming target
-//    // buffer is large enough
-//    size_t maxModifiedMessageSize = strlen(originalJsonMessage) + DX_AVNET_IOT_CONNECT_TELEMETRY_METADATA;
-//
-//    // Verify that the passed in buffer is large enough for the modified message
-//    if (maxModifiedMessageSize > modifiedBufferSize) {
-//        Log_Debug(
-//            "\n[AVT IoTConnect] "
-//            "ERROR: dx_avnetJsonSerialize() modified buffer size can't hold modified "
-//            "message\n");
-//        Log_Debug("                 Original message size: %d\n", strlen(originalJsonMessage));
-//        Log_Debug("Additional IoTConnect message overhead: %d\n", DX_AVNET_IOT_CONNECT_TELEMETRY_METADATA);
-//        Log_Debug("           Required target buffer size: %d\n", maxModifiedMessageSize);
-//        Log_Debug("             Actural target buffersize: %d\n\n", modifiedBufferSize);
-//        return false;
-//    }
-//
-//    // Build up the IoTC message and insert the telemetry JSON
-//    int length = snprintf(modifiedJsonMessage, maxModifiedMessageSize, IoTCTelemetryJson, sidString, dtgGUID, originalJsonMessage);
-//
-//    return (length >= 0 && length < maxModifiedMessageSize);
-//}
+// Construct a new message that contains all the required IoTConnect data and the original telemetry
+// message. Returns false if we have not received the first response from IoTConnect, if the
+// target buffer is not large enough, or if the incoming data is not valid JSON.
+bool dx_avnetIotConnectJsonSerializeJson(const char *originalJsonMessage, char *modifiedJsonMessage, size_t modifiedBufferSize)
+{
+    // Define the Json string format for sending telemetry to IoT Connect, note that the
+    // actual telemetry data is inserted as the last string argument
+    static const char IoTCTelemetryJson[] = "{\"sid\":\"%s\",\"dtg\":\"%s\",\"mt\": 0,\"d\":[{\"d\":%s}]}";
+
+    // Verify that we've received the initial handshake response from IoTConnect, if not return
+    // false
+    if (!avnetConnected) {
+        Log_Debug(
+            "[AVT IoTConnect] Can't construct IoTConnect Telemetry message because application has not completed the "
+            "initial IoTConnect handshake\n");
+        return false;
+    }
+
+    // Determine the largest message size needed.  We'll use this to validate the incoming target
+    // buffer is large enough
+    size_t maxModifiedMessageSize = strlen(originalJsonMessage) + DX_AVNET_IOT_CONNECT_METADATA;
+
+    // Verify that the passed in buffer is large enough for the modified message
+    if (maxModifiedMessageSize > modifiedBufferSize) {
+        Log_Debug(
+            "\n[AVT IoTConnect] "
+            "ERROR: dx_avnetJsonSerialize() modified buffer size can't hold modified "
+            "message\n");
+        Log_Debug("                 Original message size: %d\n", strlen(originalJsonMessage));
+        Log_Debug("Additional IoTConnect message overhead: %d\n", DX_AVNET_IOT_CONNECT_METADATA);
+        Log_Debug("           Required target buffer size: %d\n", maxModifiedMessageSize);
+        Log_Debug("             Actural target buffersize: %d\n\n", modifiedBufferSize);
+        return false;
+    }
+
+    // Build up the IoTC message and insert the telemetry JSON
+    int length = snprintf(modifiedJsonMessage, maxModifiedMessageSize, IoTCTelemetryJson, sidString, dtgGUID, originalJsonMessage);
+
+    return (length >= 0 && length < maxModifiedMessageSize);
+}
 
 bool dx_avnetJsonSerialize(char *jsonMessageBuffer, size_t bufferSize, int key_value_pair_count, ...)
 {
