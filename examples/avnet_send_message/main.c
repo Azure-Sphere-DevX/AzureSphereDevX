@@ -45,6 +45,7 @@
 #include "dx_terminate.h"
 #include "dx_timer.h"
 #include "dx_utilities.h"
+#include "dx_device_twins.h"
 #include <applibs/log.h>
 
 // https://docs.microsoft.com/en-us/azure/iot-pnp/overview-iot-plug-and-play
@@ -53,6 +54,7 @@
 
 // Forward declarations
 static void publish_message_handler(EventLoopTimer *eventLoopTimer);
+static void dt_desired_temperature_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
 
 DX_USER_CONFIG dx_config;
 
@@ -64,21 +66,26 @@ DX_USER_CONFIG dx_config;
 #define JSON_MESSAGE_BYTES 256
 static char msgBuffer[JSON_MESSAGE_BYTES] = {0};
 
+double desired_temperature = 0.0;
+
 static DX_MESSAGE_PROPERTY *messageProperties[] = {&(DX_MESSAGE_PROPERTY){.key = "appid", .value = "hvac"},
                                                    &(DX_MESSAGE_PROPERTY){.key = "type", .value = "telemetry"},
                                                    &(DX_MESSAGE_PROPERTY){.key = "schema", .value = "1"}};
 
-static DX_MESSAGE_CONTENT_PROPERTIES contentProperties = {.contentEncoding = "utf-8",
-                                                          .contentType = "application/json"};
+static DX_MESSAGE_CONTENT_PROPERTIES contentProperties = {.contentEncoding = "utf-8", .contentType = "application/json"};
 
 /****************************************************************************************
  * Timer Bindings
  ****************************************************************************************/
-static DX_TIMER_BINDING publish_message = {
-    .period = {5, 0}, .name = "publish_message", .handler = publish_message_handler};
+static DX_TIMER_BINDING publish_message = {.period = {5, 0}, .name = "publish_message", .handler = publish_message_handler};
 
 // All timers referenced in timers with be opened in the InitPeripheralsAndHandlers function
 DX_TIMER_BINDING *timers[] = {&publish_message};
+
+static DX_DEVICE_TWIN_BINDING dt_desired_temperature = {
+    .twinProperty = "DesiredTemperature", .twinType = DX_DEVICE_TWIN_DOUBLE, .handler = dt_desired_temperature_handler};
+static DX_DEVICE_TWIN_BINDING dt_reported_temperature = {.twinProperty = "ReportedTemperature", .twinType = DX_DEVICE_TWIN_DOUBLE};
+DX_DEVICE_TWIN_BINDING *device_twin_bindings[] = {&dt_reported_temperature, &dt_desired_temperature};
 
 /****************************************************************************************
  * Implementation
@@ -99,28 +106,47 @@ static void publish_message_handler(EventLoopTimer *eventLoopTimer)
     if (dx_isAvnetIotConnected()) {
 
         // Serialize telemetry as JSON
-        bool serialization_result = dx_avnetJsonSerialize(msgBuffer, sizeof(msgBuffer), 4, 
-            DX_JSON_INT, "MsgId", msgId++, 
-            DX_JSON_DOUBLE, "Temperature", temperature,
-            DX_JSON_DOUBLE, "Humidity", humidity, 
-            DX_JSON_DOUBLE, "Pressure", pressure);
+        bool serialization_result =
+            dx_avnetJsonSerialize(msgBuffer, sizeof(msgBuffer), 4, DX_JSON_INT, "MsgId", msgId++, DX_JSON_DOUBLE, "Temperature",
+                                  temperature, DX_JSON_DOUBLE, "Humidity", humidity, DX_JSON_DOUBLE, "Pressure", pressure);
 
         char realtime_payload[] = "{\"rt_temperature\": 40}";
 
-        serialization_result = dx_avnetJsonSerialize(msgBuffer, sizeof(msgBuffer), 1, 
-            DX_JSON_STRING, "payload", realtime_payload);
-
+        serialization_result = dx_avnetJsonSerialize(msgBuffer, sizeof(msgBuffer), 1, DX_JSON_STRING, "payload", realtime_payload);
 
         if (serialization_result) {
 
             Log_Debug("%s\n", msgBuffer);
 
-            dx_azurePublish(msgBuffer, strlen(msgBuffer), messageProperties,
-                               NELEMS(messageProperties), &contentProperties);
+            dx_azurePublish(msgBuffer, strlen(msgBuffer), messageProperties, NELEMS(messageProperties), &contentProperties);
 
         } else {
             Log_Debug("JSON Serialization failed: Buffer too small\n");
         }
+
+        if (dt_desired_temperature.twinStateUpdated) {
+            if (desired_temperature > temperature) {
+                Log_Debug("It's too hot\n");
+            } else if (desired_temperature < temperature) {
+                Log_Debug("The temperature too cold\n");
+            } else if (desired_temperature == temperature) {
+                Log_Debug("The temperature is just right\n");
+            }
+
+            // now update the reported temperature device twin
+            dx_deviceTwinReportState(&dt_reported_temperature, &temperature);
+        }
+    }
+}
+
+static void dt_desired_temperature_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
+{
+    // validate data is sensible range before applying
+    // For example set HVAC system desired temperature in celsius
+    if (deviceTwinBinding->twinType == DX_DEVICE_TWIN_DOUBLE && *(double *)deviceTwinBinding->twinState >= 18.0 &&
+        *(int *)deviceTwinBinding->twinState <= 30.0) {
+
+        desired_temperature = *(double *)deviceTwinBinding->twinState;
     }
 }
 
@@ -131,6 +157,7 @@ static void InitPeripheralsAndHandlers(void)
 {
     dx_avnetConnect(&dx_config, NETWORK_INTERFACE);
     dx_timerSetStart(timers, NELEMS(timers));
+    dx_deviceTwinSubscribe(device_twin_bindings, NELEMS(device_twin_bindings));
 }
 
 /// <summary>
@@ -139,6 +166,7 @@ static void InitPeripheralsAndHandlers(void)
 static void ClosePeripheralsAndHandlers(void)
 {
     dx_timerSetStop(timers, NELEMS(timers));
+    dx_deviceTwinUnsubscribe();
     dx_timerEventLoopStop();
 }
 

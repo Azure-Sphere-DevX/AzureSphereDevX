@@ -10,11 +10,11 @@
 
 typedef enum {
 	DX_TYPE_UNKNOWN = 0,
-	DX_TYPE_BOOL = 1,
-	DX_TYPE_FLOAT = 2,
-	DX_TYPE_DOUBLE = 3,
-	DX_TYPE_INT = 4,
-	DX_TYPE_STRING = 5
+	DX_DEVICE_TWIN_BOOL = 1,
+	DX_DEVICE_TWIN_FLOAT = 2,
+	DX_DEVICE_TWIN_DOUBLE = 3,
+	DX_DEVICE_TWIN_INT = 4,
+	DX_DEVICE_TWIN_STRING = 5
 } DX_DEVICE_TWIN_TYPE;
 
 typedef struct _deviceTwinBinding {
@@ -28,9 +28,9 @@ typedef struct _deviceTwinBinding {
 
 typedef enum
 {
-	DX_DEVICE_TWIN_COMPLETED = 200,
-	DX_DEVICE_TWIN_ERROR = 500,
-	DX_DEVICE_TWIN_INVALID = 404
+	DX_DEVICE_TWIN_RESPONSE_COMPLETED = 200,
+	DX_DEVICE_TWIN_RESPONSE_ERROR = 500,
+	DX_DEVICE_TWIN_REPONSE_INVALID = 404
 } DX_DEVICE_TWIN_RESPONSE_CODE;
 
 //typedef struct _deviceTwinBinding DX_DEVICE_TWIN_BINDING;
@@ -42,17 +42,7 @@ typedef enum
 /// <param name="state"></param>
 /// <param name="statusCode"></param>
 /// <returns></returns>
-bool dx_deviceTwinAckPnPState(DX_DEVICE_TWIN_BINDING* deviceTwinBinding, void* state, DX_DEVICE_TWIN_RESPONSE_CODE statusCode);
-
-
-/// <summary>
-/// Key Value acknowledge receipt of a device twin message.
-/// </summary>
-/// <param name="deviceTwinBinding"></param>
-/// <param name="state"></param>
-/// <param name="statusCode"></param>
-/// <returns></returns>
-bool dx_deviceTwinAckKeyValueState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, void *state, DX_DEVICE_TWIN_RESPONSE_CODE statusCode);
+bool dx_deviceTwinAckDesiredState(DX_DEVICE_TWIN_BINDING* deviceTwinBinding, void* state, DX_DEVICE_TWIN_RESPONSE_CODE statusCode);
 
 
 /// <summary>

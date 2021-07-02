@@ -10,7 +10,7 @@ static bool deviceTwinUpdateReportedState(char *reportedPropertiesString);
 static void deviceTwinClose(DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
 static void deviceTwinOpen(DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
 static void deviceTwinsReportStatusCallback(int result, void *context);
-static void setDesiredState(JSON_Object *desiredProperties,
+static void SetDesiredState(JSON_Object *desiredProperties,
                             DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
 
 static DX_DEVICE_TWIN_BINDING **_deviceTwins = NULL;
@@ -38,35 +38,35 @@ static void deviceTwinOpen(DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
     if (deviceTwinBinding->twinType == DX_TYPE_UNKNOWN) {
         Log_Debug(
             "\n\nDevice Twin '%s' missing type information.\nInclude .twinType option in "
-            "DX_DEVICE_TWIN_BINDING definition.\nExample .twinType=DX_TYPE_BOOL. Valid types "
-            "include DX_TYPE_BOOL, DX_TYPE_INT, DX_TYPE_FLOAT, DX_TYPE_STRING.\n\n",
+            "DX_DEVICE_TWIN_BINDING definition.\nExample .twinType=DX_DEVICE_TWIN_BOOL. Valid types "
+            "include DX_DEVICE_TWIN_BOOL, DX_DEVICE_TWIN_INT, DX_DEVICE_TWIN_FLOAT, DX_DEVICE_TWIN_STRING.\n\n",
             deviceTwinBinding->twinProperty);
         dx_terminate(DX_ExitCode_OpenDeviceTwin);
     }
 
     // types JSON and String allocated dynamically when called in azure_iot.c
     switch (deviceTwinBinding->twinType) {
-    case DX_TYPE_INT:
+    case DX_DEVICE_TWIN_INT:
         deviceTwinBinding->twinState = malloc(sizeof(int));
         memset(deviceTwinBinding->twinState, 0x00, sizeof(int));
         *(int *)deviceTwinBinding->twinState = 0;
         break;
-    case DX_TYPE_FLOAT:
+    case DX_DEVICE_TWIN_FLOAT:
         deviceTwinBinding->twinState = malloc(sizeof(float));
         memset(deviceTwinBinding->twinState, 0x00, sizeof(float));
         *(float *)deviceTwinBinding->twinState = 0.0f;
         break;
-    case DX_TYPE_DOUBLE:
+    case DX_DEVICE_TWIN_DOUBLE:
         deviceTwinBinding->twinState = malloc(sizeof(double));
         memset(deviceTwinBinding->twinState, 0x00, sizeof(double));
         *(double *)deviceTwinBinding->twinState = 0.0;
         break;
-    case DX_TYPE_BOOL:
+    case DX_DEVICE_TWIN_BOOL:
         deviceTwinBinding->twinState = malloc(sizeof(bool));
         memset(deviceTwinBinding->twinState, 0x00, sizeof(bool));
         *(bool *)deviceTwinBinding->twinState = false;
         break;
-    case DX_TYPE_STRING:
+    case DX_DEVICE_TWIN_STRING:
         // Note no memory is allocated for string twin type as size is unknown
         break;
     default:
@@ -123,7 +123,7 @@ void dx__deviceTwinCallbackHandler(DEVICE_TWIN_UPDATE_STATE updateState,
         JSON_Value *jsonValue =
             json_object_get_value(desiredProperties, _deviceTwins[i]->twinProperty);
         if (jsonValue != NULL) {
-            setDesiredState(desiredProperties, _deviceTwins[i]);
+            SetDesiredState(desiredProperties, _deviceTwins[i]);
         }
     }
 
@@ -143,14 +143,14 @@ cleanup:
 ///     Checks to see if the device twin twinProperty(name) is found in the json object. If yes,
 ///     then act upon the request
 /// </summary>
-static void setDesiredState(JSON_Object *jsonObject, DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
+static void SetDesiredState(JSON_Object *jsonObject, DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
 {
     if (json_object_has_value_of_type(jsonObject, "$version", JSONNumber)) {
         deviceTwinBinding->twinVersion = (int)json_object_get_number(jsonObject, "$version");
     }
 
     switch (deviceTwinBinding->twinType) {
-    case DX_TYPE_INT:
+    case DX_DEVICE_TWIN_INT:
         if (json_object_has_value_of_type(jsonObject, deviceTwinBinding->twinProperty,
                                           JSONNumber)) {
             *(int *)deviceTwinBinding->twinState =
@@ -163,7 +163,7 @@ static void setDesiredState(JSON_Object *jsonObject, DX_DEVICE_TWIN_BINDING *dev
             }
         }
         break;
-    case DX_TYPE_FLOAT:
+    case DX_DEVICE_TWIN_FLOAT:
         if (json_object_has_value_of_type(jsonObject, deviceTwinBinding->twinProperty,
                                           JSONNumber)) {
             *(float *)deviceTwinBinding->twinState =
@@ -176,7 +176,7 @@ static void setDesiredState(JSON_Object *jsonObject, DX_DEVICE_TWIN_BINDING *dev
             }
         }
         break;
-    case DX_TYPE_DOUBLE:
+    case DX_DEVICE_TWIN_DOUBLE:
         if (json_object_has_value_of_type(jsonObject, deviceTwinBinding->twinProperty,
                                           JSONNumber)) {
             *(double *)deviceTwinBinding->twinState =
@@ -189,7 +189,7 @@ static void setDesiredState(JSON_Object *jsonObject, DX_DEVICE_TWIN_BINDING *dev
             }
         }
         break;
-    case DX_TYPE_BOOL:
+    case DX_DEVICE_TWIN_BOOL:
         if (json_object_has_value_of_type(jsonObject, deviceTwinBinding->twinProperty,
                                           JSONBoolean)) {
             *(bool *)deviceTwinBinding->twinState =
@@ -202,7 +202,7 @@ static void setDesiredState(JSON_Object *jsonObject, DX_DEVICE_TWIN_BINDING *dev
             }
         }
         break;
-    case DX_TYPE_STRING:
+    case DX_DEVICE_TWIN_STRING:
         if (json_object_has_value_of_type(jsonObject, deviceTwinBinding->twinProperty,
                                           JSONString)) {
             deviceTwinBinding->twinState =
@@ -222,19 +222,10 @@ static void setDesiredState(JSON_Object *jsonObject, DX_DEVICE_TWIN_BINDING *dev
 /// <summary>
 ///     Sends device twin desire state IoT Plug and Play acknowledgement
 /// </summary>
-bool dx_deviceTwinAckPnPState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, void *state,
+bool dx_deviceTwinAckDesiredState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, void *state,
                                   DX_DEVICE_TWIN_RESPONSE_CODE statusCode)
 {
     return deviceTwinReportState(deviceTwinBinding, state, true, statusCode);
-}
-
-/// <summary>
-///     Sends device twin desire state Key Value acknowledgement
-/// </summary>
-bool dx_deviceTwinAckKeyValueState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, void *state,
-                                  DX_DEVICE_TWIN_RESPONSE_CODE statusCode)
-{
-    return deviceTwinReportState(deviceTwinBinding, state, false, statusCode);
 }
 
 /// <summary>
@@ -242,7 +233,7 @@ bool dx_deviceTwinAckKeyValueState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, vo
 /// </summary>
 bool dx_deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, void *state)
 {
-    return deviceTwinReportState(deviceTwinBinding, state, false, DX_DEVICE_TWIN_COMPLETED);
+    return deviceTwinReportState(deviceTwinBinding, state, false, DX_DEVICE_TWIN_RESPONSE_COMPLETED);
 }
 
 /// <summary>
@@ -268,7 +259,7 @@ static bool deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, voi
     reportLen +=
         strlen(deviceTwinBinding->twinProperty); // allow for twin property name in JSON response
 
-    if (deviceTwinBinding->twinType == DX_TYPE_STRING) {
+    if (deviceTwinBinding->twinType == DX_DEVICE_TWIN_STRING) {
         reportLen += strlen((char *)state);
     } else {
         reportLen += 40; // allow 40 chars for Int, float, double, and boolean serialization
@@ -287,7 +278,7 @@ static bool deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, voi
     memset(reportedPropertiesString, 0, reportLen);
 
     switch (deviceTwinBinding->twinType) {
-    case DX_TYPE_INT:
+    case DX_DEVICE_TWIN_INT:
         *(int *)deviceTwinBinding->twinState = *(int *)state;
 
         if (deviceTwinPnPAcknowledgment) {
@@ -300,7 +291,7 @@ static bool deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, voi
                            deviceTwinBinding->twinProperty, (*(int *)deviceTwinBinding->twinState));
         }
         break;
-    case DX_TYPE_FLOAT:
+    case DX_DEVICE_TWIN_FLOAT:
         *(float *)deviceTwinBinding->twinState = *(float *)state;
 
         if (deviceTwinPnPAcknowledgment) {
@@ -315,7 +306,7 @@ static bool deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, voi
                          deviceTwinBinding->twinProperty, (*(float *)deviceTwinBinding->twinState));
         }
         break;
-    case DX_TYPE_DOUBLE:
+    case DX_DEVICE_TWIN_DOUBLE:
         *(double *)deviceTwinBinding->twinState = *(double *)state;
 
         if (deviceTwinPnPAcknowledgment) {
@@ -330,7 +321,7 @@ static bool deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, voi
                            (*(double *)deviceTwinBinding->twinState));
         }
         break;
-    case DX_TYPE_BOOL:
+    case DX_DEVICE_TWIN_BOOL:
         *(bool *)deviceTwinBinding->twinState = *(bool *)state;
 
         if (deviceTwinPnPAcknowledgment) {
@@ -345,7 +336,7 @@ static bool deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, voi
                            (*(bool *)deviceTwinBinding->twinState ? "true" : "false"));
         }
         break;
-    case DX_TYPE_STRING:
+    case DX_DEVICE_TWIN_STRING:
         deviceTwinBinding->twinState = NULL;
 
         if (deviceTwinPnPAcknowledgment) {
