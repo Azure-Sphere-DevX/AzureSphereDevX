@@ -81,8 +81,8 @@ void dx_azureConnect(DX_USER_CONFIG* userConfig, const char* networkInterface, c
 void dx_azureToDeviceStop(void);
 
 
-void dx_registerMessageRecievedCallback(IOTHUBMESSAGE_DISPOSITION_RESULT (*messageReceivedCallback)(IOTHUB_MESSAGE_HANDLE message,
+void dx_registerMessageReceivedNotification(IOTHUBMESSAGE_DISPOSITION_RESULT (*messageReceivedCallback)(IOTHUB_MESSAGE_HANDLE message,
                                                                                                    void *context));
 
 
-void dx_registerConnectionChangedCallback(void (*connectionStatusCallback)(bool connected));
+void dx_registerConnectionChangedNotification(void (*connectionStatusCallback)(bool connected));

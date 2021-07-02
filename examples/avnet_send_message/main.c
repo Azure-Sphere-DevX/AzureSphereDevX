@@ -108,7 +108,7 @@ static void publish_message_handler(EventLoopTimer *eventLoopTimer)
     double pressure = 1100;
     static int msgId = 0;
 
-    if (dx_isAvnetIotConnected()) {
+    if (dx_isAvnetConnected()) {
 
         // Serialize telemetry as JSON
         bool serialization_result =

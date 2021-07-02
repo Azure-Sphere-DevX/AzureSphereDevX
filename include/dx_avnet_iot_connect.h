@@ -67,7 +67,7 @@ typedef enum
 /// <param name="modifiedJsonMessage"></param>
 /// <param name="modifiedBufferSize"></param>
 /// <returns></returns>
-bool dx_avnetIotConnectJsonSerializeJson(const char *originalJsonMessage, char *modifiedJsonMessage, size_t modifiedBufferSize);
+//bool dx_avnetIotConnectJsonSerializeJson(const char *originalJsonMessage, char *modifiedJsonMessage, size_t modifiedBufferSize);
 
 /// <summary>
 /// Returns a JSON document containing passed in <type, key, value> triples.  The JSON document
@@ -87,15 +87,7 @@ bool dx_avnetJsonSerialize(char * jsonMessageBuffer, size_t bufferSize, int key_
 void dx_avnetConnect(DX_USER_CONFIG *userConfig, const char *networkInterface);
 
 /// <summary>
-/// This routine sets up the IoTHub C2D message callback,  starts the IoTConnect timer and sends
-/// the initial IoTConnect hello message.  This routine should be called when the application connects
-/// or reconnects to the IoTHub
-/// </summary>
-/// <returns></returns>
-void dx__avnetIotRegisterMessageCallback(void);
-
-/// <summary>
 /// This routine returns the status of the IoTConnect connection.  
 /// </summary>
 /// <returns></returns>
-bool dx_isAvnetIotConnected(void);
+bool dx_isAvnetConnected(void);
