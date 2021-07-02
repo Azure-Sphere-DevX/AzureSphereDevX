@@ -67,7 +67,7 @@ typedef enum
 /// <param name="modifiedJsonMessage"></param>
 /// <param name="modifiedBufferSize"></param>
 /// <returns></returns>
-//bool dx_avnetIotConnectJsonSerializeJson(const char *originalJsonMessage, char *modifiedJsonMessage, size_t modifiedBufferSize);
+bool dx_avnetJsonSerializePayload(const char *originalJsonMessage, char *modifiedJsonMessage, size_t modifiedBufferSize);
 
 /// <summary>
 /// Returns a JSON document containing passed in <type, key, value> triples.  The JSON document

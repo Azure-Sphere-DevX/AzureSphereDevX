@@ -122,6 +122,9 @@ static void publish_message_handler(EventLoopTimer *eventLoopTimer)
         serialization_result = dx_avnetJsonSerialize(msgBuffer, sizeof(msgBuffer), 1, 
                 DX_JSON_STRING, "payload", realtime_payload);
 
+        dx_avnetJsonSerializePayload(realtime_payload, msgBuffer, sizeof(realtime_payload));
+
+
         if (serialization_result) {
 
             Log_Debug("%s\n", msgBuffer);

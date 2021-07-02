@@ -244,7 +244,7 @@ static void AvnetSendHelloTelemetry(void)
 // Construct a new message that contains all the required IoTConnect data and the original telemetry
 // message. Returns false if we have not received the first response from IoTConnect, if the
 // target buffer is not large enough, or if the incoming data is not valid JSON.
-bool dx_avnetIotConnectJsonSerializeJson(const char *originalJsonMessage, char *modifiedJsonMessage, size_t modifiedBufferSize)
+bool dx_avnetJsonSerializePayload(const char *originalJsonMessage, char *modifiedJsonMessage, size_t modifiedBufferSize)
 {
     // Define the Json string format for sending telemetry to IoT Connect, note that the
     // actual telemetry data is inserted as the last string argument
