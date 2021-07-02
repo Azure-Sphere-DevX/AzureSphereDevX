@@ -10,11 +10,11 @@
 
 typedef enum {
 	DX_TYPE_UNKNOWN = 0,
-	DX_TYPE_BOOL = 1,
-	DX_TYPE_FLOAT = 2,
-	DX_TYPE_DOUBLE = 3,
-	DX_TYPE_INT = 4,
-	DX_TYPE_STRING = 5
+	DX_DEVICE_TWIN_BOOL = 1,
+	DX_DEVICE_TWIN_FLOAT = 2,
+	DX_DEVICE_TWIN_DOUBLE = 3,
+	DX_DEVICE_TWIN_INT = 4,
+	DX_DEVICE_TWIN_STRING = 5
 } DX_DEVICE_TWIN_TYPE;
 
 typedef struct _deviceTwinBinding {
@@ -28,21 +28,22 @@ typedef struct _deviceTwinBinding {
 
 typedef enum
 {
-	DX_DEVICE_TWIN_COMPLETED = 200,
-	DX_DEVICE_TWIN_ERROR = 500,
-	DX_DEVICE_TWIN_INVALID = 404
+	DX_DEVICE_TWIN_RESPONSE_COMPLETED = 200,
+	DX_DEVICE_TWIN_RESPONSE_ERROR = 500,
+	DX_DEVICE_TWIN_REPONSE_INVALID = 404
 } DX_DEVICE_TWIN_RESPONSE_CODE;
 
 //typedef struct _deviceTwinBinding DX_DEVICE_TWIN_BINDING;
 
 /// <summary>
-/// Acknowledge receipt of a device twin message with new state and status code.
+/// IoT Plug and Play acknowledge receipt of a device twin message with new state and status code.
 /// </summary>
 /// <param name="deviceTwinBinding"></param>
 /// <param name="state"></param>
 /// <param name="statusCode"></param>
 /// <returns></returns>
 bool dx_deviceTwinAckDesiredState(DX_DEVICE_TWIN_BINDING* deviceTwinBinding, void* state, DX_DEVICE_TWIN_RESPONSE_CODE statusCode);
+
 
 /// <summary>
 /// Update device twin state.

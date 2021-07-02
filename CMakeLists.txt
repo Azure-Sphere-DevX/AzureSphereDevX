@@ -5,6 +5,7 @@ PROJECT(azure_sphere_devx C)
 # Source groups
 ################################################################################
 set(Source
+    "./src/dx_avnet_iot_connect.c"	
     "./src/dx_azure_iot.c"
     "./src/dx_config.c"
     "./src/dx_device_twins.c"

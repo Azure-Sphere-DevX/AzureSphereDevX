@@ -74,17 +74,17 @@ DX_TIMER_BINDING *timerSet[] = {&report_now_timer};
  * Azure IoT Device Twin Bindings
  ****************************************************************************************/
 static DX_DEVICE_TWIN_BINDING dt_desired_sample_rate = {.twinProperty = "DesiredSampleRate",
-                                                        .twinType = DX_TYPE_INT,
+                                                        .twinType = DX_DEVICE_TWIN_INT,
                                                         .handler = dt_desired_sample_rate_handler};
 
 static DX_DEVICE_TWIN_BINDING dt_reported_temperature = {.twinProperty = "ReportedTemperature",
-                                                         .twinType = DX_TYPE_FLOAT};
+                                                         .twinType = DX_DEVICE_TWIN_FLOAT};
 
 static DX_DEVICE_TWIN_BINDING dt_reported_humidity = {.twinProperty = "ReportedHumidity",
-                                                      .twinType = DX_TYPE_DOUBLE};
+                                                      .twinType = DX_DEVICE_TWIN_DOUBLE};
 
 static DX_DEVICE_TWIN_BINDING dt_reported_utc = {.twinProperty = "ReportedUTC",
-                                                 .twinType = DX_TYPE_STRING};
+                                                 .twinType = DX_DEVICE_TWIN_STRING};
 
 // All device twins listed in device_twin_bindings will be subscribed to in
 // the InitPeripheralsAndHandlers function
@@ -106,28 +106,28 @@ static void report_now_handler(EventLoopTimer *eventLoopTimer)
     // Update twin with current UTC (Universal Time Coordinate) in ISO format
     dx_deviceTwinReportState(&dt_reported_utc, dx_getCurrentUtc(msgBuffer, sizeof(msgBuffer)));
 
-    // The type passed in must match the Divice Twin Type DX_TYPE_FLOAT
+    // The type passed in must match the Divice Twin Type DX_DEVICE_TWIN_FLOAT
     dx_deviceTwinReportState(&dt_reported_temperature, &temperature);
 
-    // The type passed in must match the Divice Twin Type DX_TYPE_DOUBLE
+    // The type passed in must match the Divice Twin Type DX_DEVICE_TWIN_DOUBLE
     dx_deviceTwinReportState(&dt_reported_humidity, &humidity);
 }
 
 static void dt_desired_sample_rate_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
 {
     // validate data is sensible range before applying
-    if (deviceTwinBinding->twinType == DX_TYPE_INT && *(int *)deviceTwinBinding->twinState >= 0 &&
+    if (deviceTwinBinding->twinType == DX_DEVICE_TWIN_INT && *(int *)deviceTwinBinding->twinState >= 0 &&
         *(int *)deviceTwinBinding->twinState <= 120) {
 
         dx_timerChange(&report_now_timer,
                        &(struct timespec){*(int *)deviceTwinBinding->twinState, 0});
 
         dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState,
-                                     DX_DEVICE_TWIN_COMPLETED);
+                                     DX_DEVICE_TWIN_RESPONSE_COMPLETED);
 
     } else {
         dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState,
-                                     DX_DEVICE_TWIN_ERROR);
+                                     DX_DEVICE_TWIN_RESPONSE_ERROR);
     }
 
     /*	Casting device twin state examples
