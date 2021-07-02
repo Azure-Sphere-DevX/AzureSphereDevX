@@ -152,6 +152,9 @@ static void dt_desired_temperature_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBin
         *(int *)deviceTwinBinding->twinState <= 30.0) {
 
         desired_temperature = *(double *)deviceTwinBinding->twinState;
+
+        // If IoT Connect Pattern is to respond with the Device Twin Key Value then do the following
+        dx_deviceTwinReportState(deviceTwinBinding, deviceTwinBinding->twinState);
     }
 }
 
