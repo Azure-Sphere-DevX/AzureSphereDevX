@@ -85,8 +85,7 @@ DX_TIMER_BINDING *timers[] = {&publish_message};
 /****************************************************************************************
  * Device Twins Bindings
  ****************************************************************************************/
-static DX_DEVICE_TWIN_BINDING dt_desired_temperature = {
-    .twinProperty = "DesiredTemperature", .twinType = DX_DEVICE_TWIN_DOUBLE, .handler = dt_desired_temperature_handler};
+static DX_DEVICE_TWIN_BINDING dt_desired_temperature = { .twinProperty = "DesiredTemperature", .twinType = DX_DEVICE_TWIN_DOUBLE, .handler = dt_desired_temperature_handler};
 static DX_DEVICE_TWIN_BINDING dt_reported_temperature = {.twinProperty = "ReportedTemperature", .twinType = DX_DEVICE_TWIN_DOUBLE};
 
 // All device twins referenced in timers with be opened in the InitPeripheralsAndHandlers function
