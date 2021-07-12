@@ -257,7 +257,7 @@ bool dx_avnetJsonSerializePayload(const char *originalJsonMessage, char *modifie
 
         // Define the Json string format for sending telemetry to IoT Connect, note that the
         // actual telemetry data is inserted as the last string argument
-        static const char IoTCTelemetryJson[] = "{\"sid\":\"%s\",\"dtg\":\"%s\",\"mt\": 0,\"d\":[{\"d\":%s}]}";
+        static const char IoTCTelemetryJson[] = "{\"sid\":\"%s\",\"dtg\":\"%s\",\"mt\":0,\"d\":[{\"d\":%s}]}";
 
         // Determine the largest message size needed.  We'll use this to validate the incoming target
         // buffer is large enough
@@ -313,10 +313,8 @@ bool dx_avnetJsonSerialize(char *jsonMessageBuffer, size_t bufferSize, int key_v
     JSON_Value *array_value_object = json_value_init_object();
     JSON_Object *array_object = json_value_get_object(array_value_object);
 
-#define LOCAL_BUFFER_SIZE 128
-
     // Allocate a buffer that we used to dynamically create the list key names d.<keyname>
-    char *keyBuffer = (char *)malloc(LOCAL_BUFFER_SIZE);
+    char *keyBuffer = (char *)malloc(DX_AVNET_IOT_CONNECT_JSON_BUFFER_SIZE);
     if (keyBuffer == NULL) {
         Log_Debug("[AVT IoTConnect] ERROR: not enough memory to send telemetry.");
         return false;
