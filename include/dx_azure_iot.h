@@ -27,6 +27,14 @@
 #include <time.h>
 #include "iothub_client_core_common.h"
 
+#ifndef IOT_HUB_POLL_TIME_SECONDS
+#define IOT_HUB_POLL_TIME_SECONDS 0
+#endif
+
+#ifndef IOT_HUB_POLL_TIME_NANOSECONDS
+#define IOT_HUB_POLL_TIME_NANOSECONDS 100000000
+#endif
+
 typedef struct DX_MESSAGE_PROPERTY
 {
 	const char* key;

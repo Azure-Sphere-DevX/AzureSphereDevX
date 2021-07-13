@@ -191,7 +191,7 @@ static void AzureConnectionHandler(EventLoopTimer *eventLoopTimer)
         break;
     case IoTHubClientAuthenticationState_Authenticated:
         IoTHubDeviceClient_LL_DoWork(iothubClientHandle);
-        nextEventPeriod = (struct timespec){0, 100000000};
+        nextEventPeriod = (struct timespec){IOT_HUB_POLL_TIME_SECONDS, IOT_HUB_POLL_TIME_NANOSECONDS};
         break;
     case IoTHubClientAuthenticationState_Device_Disbled:
         iotHubClientAuthenticationState = IoTHubClientAuthenticationState_NotAuthenticated;
