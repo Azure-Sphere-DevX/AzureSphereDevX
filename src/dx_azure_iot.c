@@ -1,14 +1,13 @@
 #include "dx_azure_iot.h"
 
-#define MAX_CONNECTION_STATUS_CALLBASKS 5
-
 static bool SetupAzureClient(void);
 static bool SetUpAzureIoTHubClientWithDaa(void);
 static bool SetUpAzureIoTHubClientWithDaaDpsPnP(void);
 static const char *GetMessageResultReasonString(IOTHUB_MESSAGE_RESULT reason);
 static const char *GetReasonString(IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason);
 static void AzureConnectionHandler(EventLoopTimer *eventLoopTimer);
-static void HubConnectionStatusCallback(IOTHUB_CLIENT_CONNECTION_STATUS, IOTHUB_CLIENT_CONNECTION_STATUS_REASON, void *);
+static void HubConnectionStatusCallback(IOTHUB_CLIENT_CONNECTION_STATUS,
+                                        IOTHUB_CLIENT_CONNECTION_STATUS_REASON, void *);
 static void SendMessageCallback(IOTHUB_CLIENT_CONFIRMATION_RESULT, void *);
 
 static IOTHUB_DEVICE_CLIENT_LL_HANDLE iothubClientHandle = NULL;
@@ -21,10 +20,6 @@ static int outstandingMessageCount = 0;
 static char *_pnpModelIdJson = NULL;
 static const char *_pnpModelId = NULL;
 static const char *_pnpModelIdJsonTemplate = "{\"modelId\":\"%s\"}";
-
-static IOTHUBMESSAGE_DISPOSITION_RESULT (*_messageReceivedCallback)(IOTHUB_MESSAGE_HANDLE message, void *context) = NULL;
-
-static void (*_connectionStatusCallback[MAX_CONNECTION_STATUS_CALLBASKS])(bool connected);
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUE);
@@ -55,43 +50,16 @@ typedef enum {
 } IoTHubClientAuthenticationState;
 
 // Authentication state with respect to the IoT Hub.
-static IoTHubClientAuthenticationState iotHubClientAuthenticationState = IoTHubClientAuthenticationState_NotAuthenticated;
+static IoTHubClientAuthenticationState iotHubClientAuthenticationState =
+    IoTHubClientAuthenticationState_NotAuthenticated;
 
 #define dpsUrl "global.azure-devices-provisioning.net"
 
 static PROV_DEVICE_RESULT dpsRegisterStatus = PROV_DEVICE_RESULT_INVALID_STATE;
 
 static DX_TIMER_BINDING azureConnectionTimer = {.period = {0, 0}, // one-shot timer
-                                                .name = "azureConnectionTimer",
-                                                .handler = &AzureConnectionHandler};
-
-void dx_registerMessageReceivedNotification(
-    IOTHUBMESSAGE_DISPOSITION_RESULT (*messageReceivedCallback)(IOTHUB_MESSAGE_HANDLE message,void *context))
-{
-    _messageReceivedCallback = messageReceivedCallback;
-}
-
-bool dx_azureRegisterConnectionChangedNotification(void (*connectionStatusCallback)(bool connected))
-{
-    bool result = false;
-    for (size_t i = 0; i < MAX_CONNECTION_STATUS_CALLBASKS; i++) {
-        if (_connectionStatusCallback[i] == NULL) {
-            _connectionStatusCallback[i] = connectionStatusCallback;
-            result = true;
-            break;
-        }
-    }
-    return result;
-}
-
-void dx_azureUnregisterConnectionChangedNotification(void (*connectionStatusCallback)(bool connected))
-{
-    for (size_t i = 0; i < MAX_CONNECTION_STATUS_CALLBASKS; i++) {
-        if (_connectionStatusCallback[i] == connectionStatusCallback) {
-            _connectionStatusCallback[i] = NULL;
-        }
-    }
-}
+                                      .name = "azureConnectionTimer",
+                                      .handler = &AzureConnectionHandler};
 
 static void dx_azureToDeviceStart(void)
 {
@@ -143,7 +111,8 @@ bool createPnpModelIdJson(void)
     return true;
 }
 
-void dx_azureConnect(DX_USER_CONFIG *userConfig, const char *networkInterface, const char *plugAndPlayModelId)
+void dx_azureConnect(DX_USER_CONFIG *userConfig, const char *networkInterface,
+                     const char *plugAndPlayModelId)
 {
     if (userConfig->connectionType == DX_CONNECTION_TYPE_NOT_DEFINED) {
         Log_Debug("ERROR: Connection type not defined\n");
@@ -166,11 +135,13 @@ void dx_azureConnect(DX_USER_CONFIG *userConfig, const char *networkInterface, c
 
 bool dx_isAzureConnected(void)
 {
-    if (!dx_isNetworkConnected(_networkInterface) && iotHubClientAuthenticationState == IoTHubClientAuthenticationState_Authenticated) {
+    if (!dx_isNetworkConnected(_networkInterface) &&
+        iotHubClientAuthenticationState == IoTHubClientAuthenticationState_Authenticated) {
         iotHubClientAuthenticationState = IoTHubClientAuthenticationState_NotAuthenticated;
         deviceConnectionState = DEVICE_NOT_CONNECTED;
         return false;
-    } else if (iothubClientHandle != NULL && iotHubClientAuthenticationState == IoTHubClientAuthenticationState_Authenticated &&
+    } else if (iothubClientHandle != NULL &&
+               iotHubClientAuthenticationState == IoTHubClientAuthenticationState_Authenticated &&
                dx_isNetworkConnected(_networkInterface)) {
         return true;
     }
@@ -203,7 +174,8 @@ static void AzureConnectionHandler(EventLoopTimer *eventLoopTimer)
     }
 
     // network disconnected but was previously authenticated
-    if (!dx_isNetworkConnected(_networkInterface) && iotHubClientAuthenticationState == IoTHubClientAuthenticationState_Authenticated) {
+    if (!dx_isNetworkConnected(_networkInterface) &&
+        iotHubClientAuthenticationState == IoTHubClientAuthenticationState_Authenticated) {
         iotHubClientAuthenticationState = IoTHubClientAuthenticationState_NotAuthenticated;
         deviceConnectionState = DEVICE_NOT_CONNECTED;
     }
@@ -219,7 +191,7 @@ static void AzureConnectionHandler(EventLoopTimer *eventLoopTimer)
         break;
     case IoTHubClientAuthenticationState_Authenticated:
         IoTHubDeviceClient_LL_DoWork(iothubClientHandle);
-        nextEventPeriod = (struct timespec){0, 100000000};
+        nextEventPeriod = (struct timespec){IOT_HUB_POLL_TIME_SECONDS, IOT_HUB_POLL_TIME_NANOSECONDS};
         break;
     case IoTHubClientAuthenticationState_Device_Disbled:
         iotHubClientAuthenticationState = IoTHubClientAuthenticationState_NotAuthenticated;
@@ -231,7 +203,8 @@ static void AzureConnectionHandler(EventLoopTimer *eventLoopTimer)
     dx_timerOneShotSet(&azureConnectionTimer, &nextEventPeriod);
 }
 
-bool dx_azurePublish(const void *message, size_t messageLength, DX_MESSAGE_PROPERTY **messageProperties, size_t messagePropertyCount,
+bool dx_azurePublish(const void *message, size_t messageLength,
+                     DX_MESSAGE_PROPERTY **messageProperties, size_t messagePropertyCount,
                      DX_MESSAGE_CONTENT_PROPERTIES *messageContentProperties)
 {
     IOTHUB_CLIENT_RESULT result;
@@ -258,16 +231,19 @@ bool dx_azurePublish(const void *message, size_t messageLength, DX_MESSAGE_PROPE
     if (messageContentProperties != NULL) {
         if (!dx_isStringNullOrEmpty(messageContentProperties->contentEncoding)) {
             if ((messageResult = IoTHubMessage_SetContentEncodingSystemProperty(
-                     messageHandle, messageContentProperties->contentEncoding)) != IOTHUB_MESSAGE_OK) {
-                Log_Debug("ERROR: ContentEncodingSystemProperty: %s\n", GetMessageResultReasonString(messageResult));
+                     messageHandle, messageContentProperties->contentEncoding)) !=
+                IOTHUB_MESSAGE_OK) {
+                Log_Debug("ERROR: ContentEncodingSystemProperty: %s\n",
+                          GetMessageResultReasonString(messageResult));
                 return false;
             }
         }
 
         if (!dx_isStringNullOrEmpty(messageContentProperties->contentType)) {
-            if ((messageResult = IoTHubMessage_SetContentTypeSystemProperty(messageHandle, messageContentProperties->contentType)) !=
-                IOTHUB_MESSAGE_OK) {
-                Log_Debug("ERROR: ContentTypeSystemProperty: %s\n", GetMessageResultReasonString(messageResult));
+            if ((messageResult = IoTHubMessage_SetContentTypeSystemProperty(
+                     messageHandle, messageContentProperties->contentType)) != IOTHUB_MESSAGE_OK) {
+                Log_Debug("ERROR: ContentTypeSystemProperty: %s\n",
+                          GetMessageResultReasonString(messageResult));
                 return false;
             }
         }
@@ -276,10 +252,13 @@ bool dx_azurePublish(const void *message, size_t messageLength, DX_MESSAGE_PROPE
     // add application properties
     if (messageProperties != NULL && messagePropertyCount > 0) {
         for (size_t i = 0; i < messagePropertyCount; i++) {
-            if (!dx_isStringNullOrEmpty(messageProperties[i]->key) && !dx_isStringNullOrEmpty(messageProperties[i]->value)) {
-                if ((messageResult = IoTHubMessage_SetProperty(messageHandle, messageProperties[i]->key, messageProperties[i]->value)) !=
+            if (!dx_isStringNullOrEmpty(messageProperties[i]->key) &&
+                !dx_isStringNullOrEmpty(messageProperties[i]->value)) {
+                if ((messageResult = IoTHubMessage_SetProperty(
+                         messageHandle, messageProperties[i]->key, messageProperties[i]->value)) !=
                     IOTHUB_MESSAGE_OK) {
-                    Log_Debug("ERROR: Setting key/value properties: %s, %s, %s\n", messageProperties[i]->key, messageProperties[i]->value,
+                    Log_Debug("ERROR: Setting key/value properties: %s, %s, %s\n",
+                              messageProperties[i]->key, messageProperties[i]->value,
                               GetMessageResultReasonString(messageResult));
                     return false;
                 }
@@ -287,8 +266,9 @@ bool dx_azurePublish(const void *message, size_t messageLength, DX_MESSAGE_PROPE
         }
     }
 
-    if ((result = IoTHubDeviceClient_LL_SendEventAsync(iothubClientHandle, messageHandle, SendMessageCallback,
-                                                       /*&callback_param*/ 0)) != IOTHUB_CLIENT_OK) {
+    if ((result = IoTHubDeviceClient_LL_SendEventAsync(
+             iothubClientHandle, messageHandle, SendMessageCallback,
+             /*&callback_param*/ 0)) != IOTHUB_CLIENT_OK) {
         Log_Debug("ERROR: failed to hand over the message to IoTHubClient\n");
     } else {
         outstandingMessageCount++;
@@ -296,7 +276,7 @@ bool dx_azurePublish(const void *message, size_t messageLength, DX_MESSAGE_PROPE
 
     IoTHubMessage_Destroy(messageHandle);
 
-    // IoTHubDeviceClient_LL_DoWork(iothubClientHandle);
+    //IoTHubDeviceClient_LL_DoWork(iothubClientHandle);
 
     return result == IOTHUB_CLIENT_OK;
 }
@@ -304,16 +284,6 @@ bool dx_azurePublish(const void *message, size_t messageLength, DX_MESSAGE_PROPE
 IOTHUB_DEVICE_CLIENT_LL_HANDLE dx_azureClientHandleGet(void)
 {
     return iothubClientHandle;
-}
-
-static IOTHUBMESSAGE_DISPOSITION_RESULT HubMessageReceivedCallback(IOTHUB_MESSAGE_HANDLE message, void *context)
-{
-    if (_messageReceivedCallback != NULL) {
-       return _messageReceivedCallback(message, context);
-    }
-
-    // if no active callbacks then just return message accepted
-    return IOTHUBMESSAGE_ACCEPTED;
 }
 
 /// <summary>
@@ -350,10 +320,12 @@ static bool SetupAzureClient()
 
     iotHubClientAuthenticationState = IoTHubClientAuthenticationState_AuthenticationInitiated;
 
-    IoTHubDeviceClient_LL_SetDeviceTwinCallback(iothubClientHandle, dx__deviceTwinCallbackHandler, NULL);
-    IoTHubDeviceClient_LL_SetDeviceMethodCallback(iothubClientHandle, dx__deviceDirectMethodCallbackHandler, NULL);
-    IoTHubDeviceClient_LL_SetConnectionStatusCallback(iothubClientHandle, HubConnectionStatusCallback, NULL);
-    IoTHubDeviceClient_LL_SetMessageCallback(iothubClientHandle, HubMessageReceivedCallback, NULL);
+    IoTHubDeviceClient_LL_SetDeviceTwinCallback(iothubClientHandle, dx__deviceTwinCallbackHandler,
+                                                NULL);
+    IoTHubDeviceClient_LL_SetDeviceMethodCallback(iothubClientHandle,
+                                                  dx__deviceDirectMethodCallbackHandler, NULL);
+    IoTHubDeviceClient_LL_SetConnectionStatusCallback(iothubClientHandle,
+                                                      HubConnectionStatusCallback, NULL);
 
     IoTHubDeviceClient_LL_DoWork(iothubClientHandle);
 
@@ -375,28 +347,34 @@ static bool ConnectToIotHub(const char *hostname)
         return false;
     }
 
-    if ((iothubClientHandle = IoTHubDeviceClient_LL_CreateWithAzureSphereFromDeviceAuth(hostname, &MQTT_Protocol)) == NULL) {
+    if ((iothubClientHandle = IoTHubDeviceClient_LL_CreateWithAzureSphereFromDeviceAuth(
+             hostname, &MQTT_Protocol)) == NULL) {
         Log_Debug("ERROR: Failed to create client IoT Hub Client Handle\n");
         return false;
     }
 
     // IOTHUB_CLIENT_RESULT iothub_result
-    if ((iothubResult = IoTHubDeviceClient_LL_SetOption(iothubClientHandle, "SetDeviceId", &deviceIdForDaaCertUsage)) != IOTHUB_CLIENT_OK) {
-        Log_Debug("ERROR: Failed to set Device ID on IoT Hub Client: %s\n", IOTHUB_CLIENT_RESULTStrings(iothubResult));
+    if ((iothubResult = IoTHubDeviceClient_LL_SetOption(
+             iothubClientHandle, "SetDeviceId", &deviceIdForDaaCertUsage)) != IOTHUB_CLIENT_OK) {
+        Log_Debug("ERROR: Failed to set Device ID on IoT Hub Client: %s\n",
+                  IOTHUB_CLIENT_RESULTStrings(iothubResult));
         return false;
     }
 
     // Sets auto URL encoding on IoT Hub Client
-    if ((iothubResult = IoTHubDeviceClient_LL_SetOption(iothubClientHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlAutoEncodeDecode)) !=
+    if ((iothubResult = IoTHubDeviceClient_LL_SetOption(
+             iothubClientHandle, OPTION_AUTO_URL_ENCODE_DECODE, &urlAutoEncodeDecode)) !=
         IOTHUB_CLIENT_OK) {
-        Log_Debug("ERROR: Failed to set auto Url encode option on IoT Hub Client: %s\n", IOTHUB_CLIENT_RESULTStrings(iothubResult));
+        Log_Debug("ERROR: Failed to set auto Url encode option on IoT Hub Client: %s\n",
+                  IOTHUB_CLIENT_RESULTStrings(iothubResult));
         return false;
     }
 
     if (_pnpModelIdJson != NULL) {
-        if ((iothubResult = IoTHubDeviceClient_LL_SetOption(iothubClientHandle, OPTION_MODEL_ID, _pnpModelId)) != IOTHUB_CLIENT_OK) {
-            Log_Debug("ERROR: Failed to set PnP Model ID %s, for Model ID: %s\n", IOTHUB_CLIENT_RESULTStrings(iothubResult),
-                      OPTION_MODEL_ID);
+        if ((iothubResult = IoTHubDeviceClient_LL_SetOption(iothubClientHandle, OPTION_MODEL_ID,
+                                                            _pnpModelId)) != IOTHUB_CLIENT_OK) {
+            Log_Debug("ERROR: Failed to set PnP Model ID %s, for Model ID: %s\n",
+                      IOTHUB_CLIENT_RESULTStrings(iothubResult), OPTION_MODEL_ID);
             return false;
         }
     }
@@ -446,7 +424,8 @@ cleanup:
 /// <summary>
 ///     DPS provisioning callback with status
 /// </summary>
-static void RegisterProvisioningDeviceCallback(PROV_DEVICE_RESULT registerResult, const char *callbackHubUri, const char *deviceId,
+static void RegisterProvisioningDeviceCallback(PROV_DEVICE_RESULT registerResult,
+                                               const char *callbackHubUri, const char *deviceId,
                                                void *userContext)
 {
     dpsRegisterStatus = registerResult;
@@ -475,8 +454,9 @@ static void RegisterProvisioningDeviceCallback(PROV_DEVICE_RESULT registerResult
 /// </summary>
 static bool SetUpAzureIoTHubClientWithDaaDpsPnP(void)
 {
-    const int deviceIdForDaaCertUsage = 1; // Use DAA cert in provisioning flow - requires the SetDeviceId option to be set on the
-                                           // provisioning client.
+    const int deviceIdForDaaCertUsage =
+        1; // Use DAA cert in provisioning flow - requires the SetDeviceId option to be set on the
+           // provisioning client.
     PROV_DEVICE_RESULT prov_result;
     static bool security_init_called = false;
     static int provisionCompletedMaxRetry = 0;
@@ -502,32 +482,39 @@ static bool SetUpAzureIoTHubClientWithDaaDpsPnP(void)
         security_init_called = true;
 
         // Create Provisioning Client for communication with DPS using MQTT protocol
-        if ((prov_handle = Prov_Device_LL_Create(dpsUrl, _userConfig->idScope, Prov_Device_MQTT_Protocol)) == NULL) {
+        if ((prov_handle = Prov_Device_LL_Create(dpsUrl, _userConfig->idScope,
+                                                 Prov_Device_MQTT_Protocol)) == NULL) {
             Log_Debug("ERROR: Failed to create Provisioning Client\n");
             deviceConnectionState = DEVICE_PROVISIONING_ERROR;
             goto cleanup;
         }
 
         // Sets Device ID on Provisioning Client
-        if ((prov_result = Prov_Device_LL_SetOption(prov_handle, "SetDeviceId", &deviceIdForDaaCertUsage)) != PROV_DEVICE_RESULT_OK) {
-            Log_Debug("ERROR: Failed to set Device ID in Provisioning Client, error=%d\n", prov_result);
+        if ((prov_result = Prov_Device_LL_SetOption(
+                 prov_handle, "SetDeviceId", &deviceIdForDaaCertUsage)) != PROV_DEVICE_RESULT_OK) {
+            Log_Debug("ERROR: Failed to set Device ID in Provisioning Client, error=%d\n",
+                      prov_result);
             deviceConnectionState = DEVICE_PROVISIONING_ERROR;
             goto cleanup;
         }
 
         // Sets Model ID provisioning data
         if (_pnpModelIdJson != NULL) {
-            if ((prov_result = Prov_Device_LL_Set_Provisioning_Payload(prov_handle, _pnpModelIdJson)) != PROV_DEVICE_RESULT_OK) {
-                Log_Debug("Error: Failed to set Model ID in Provisioning Client, error=%d\n", prov_result);
+            if ((prov_result = Prov_Device_LL_Set_Provisioning_Payload(
+                     prov_handle, _pnpModelIdJson)) != PROV_DEVICE_RESULT_OK) {
+                Log_Debug("Error: Failed to set Model ID in Provisioning Client, error=%d\n",
+                          prov_result);
                 deviceConnectionState = DEVICE_PROVISIONING_ERROR;
                 goto cleanup;
             }
         }
 
         // Sets the callback function for device registration
-        if ((prov_result = Prov_Device_LL_Register_Device(prov_handle, RegisterProvisioningDeviceCallback, NULL, NULL, NULL)) !=
+        if ((prov_result = Prov_Device_LL_Register_Device(
+                 prov_handle, RegisterProvisioningDeviceCallback, NULL, NULL, NULL)) !=
             PROV_DEVICE_RESULT_OK) {
-            Log_Debug("ERROR: Failed to set callback function for device registration, error=%d\n", prov_result);
+            Log_Debug("ERROR: Failed to set callback function for device registration, error=%d\n",
+                      prov_result);
             deviceConnectionState = DEVICE_PROVISIONING_ERROR;
             goto cleanup;
         }
@@ -547,7 +534,8 @@ static bool SetUpAzureIoTHubClientWithDaaDpsPnP(void)
         // RegisterProvisioningDeviceCallback() to complete else restart provisioning process
         if (provisionCompletedMaxRetry++ > 60) {
             deviceConnectionState = DEVICE_PROVISIONING_ERROR;
-            Log_Debug("ERROR: Failed to register device with provisioning service: %s\n", PROV_DEVICE_RESULTStrings(dpsRegisterStatus));
+            Log_Debug("ERROR: Failed to register device with provisioning service: %s\n",
+                      PROV_DEVICE_RESULTStrings(dpsRegisterStatus));
         }
 
         break;
@@ -574,7 +562,8 @@ static bool SetUpAzureIoTHubClientWithDaaDpsPnP(void)
     }
 
 cleanup:
-    if (deviceConnectionState == DEVICE_CONNECTED || deviceConnectionState == DEVICE_PROVISIONING_ERROR) {
+    if (deviceConnectionState == DEVICE_CONNECTED ||
+        deviceConnectionState == DEVICE_PROVISIONING_ERROR) {
 
         if (prov_handle != NULL) {
             Prov_Device_LL_Destroy(prov_handle);
@@ -594,7 +583,8 @@ cleanup:
 ///     Sets the IoT Hub authentication state for the app
 ///     The SAS Token expires which will set the authentication state
 /// </summary>
-static void HubConnectionStatusCallback(IOTHUB_CLIENT_CONNECTION_STATUS result, IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason,
+static void HubConnectionStatusCallback(IOTHUB_CLIENT_CONNECTION_STATUS result,
+                                        IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason,
                                         void *userContextCallback)
 {
     switch (result) {
@@ -609,7 +599,8 @@ static void HubConnectionStatusCallback(IOTHUB_CLIENT_CONNECTION_STATUS result, 
     Log_Debug("IoT Hub Connection Status reason: %s\n", GetReasonString(reason));
 
     if (result != IOTHUB_CLIENT_CONNECTION_AUTHENTICATED) {
-        if (reason == IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED || reason == IOTHUB_CLIENT_CONNECTION_NO_NETWORK) {
+        if (reason == IOTHUB_CLIENT_CONNECTION_DEVICE_DISABLED ||
+            reason == IOTHUB_CLIENT_CONNECTION_NO_NETWORK) {
 
             iotHubClientAuthenticationState = IoTHubClientAuthenticationState_Device_Disbled;
             Log_Debug("Hub status callback: IoTHubClientAuthenticationState_Device_Disbled\n");
@@ -623,12 +614,6 @@ static void HubConnectionStatusCallback(IOTHUB_CLIENT_CONNECTION_STATUS result, 
     }
 
     iotHubClientAuthenticationState = IoTHubClientAuthenticationState_Authenticated;
-
-    for (size_t i = 0; i < MAX_CONNECTION_STATUS_CALLBASKS; i++) {
-        if (_connectionStatusCallback[i] != NULL) {
-            _connectionStatusCallback[i](dx_isAzureConnected());
-        }
-    }
 }
 
 static const char *GetMessageResultReasonString(IOTHUB_MESSAGE_RESULT reason)
