@@ -1,5 +1,7 @@
 #include "dx_azure_iot.h"
 
+#define MAX_CONNECTION_STATUS_CALLBASKS 5
+
 static bool SetupAzureClient(void);
 static bool SetUpAzureIoTHubClientWithDaa(void);
 static bool SetUpAzureIoTHubClientWithDaaDpsPnP(void);
@@ -21,7 +23,8 @@ static const char *_pnpModelId = NULL;
 static const char *_pnpModelIdJsonTemplate = "{\"modelId\":\"%s\"}";
 
 static IOTHUBMESSAGE_DISPOSITION_RESULT (*_messageReceivedCallback)(IOTHUB_MESSAGE_HANDLE message, void *context) = NULL;
-static void (*_connectionStatusCallback)(bool connected) = NULL;
+
+static void (*_connectionStatusCallback[MAX_CONNECTION_STATUS_CALLBASKS])(bool connected);
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUE);
@@ -68,9 +71,26 @@ void dx_registerMessageReceivedNotification(
     _messageReceivedCallback = messageReceivedCallback;
 }
 
-void dx_registerConnectionChangedNotification(void (*connectionStatusCallback)(bool connected))
+bool dx_azureRegisterConnectionChangedNotification(void (*connectionStatusCallback)(bool connected))
 {
-    _connectionStatusCallback = connectionStatusCallback;
+    bool result = false;
+    for (size_t i = 0; i < MAX_CONNECTION_STATUS_CALLBASKS; i++) {
+        if (_connectionStatusCallback[i] == NULL) {
+            _connectionStatusCallback[i] = connectionStatusCallback;
+            result = true;
+            break;
+        }
+    }
+    return result;
+}
+
+void dx_azureUnregisterConnectionChangedNotification(void (*connectionStatusCallback)(bool connected))
+{
+    for (size_t i = 0; i < MAX_CONNECTION_STATUS_CALLBASKS; i++) {
+        if (_connectionStatusCallback[i] == connectionStatusCallback) {
+            _connectionStatusCallback[i] = NULL;
+        }
+    }
 }
 
 static void dx_azureToDeviceStart(void)
@@ -604,8 +624,10 @@ static void HubConnectionStatusCallback(IOTHUB_CLIENT_CONNECTION_STATUS result, 
 
     iotHubClientAuthenticationState = IoTHubClientAuthenticationState_Authenticated;
 
-    if (_connectionStatusCallback != NULL) {
-        _connectionStatusCallback(dx_isAzureConnected());
+    for (size_t i = 0; i < MAX_CONNECTION_STATUS_CALLBASKS; i++) {
+        if (_connectionStatusCallback[i] != NULL) {
+            _connectionStatusCallback[i](dx_isAzureConnected());
+        }
     }
 }
 

@@ -28,6 +28,8 @@
 #include <time.h>
 #include "iothub_client_core_common.h"
 
+#define MAX_CONNECTION_STATUS_CALLBASKS 5
+
 typedef struct DX_MESSAGE_PROPERTY
 {
 	const char* key;
@@ -85,4 +87,5 @@ void dx_registerMessageReceivedNotification(IOTHUBMESSAGE_DISPOSITION_RESULT (*m
                                                                                                    void *context));
 
 
-void dx_registerConnectionChangedNotification(void (*connectionStatusCallback)(bool connected));
+bool dx_azureRegisterConnectionChangedNotification(void (*connectionStatusCallback)(bool connected));
+void dx_azureUnregisterConnectionChangedNotification(void (*connectionStatusCallback)(bool connected));
