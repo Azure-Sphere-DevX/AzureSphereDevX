@@ -18,6 +18,7 @@ set(Source
     "./src/dx_utilities.c"
     "./src/dx_json_serializer.c"
     "./src/dx_deferred_update.c"	
+    "./src/dx_avnet_iot_connect.c"	
 )
 source_group("Source" FILES ${Source})
 
