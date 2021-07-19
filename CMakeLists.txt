@@ -5,7 +5,6 @@ PROJECT(azure_sphere_devx C)
 # Source groups
 ################################################################################
 set(Source
-    "./src/dx_avnet_iot_connect.c"	
     "./src/dx_azure_iot.c"
     "./src/dx_config.c"
     "./src/dx_device_twins.c"
@@ -19,6 +18,7 @@ set(Source
     "./src/dx_utilities.c"
     "./src/dx_json_serializer.c"
     "./src/dx_deferred_update.c"	
+    "./src/dx_avnet_iot_connect.c"	
 )
 source_group("Source" FILES ${Source})
 
