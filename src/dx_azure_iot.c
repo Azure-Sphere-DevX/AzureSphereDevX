@@ -65,7 +65,7 @@ static DX_TIMER_BINDING azureConnectionTimer = {.period = {0, 0}, // one-shot ti
                                                 .name = "azureConnectionTimer",
                                                 .handler = &AzureConnectionHandler};
 
-void dx_registerMessageReceivedNotification(
+void dx_azureRegisterMessageReceivedNotification(
     IOTHUBMESSAGE_DISPOSITION_RESULT (*messageReceivedCallback)(IOTHUB_MESSAGE_HANDLE message,void *context))
 {
     _messageReceivedCallback = messageReceivedCallback;

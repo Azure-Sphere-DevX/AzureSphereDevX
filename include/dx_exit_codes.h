@@ -44,6 +44,9 @@ typedef enum {
 	DX_ExitCode_UpdateCallback_DeferEvent = 228,
 	DX_ExitCode_UpdateCallback_FinalUpdate = 227,
 	DX_ExitCode_UpdateCallback_UnexpectedStatus = 226,
-	DX_ExitCode_SetUpSysEvent_RegisterEvent = 225
+	DX_ExitCode_SetUpSysEvent_RegisterEvent = 225,
+
+	DX_ExitCode_Init_IoTCTimer = 220,
+	DX_ExitCode_IoTCTimer_Consume = 219
 
 } ExitCode;

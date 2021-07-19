@@ -68,7 +68,7 @@ void dx_avnetConnect(DX_USER_CONFIG *userConfig, const char *networkInterface)
     // Register to receive updates when the application receives an Azure IoTHub connection update
     // and C2D messages
     dx_azureRegisterConnectionChangedNotification(AvnetReconnectCallback);
-    dx_registerMessageReceivedNotification(ReceiveMessageCallback);
+    dx_azureRegisterMessageReceivedNotification(ReceiveMessageCallback);
     
     dx_azureConnect(userConfig, networkInterface, NULL);
 }
