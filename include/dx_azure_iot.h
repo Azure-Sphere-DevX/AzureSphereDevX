@@ -30,6 +30,7 @@
 
 #define MAX_CONNECTION_STATUS_CALLBASKS 5
 
+
 #ifndef IOT_HUB_POLL_TIME_SECONDS
 #define IOT_HUB_POLL_TIME_SECONDS 0
 #endif
@@ -37,6 +38,7 @@
 #ifndef IOT_HUB_POLL_TIME_NANOSECONDS
 #define IOT_HUB_POLL_TIME_NANOSECONDS 100000000
 #endif
+
 
 typedef struct DX_MESSAGE_PROPERTY
 {
@@ -90,7 +92,5 @@ void dx_azureConnect(DX_USER_CONFIG* userConfig, const char* networkInterface, c
 /// <param name=""></param>
 void dx_azureToDeviceStop(void);
 
-void dx_registerMessageReceivedNotification(IOTHUBMESSAGE_DISPOSITION_RESULT (*messageReceivedCallback)(IOTHUB_MESSAGE_HANDLE message,
-                                                                                                   void *context));
 bool dx_azureRegisterConnectionChangedNotification(void (*connectionStatusCallback)(bool connected));
 void dx_azureUnregisterConnectionChangedNotification(void (*connectionStatusCallback)(bool connected));
