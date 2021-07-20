@@ -23,6 +23,11 @@ static const char *_pnpModelId = NULL;
 static const char *_pnpModelIdJsonTemplate = "{\"modelId\":\"%s\"}";
 
 static IOTHUBMESSAGE_DISPOSITION_RESULT (*_messageReceivedCallback)(IOTHUB_MESSAGE_HANDLE message, void *context) = NULL;
+static void (*_deviceTwinCallbackHandler)(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char *payload, size_t payloadSize,
+                                          void *userContextCallback);
+
+static int (*_directMethodCallbackHandler)(const char *method_name, const unsigned char *payload, size_t payloadSize,
+                                           unsigned char **responsePayload, size_t *responsePayloadSize, void *userContextCallback);
 
 static void (*_connectionStatusCallback[MAX_CONNECTION_STATUS_CALLBASKS])(bool connected);
 
@@ -65,8 +70,22 @@ static DX_TIMER_BINDING azureConnectionTimer = {.period = {0, 0}, // one-shot ti
                                                 .name = "azureConnectionTimer",
                                                 .handler = &AzureConnectionHandler};
 
-void dx_azureRegisterMessageReceivedNotification(
-    IOTHUBMESSAGE_DISPOSITION_RESULT (*messageReceivedCallback)(IOTHUB_MESSAGE_HANDLE message,void *context))
+void dx_azureRegisterDeviceTwinCallback(void (*deviceTwinCallbackHandler)(DEVICE_TWIN_UPDATE_STATE updateState,
+                                                                          const unsigned char *payload, size_t payloadSize,
+                                                                          void *userContextCallback))
+{
+    _deviceTwinCallbackHandler = deviceTwinCallbackHandler;
+}
+
+void dx_azureRegisterDirectMethodCallback(int (*directMethodCallbackHandler)(const char *method_name, const unsigned char *payload,
+                                                                             size_t payloadSize, unsigned char **responsePayload,
+                                                                             size_t *responsePayloadSize, void *userContextCallback))
+{
+    _directMethodCallbackHandler = directMethodCallbackHandler;
+}
+
+void dx_azureRegisterMessageReceivedNotification(IOTHUBMESSAGE_DISPOSITION_RESULT (*messageReceivedCallback)(IOTHUB_MESSAGE_HANDLE message,
+                                                                                                             void *context))
 {
     _messageReceivedCallback = messageReceivedCallback;
 }
@@ -309,11 +328,29 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE dx_azureClientHandleGet(void)
 static IOTHUBMESSAGE_DISPOSITION_RESULT HubMessageReceivedCallback(IOTHUB_MESSAGE_HANDLE message, void *context)
 {
     if (_messageReceivedCallback != NULL) {
-       return _messageReceivedCallback(message, context);
+        return _messageReceivedCallback(message, context);
     }
 
     // if no active callbacks then just return message accepted
     return IOTHUBMESSAGE_ACCEPTED;
+}
+
+static void HubDeviceTwinCallback(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char *payload, size_t payloadSize,
+                                  void *userContextCallback)
+{
+    if (_deviceTwinCallbackHandler != NULL) {
+        _deviceTwinCallbackHandler(updateState, payload, payloadSize, userContextCallback);
+    }
+}
+
+static int HubDirectMethodCallback(const char *method_name, const unsigned char *payload, size_t payloadSize,
+                                   unsigned char **responsePayload, size_t *responsePayloadSize, void *userContextCallback)
+{
+    if (_directMethodCallbackHandler != NULL) {
+        return _directMethodCallbackHandler(method_name, payload, payloadSize, responsePayload, responsePayloadSize, userContextCallback);
+    } else {
+        return -1;
+    }
 }
 
 /// <summary>
@@ -350,8 +387,8 @@ static bool SetupAzureClient()
 
     iotHubClientAuthenticationState = IoTHubClientAuthenticationState_AuthenticationInitiated;
 
-    IoTHubDeviceClient_LL_SetDeviceTwinCallback(iothubClientHandle, dx__deviceTwinCallbackHandler, NULL);
-    IoTHubDeviceClient_LL_SetDeviceMethodCallback(iothubClientHandle, dx__deviceDirectMethodCallbackHandler, NULL);
+    IoTHubDeviceClient_LL_SetDeviceTwinCallback(iothubClientHandle, HubDeviceTwinCallback, NULL);
+    IoTHubDeviceClient_LL_SetDeviceMethodCallback(iothubClientHandle, HubDirectMethodCallback, NULL);
     IoTHubDeviceClient_LL_SetConnectionStatusCallback(iothubClientHandle, HubConnectionStatusCallback, NULL);
     IoTHubDeviceClient_LL_SetMessageCallback(iothubClientHandle, HubMessageReceivedCallback, NULL);
 

@@ -65,8 +65,3 @@ void dx_deviceTwinUnsubscribe(void);
 /// <param name="deviceTwins"></param>
 /// <param name="deviceTwinCount"></param>
 void dx_deviceTwinSubscribe(DX_DEVICE_TWIN_BINDING* deviceTwins[], size_t deviceTwinCount);
-
-/// <summary>
-/// Callback used by IoT Hub client to process inbound device twin messages.
-/// </summary>
-void dx__deviceTwinCallbackHandler(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char* payload, size_t payloadSize, void* userContextCallback);

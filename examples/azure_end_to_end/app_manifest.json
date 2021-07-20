@@ -1,12 +1,11 @@
 {
   "SchemaVersion": 1,
-  "Name": "direct_methods_example",
+  "Name": "azure_end_to_end",
   "ComponentId": "b217fd65-ac8d-4d7c-b62c-0d07b5df6357",
   "EntryPoint": "/bin/app",
-  "CmdArgs": ["--ScopeID", "REPLACE_WITH_YOUR_ID_SCOPE"],
+  "CmdArgs": [ "--ScopeID", "REPLACE_WITH_YOUR_ID_SCOPE" ],
   "Capabilities": {
-    "Gpio": [ "$LED2" ],
-    "PowerControls": [ "ForceReboot" ],
+    "Gpio": [ "$NETWORK_CONNECTED_LED", "$LED2" ],
     "AllowedConnections": [
       "global.azure-devices-provisioning.net",
       "REPLACE_WITH_YOUR_IOT_HUB_ENDPOINT_URL"
