@@ -47,6 +47,10 @@ typedef enum {
 	DX_ExitCode_SetUpSysEvent_RegisterEvent = 225,
 
 	DX_ExitCode_Init_IoTCTimer = 220,
-	DX_ExitCode_IoTCTimer_Consume = 219
+	DX_ExitCode_IoTCTimer_Consume = 219,
 
+	DX_ExitCode_Uart_Open_Failed = 215,
+	DX_ExitCode_Uart_Read_Failed = 214,
+	DX_ExitCode_Uart_Write_Failed = 213,
+	DX_ExitCode_UartHandler = 212
 } ExitCode;

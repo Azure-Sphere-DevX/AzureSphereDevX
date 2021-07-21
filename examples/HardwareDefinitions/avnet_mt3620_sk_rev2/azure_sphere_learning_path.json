@@ -30,6 +30,9 @@
         {"Name": "Adc0", "Type": "Adc", "Mapping": "AVNET_MT3620_SK_ADC_CONTROLLER0", "Comment": "AVNET Start Kit Definition"},
         {"Name": "LED_RED", "Type": "Gpio", "Mapping": "AVNET_MT3620_SK_USER_LED_RED", "Comment": "Red LED"},
         {"Name": "LED_GREEN", "Type": "Gpio", "Mapping": "AVNET_MT3620_SK_USER_LED_GREEN", "Comment": "Green LED"},
-        {"Name": "LED_BLUE", "Type": "Gpio", "Mapping": "AVNET_MT3620_SK_USER_LED_BLUE", "Comment": "Blue LED"}
+        {"Name": "LED_BLUE", "Type": "Gpio", "Mapping": "AVNET_MT3620_SK_USER_LED_BLUE", "Comment": "Blue LED"},
+        {"Name": "UART_CLICK1", "Type": "Uart", "Mapping": "AVNET_MT3620_SK_ISU0_UART", "Comment": "MT3620 SK: Connect CLICK1: RX (RX), TX (TX), CTS (CS), and RTS (SDI)."},
+        {"Name": "UART_CLICK2", "Type": "Uart", "Mapping": "AVNET_MT3620_SK_ISU1_UART", "Comment": "MT3620 SK: Connect CLICK2: RX (RX), TX (TX), CTS (CS), and RTS (SDI)."}
+
     ]
 }
