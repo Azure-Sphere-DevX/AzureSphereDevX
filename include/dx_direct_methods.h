@@ -20,5 +20,3 @@ typedef struct _directMethodBinding {
 
 void dx_directMethodUnsubscribe(void);
 void dx_directMethodSubscribe(DX_DIRECT_METHOD_BINDING* directMethods[], size_t directMethodCount);
-int dx__deviceDirectMethodCallbackHandler(const char* method_name, const unsigned char* payload, size_t payloadSize,
-	unsigned char** responsePayload, size_t* responsePayloadSize, void* userContextCallback);

@@ -12,12 +12,16 @@ static void deviceTwinOpen(DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
 static void deviceTwinsReportStatusCallback(int result, void *context);
 static void SetDesiredState(JSON_Object *desiredProperties,
                             DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
+static void DeviceTwinCallbackHandler(DEVICE_TWIN_UPDATE_STATE updateState, const unsigned char *payload, size_t payloadSize,
+                                      void *userContextCallback);
 
 static DX_DEVICE_TWIN_BINDING **_deviceTwins = NULL;
 static size_t _deviceTwinCount = 0;
 
 void dx_deviceTwinSubscribe(DX_DEVICE_TWIN_BINDING *deviceTwins[], size_t deviceTwinCount)
 {
+    dx_azureRegisterDeviceTwinCallback(DeviceTwinCallbackHandler);
+
     _deviceTwins = deviceTwins;
     _deviceTwinCount = deviceTwinCount;
 
@@ -28,6 +32,8 @@ void dx_deviceTwinSubscribe(DX_DEVICE_TWIN_BINDING *deviceTwins[], size_t device
 
 void dx_deviceTwinUnsubscribe(void)
 {
+    dx_azureRegisterDeviceTwinCallback(NULL);
+
     for (int i = 0; i < _deviceTwinCount; i++) {
         deviceTwinClose(_deviceTwins[i]);
     }
@@ -87,7 +93,7 @@ static void deviceTwinClose(DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
 /// </summary>
 /// <param name="payload">contains the Device Twin JSON document (desired and reported)</param>
 /// <param name="payloadSize">size of the Device Twin JSON document</param>
-void dx__deviceTwinCallbackHandler(DEVICE_TWIN_UPDATE_STATE updateState,
+static void DeviceTwinCallbackHandler(DEVICE_TWIN_UPDATE_STATE updateState,
                                    const unsigned char *payload, size_t payloadSize,
                                    void *userContextCallback)
 {

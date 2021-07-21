@@ -3,17 +3,24 @@
 
 #include "dx_direct_methods.h"
 
+static int DirectMethodCallbackHandler(const char *method_name, const unsigned char *payload, size_t payloadSize,
+                                       unsigned char **responsePayload, size_t *responsePayloadSize, void *userContextCallback);
+
 static DX_DIRECT_METHOD_BINDING **_directMethods;
 static size_t _directMethodCount;
 
 void dx_directMethodSubscribe(DX_DIRECT_METHOD_BINDING *directMethods[], size_t directMethodCount)
 {
+    dx_azureRegisterDirectMethodCallback(DirectMethodCallbackHandler);
+
     _directMethods = directMethods;
     _directMethodCount = directMethodCount;
 }
 
 void dx_directMethodUnsubscribe(void)
 {
+    dx_azureRegisterDirectMethodCallback(NULL);
+
     _directMethods = NULL;
     _directMethodCount = 0;
 }
@@ -21,7 +28,7 @@ void dx_directMethodUnsubscribe(void)
 /*
 This implementation of Direct Methods expects a JSON Payload Object
 */
-int dx__deviceDirectMethodCallbackHandler(const char *method_name, const unsigned char *payload,
+static int DirectMethodCallbackHandler(const char *method_name, const unsigned char *payload,
                                           size_t payloadSize, unsigned char **responsePayload,
                                           size_t *responsePayloadSize, void *userContextCallback)
 {
