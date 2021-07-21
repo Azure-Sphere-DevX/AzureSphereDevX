@@ -66,15 +66,14 @@ DX_GPIO_BINDING *gpio_set[] = {&buttonA, &buttonB};
 /****************************************************************************************
  * UART Peripherals
  ****************************************************************************************/
-static DX_UART_BINDING loopBackClick1 = {
-                              .uart = UART_CLICK1,
-                              .name = "uart click2",
-                              .handler = uart_rx_handler1,
-                              .uartConfig.baudRate = 115200,
-                              .uartConfig.dataBits = UART_DataBits_Eight,
-                              .uartConfig.parity = UART_Parity_None,
-                              .uartConfig.stopBits = UART_StopBits_One,
-                              .uartConfig.flowControl = UART_FlowControl_None};
+static DX_UART_BINDING loopBackClick1 = {.uart = UART_CLICK1,
+                                         .name = "uart click2",
+                                         .handler = uart_rx_handler1,
+                                         .uartConfig.baudRate = 115200,
+                                         .uartConfig.dataBits = UART_DataBits_Eight,
+                                         .uartConfig.parity = UART_Parity_None,
+                                         .uartConfig.stopBits = UART_StopBits_One,
+                                         .uartConfig.flowControl = UART_FlowControl_None};
 
 // All UARTSs added to uart_set will be opened in InitPeripheralsAndHandlers
 DX_UART_BINDING *uart_set[] = {&loopBackClick1};
@@ -108,7 +107,7 @@ static void ButtonPressCheckHandler(EventLoopTimer *eventLoopTimer)
     char buttonBMsg[] = "This is a test, ButtonB!";
 
     if (dx_gpioStateGet(&buttonA, &buttonAState)) {
-        
+
         Log_Debug("Sending data over the uart!\n");
         dx_uartWrite(&loopBackClick1, buttonAMsg, strnlen(buttonAMsg, 32));
     }
@@ -121,13 +120,14 @@ static void ButtonPressCheckHandler(EventLoopTimer *eventLoopTimer)
 
 static void uart_rx_handler1(DX_UART_BINDING *uartBinding)
 {
-  // Read data from the uart here
-    char rxBuffer[128+1];
+    // Read data from the uart here
+    char rxBuffer[128 + 1];
     int bytesRead = dx_uartRead(uartBinding, rxBuffer, 128);
-    if (bytesRead > 0){
+    if (bytesRead > 0) {
         // Null terminate the buffer before printing it to debug
         rxBuffer[bytesRead] = '\0';
-        Log_Debug("RX(1) %d bytes from %s: %s\n", bytesRead, uartBinding->name == NULL ? "No name" : uartBinding->name, rxBuffer);
+        Log_Debug("RX(1) %d bytes from %s: %s\n", bytesRead,
+                  uartBinding->name == NULL ? "No name" : uartBinding->name, rxBuffer);
     }
 }
 

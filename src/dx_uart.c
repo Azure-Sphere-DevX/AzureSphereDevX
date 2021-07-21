@@ -9,7 +9,7 @@ static bool ProcessUartEvent(DX_UART_BINDING *uart_binding);
 
 static EventRegistration *uartEventReg = NULL;
 
-void dx_uartSetOpen(DX_UART_BINDING** uartSet, size_t uartSetCount)
+void dx_uartSetOpen(DX_UART_BINDING **uartSet, size_t uartSetCount)
 {
     for (int i = 0; i < uartSetCount; i++) {
         if (!dx_uartOpen(uartSet[i])) {
@@ -18,7 +18,7 @@ void dx_uartSetOpen(DX_UART_BINDING** uartSet, size_t uartSetCount)
     }
 }
 
-bool dx_uartOpen(DX_UART_BINDING* uart_binding)
+bool dx_uartOpen(DX_UART_BINDING *uart_binding)
 {
     if (uart_binding == NULL || uart_binding->uart < 0) {
         return false;
@@ -40,8 +40,7 @@ bool dx_uartOpen(DX_UART_BINDING* uart_binding)
     }
 
     // Register handler for incoming messages from this uart
-    uartEventReg = EventLoop_RegisterIo(dx_timerGetEventLoop(), uart_binding->fd,
-                                          EventLoop_Input, UartEventHandler, uart_binding);
+    uartEventReg = EventLoop_RegisterIo(dx_timerGetEventLoop(), uart_binding->fd, EventLoop_Input, UartEventHandler, uart_binding);
     if (uartEventReg == NULL) {
         Log_Debug("ERROR: Unable to register uart event: %d (%s)\n", errno, strerror(errno));
         return false;
@@ -66,52 +65,54 @@ static void UartEventHandler(EventLoop *el, int fd, EventLoop_IoEvents events, v
 /// </summary>
 static bool ProcessUartEvent(DX_UART_BINDING *uart_binding)
 {
-    if(uart_binding->handler == NULL){
+    if (uart_binding->handler == NULL) {
 
         return false;
-    }
-    else{
+    } else {
         // call the binding specific handler to read and process the data
         uart_binding->handler(uart_binding);
         return true;
-    }   
+    }
 }
 
-void dx_uartSetClose(DX_UART_BINDING** uartSet, size_t uartSetCount){
+void dx_uartSetClose(DX_UART_BINDING **uartSet, size_t uartSetCount)
+{
 
     for (int i = 0; i < uartSetCount; i++) {
         dx_uartClose(uartSet[i]);
     }
 }
 
-void dx_uartClose(DX_UART_BINDING* uart_binding){
+void dx_uartClose(DX_UART_BINDING *uart_binding)
+{
 
     if (uart_binding->opened && (uart_binding->fd >= 0)) {
         int result = close(uart_binding->fd);
         if (result != 0) {
-            Log_Debug("ERROR: Could not close uart %s: %s (%d).\n",
-                      uart_binding->name == NULL ? "No name" : uart_binding->name, strerror(errno),
-                      errno);
+            Log_Debug("ERROR: Could not close uart %s: %s (%d).\n", uart_binding->name == NULL ? "No name" : uart_binding->name,
+                      strerror(errno), errno);
         }
     }
     uart_binding->fd = -1;
     uart_binding->opened = false;
 }
 
-int dx_uartWrite(DX_UART_BINDING* uart_binding, char* writeBuffer, size_t dataLength){
+int dx_uartWrite(DX_UART_BINDING *uart_binding, char *writeBuffer, size_t dataLength)
+{
 
-    if(!uart_binding->opened){
+    if (!uart_binding->opened) {
         return -1;
     }
-    
+
     return write(uart_binding->fd, writeBuffer, dataLength);
 }
 
-int dx_uartRead(DX_UART_BINDING* uart_binding, char* rxBuffer, size_t bufferSize ){  
+int dx_uartRead(DX_UART_BINDING *uart_binding, char *rxBuffer, size_t bufferSize)
+{
 
-    if(!uart_binding->opened){
+    if (!uart_binding->opened) {
         return -1;
     }
 
-    return read(uart_binding->fd, rxBuffer, bufferSize );
+    return read(uart_binding->fd, rxBuffer, bufferSize);
 }
