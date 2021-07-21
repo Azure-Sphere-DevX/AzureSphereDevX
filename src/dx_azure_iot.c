@@ -655,11 +655,12 @@ static void HubConnectionStatusCallback(IOTHUB_CLIENT_CONNECTION_STATUS result, 
             iotHubClientAuthenticationState = IoTHubClientAuthenticationState_NotAuthenticated;
             Log_Debug("Hub status callback: IoTHubClientAuthenticationState_NotAuthenticated\n");
         }
-        deviceConnectionState = DEVICE_NOT_CONNECTED;
-        return;
-    }
 
-    iotHubClientAuthenticationState = IoTHubClientAuthenticationState_Authenticated;
+        deviceConnectionState = DEVICE_NOT_CONNECTED;
+
+    } else {
+        iotHubClientAuthenticationState = IoTHubClientAuthenticationState_Authenticated;
+    }
 
     for (size_t i = 0; i < MAX_CONNECTION_STATUS_CALLBASKS; i++) {
         if (_connectionStatusCallback[i] != NULL) {
