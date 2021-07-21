@@ -1,6 +1,6 @@
 #include "dx_azure_iot.h"
 
-#define MAX_CONNECTION_STATUS_CALLBASKS 5
+#define MAX_CONNECTION_STATUS_CALLBACKS 5
 
 static bool SetupAzureClient(void);
 static bool SetUpAzureIoTHubClientWithDaa(void);
@@ -29,7 +29,7 @@ static void (*_deviceTwinCallbackHandler)(DEVICE_TWIN_UPDATE_STATE updateState, 
 static int (*_directMethodCallbackHandler)(const char *method_name, const unsigned char *payload, size_t payloadSize,
                                            unsigned char **responsePayload, size_t *responsePayloadSize, void *userContextCallback);
 
-static void (*_connectionStatusCallback[MAX_CONNECTION_STATUS_CALLBASKS])(bool connected);
+static void (*_connectionStatusCallback[MAX_CONNECTION_STATUS_CALLBACKS])(bool connected);
 
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(PROV_DEVICE_RESULT, PROV_DEVICE_RESULT_VALUE);
 MU_DEFINE_ENUM_STRINGS_WITHOUT_INVALID(IOTHUB_CLIENT_RESULT, IOTHUB_CLIENT_RESULT_VALUE);
@@ -93,7 +93,7 @@ void dx_azureRegisterMessageReceivedNotification(IOTHUBMESSAGE_DISPOSITION_RESUL
 bool dx_azureRegisterConnectionChangedNotification(void (*connectionStatusCallback)(bool connected))
 {
     bool result = false;
-    for (size_t i = 0; i < MAX_CONNECTION_STATUS_CALLBASKS; i++) {
+    for (size_t i = 0; i < MAX_CONNECTION_STATUS_CALLBACKS; i++) {
         if (_connectionStatusCallback[i] == NULL) {
             _connectionStatusCallback[i] = connectionStatusCallback;
             result = true;
@@ -105,7 +105,7 @@ bool dx_azureRegisterConnectionChangedNotification(void (*connectionStatusCallba
 
 void dx_azureUnregisterConnectionChangedNotification(void (*connectionStatusCallback)(bool connected))
 {
-    for (size_t i = 0; i < MAX_CONNECTION_STATUS_CALLBASKS; i++) {
+    for (size_t i = 0; i < MAX_CONNECTION_STATUS_CALLBACKS; i++) {
         if (_connectionStatusCallback[i] == connectionStatusCallback) {
             _connectionStatusCallback[i] = NULL;
         }
@@ -662,7 +662,7 @@ static void HubConnectionStatusCallback(IOTHUB_CLIENT_CONNECTION_STATUS result, 
         iotHubClientAuthenticationState = IoTHubClientAuthenticationState_Authenticated;
     }
 
-    for (size_t i = 0; i < MAX_CONNECTION_STATUS_CALLBASKS; i++) {
+    for (size_t i = 0; i < MAX_CONNECTION_STATUS_CALLBACKS; i++) {
         if (_connectionStatusCallback[i] != NULL) {
             _connectionStatusCallback[i](dx_isAzureConnected());
         }
