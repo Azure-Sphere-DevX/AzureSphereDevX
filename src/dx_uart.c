@@ -61,12 +61,11 @@ static void UartEventHandler(EventLoop *el, int fd, EventLoop_IoEvents events, v
 }
 
 /// <summary>
-///     Handle uart event by passing controll to the uart binding handler
+///     Handle uart event by passing control to the uart binding handler
 /// </summary>
 static bool ProcessUartEvent(DX_UART_BINDING *uart_binding)
 {
     if (uart_binding->handler == NULL) {
-
         return false;
     } else {
         // call the binding specific handler to read and process the data
@@ -77,7 +76,6 @@ static bool ProcessUartEvent(DX_UART_BINDING *uart_binding)
 
 void dx_uartSetClose(DX_UART_BINDING **uartSet, size_t uartSetCount)
 {
-
     for (int i = 0; i < uartSetCount; i++) {
         dx_uartClose(uartSet[i]);
     }
@@ -85,7 +83,6 @@ void dx_uartSetClose(DX_UART_BINDING **uartSet, size_t uartSetCount)
 
 void dx_uartClose(DX_UART_BINDING *uart_binding)
 {
-
     if (uart_binding->opened && (uart_binding->fd >= 0)) {
         int result = close(uart_binding->fd);
         if (result != 0) {
@@ -99,7 +96,6 @@ void dx_uartClose(DX_UART_BINDING *uart_binding)
 
 int dx_uartWrite(DX_UART_BINDING *uart_binding, char *writeBuffer, size_t dataLength)
 {
-
     if (!uart_binding->opened) {
         return -1;
     }
@@ -109,7 +105,6 @@ int dx_uartWrite(DX_UART_BINDING *uart_binding, char *writeBuffer, size_t dataLe
 
 int dx_uartRead(DX_UART_BINDING *uart_binding, char *rxBuffer, size_t bufferSize)
 {
-
     if (!uart_binding->opened) {
         return -1;
     }

@@ -60,14 +60,14 @@ static DX_GPIO_BINDING buttonA = {
 static DX_GPIO_BINDING buttonB = {
     .pin = BUTTON_B, .name = "buttonB", .direction = DX_INPUT, .detect = DX_GPIO_DETECT_LOW};
 
-// All GPIOs added to gpio_set will be opened in InitPeripheralsAndHandlers
-DX_GPIO_BINDING *gpio_set[] = {&buttonA, &buttonB};
+// All GPIOs added to gpio_bindings will be opened in InitPeripheralsAndHandlers
+DX_GPIO_BINDING *gpio_bindings[] = {&buttonA, &buttonB};
 
 /****************************************************************************************
  * UART Peripherals
  ****************************************************************************************/
 static DX_UART_BINDING loopBackClick1 = {.uart = UART_CLICK1,
-                                         .name = "uart click2",
+                                         .name = "uart click1",
                                          .handler = uart_rx_handler1,
                                          .uartConfig.baudRate = 115200,
                                          .uartConfig.dataBits = UART_DataBits_Eight,
@@ -75,17 +75,17 @@ static DX_UART_BINDING loopBackClick1 = {.uart = UART_CLICK1,
                                          .uartConfig.stopBits = UART_StopBits_One,
                                          .uartConfig.flowControl = UART_FlowControl_None};
 
-// All UARTSs added to uart_set will be opened in InitPeripheralsAndHandlers
-DX_UART_BINDING *uart_set[] = {&loopBackClick1};
+// All UARTSs added to uart_bindings will be opened in InitPeripheralsAndHandlers
+DX_UART_BINDING *uart_bindings[] = {&loopBackClick1};
 
 /****************************************************************************************
  * Timer Bindings
  ****************************************************************************************/
 static DX_TIMER_BINDING buttonPressCheckTimer = {
-    .period = {0, 1000000}, .name = "buttonPressCheckTimer", .handler = ButtonPressCheckHandler};
+    .period = {0, ONE_MS}, .name = "buttonPressCheckTimer", .handler = ButtonPressCheckHandler};
 
-// All timers referenced in timers with be opened in the InitPeripheralsAndHandlers function
-DX_TIMER_BINDING *timerSet[] = {&buttonPressCheckTimer};
+// All timers referenced in timer_bindings with be opened in the InitPeripheralsAndHandlers function
+DX_TIMER_BINDING *timer_bindings[] = {&buttonPressCheckTimer};
 
 /****************************************************************************************
  * Implementation
@@ -136,9 +136,9 @@ static void uart_rx_handler1(DX_UART_BINDING *uartBinding)
 /// </summary>
 static void InitPeripheralsAndHandlers(void)
 {
-    dx_gpioSetOpen(gpio_set, NELEMS(gpio_set));
-    dx_uartSetOpen(uart_set, NELEMS(uart_set));
-    dx_timerSetStart(timerSet, NELEMS(timerSet));
+    dx_gpioSetOpen(gpio_bindings, NELEMS(gpio_bindings));
+    dx_uartSetOpen(uart_bindings, NELEMS(uart_bindings));
+    dx_timerSetStart(timer_bindings, NELEMS(timer_bindings));
 }
 
 /// <summary>
@@ -146,9 +146,9 @@ static void InitPeripheralsAndHandlers(void)
 /// </summary>
 static void ClosePeripheralsAndHandlers(void)
 {
-    dx_timerSetStop(timerSet, NELEMS(timerSet));
-    dx_uartSetClose(uart_set, NELEMS(uart_set));
-    dx_gpioSetClose(gpio_set, NELEMS(gpio_set));
+    dx_timerSetStop(timer_bindings, NELEMS(timer_bindings));
+    dx_uartSetClose(uart_bindings, NELEMS(uart_bindings));
+    dx_gpioSetClose(gpio_bindings, NELEMS(gpio_bindings));
     dx_timerEventLoopStop();
 }
 
