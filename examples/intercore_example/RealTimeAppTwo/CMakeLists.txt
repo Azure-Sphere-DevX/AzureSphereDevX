@@ -11,7 +11,7 @@ cmake_minimum_required(VERSION 3.10)
 # Configurations
 project(realtime_app_two_sample C)
 
-azsphere_configure_tools(TOOLS_REVISION "21.04")
+azsphere_configure_tools(TOOLS_REVISION "21.07")
 add_compile_definitions(OSAI_BARE_METAL)
 add_compile_definitions(OSAI_ENABLE_DMA)
 
