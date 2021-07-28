@@ -19,8 +19,8 @@ set(AVNET TRUE "AVNET Azure Sphere Starter Kit Revision 1 ")
 cmake_minimum_required (VERSION 3.10)
 project (AzureSphereAzureIoT C)
 
-azsphere_configure_tools(TOOLS_REVISION "20.10")
-azsphere_configure_api(TARGET_API_SET "9")
+azsphere_configure_tools(TOOLS_REVISION "21.07")
+azsphere_configure_api(TARGET_API_SET "10")
 
 
 add_subdirectory("../../../" out)
