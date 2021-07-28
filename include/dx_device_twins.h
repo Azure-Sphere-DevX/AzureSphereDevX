@@ -18,10 +18,10 @@ typedef enum {
 } DX_DEVICE_TWIN_TYPE;
 
 typedef struct _deviceTwinBinding {
-	const char* twinProperty;
-	void* twinState;
-	int twinVersion;
-	bool twinStateUpdated;
+	const char* propertyName;
+	void* propertyValue;
+	int propertyVersion;
+	bool propertyUpdated;
 	DX_DEVICE_TWIN_TYPE twinType;
 	void (*handler)(struct _deviceTwinBinding* deviceTwinBinding);
 } DX_DEVICE_TWIN_BINDING;
@@ -42,7 +42,7 @@ typedef enum
 /// <param name="state"></param>
 /// <param name="statusCode"></param>
 /// <returns></returns>
-bool dx_deviceTwinAckDesiredState(DX_DEVICE_TWIN_BINDING* deviceTwinBinding, void* state, DX_DEVICE_TWIN_RESPONSE_CODE statusCode);
+bool dx_deviceTwinAckDesiredValue(DX_DEVICE_TWIN_BINDING* deviceTwinBinding, void* state, DX_DEVICE_TWIN_RESPONSE_CODE statusCode);
 
 
 /// <summary>
@@ -51,7 +51,7 @@ bool dx_deviceTwinAckDesiredState(DX_DEVICE_TWIN_BINDING* deviceTwinBinding, voi
 /// <param name="deviceTwinBinding"></param>
 /// <param name="state"></param>
 /// <returns></returns>
-bool dx_deviceTwinReportState(DX_DEVICE_TWIN_BINDING* deviceTwinBinding, void* state);
+bool dx_deviceTwinReportValue(DX_DEVICE_TWIN_BINDING* deviceTwinBinding, void* state);
 
 /// <summary>
 /// Close all device twins, deallocate backing storage for each twin, and stop inbound and outbound device twin updates.

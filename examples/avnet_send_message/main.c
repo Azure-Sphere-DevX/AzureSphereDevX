@@ -85,8 +85,8 @@ DX_TIMER_BINDING *timers[] = {&publish_message};
 /****************************************************************************************
  * Device Twins Bindings
  ****************************************************************************************/
-static DX_DEVICE_TWIN_BINDING dt_desired_temperature = { .twinProperty = "DesiredTemperature", .twinType = DX_DEVICE_TWIN_DOUBLE, .handler = dt_desired_temperature_handler};
-static DX_DEVICE_TWIN_BINDING dt_reported_temperature = {.twinProperty = "ReportedTemperature", .twinType = DX_DEVICE_TWIN_DOUBLE};
+static DX_DEVICE_TWIN_BINDING dt_desired_temperature = { .propertyName = "DesiredTemperature", .twinType = DX_DEVICE_TWIN_DOUBLE, .handler = dt_desired_temperature_handler};
+static DX_DEVICE_TWIN_BINDING dt_reported_temperature = {.propertyName = "ReportedTemperature", .twinType = DX_DEVICE_TWIN_DOUBLE};
 
 // All device twins referenced in timers with be opened in the InitPeripheralsAndHandlers function
 DX_DEVICE_TWIN_BINDING *device_twin_bindings[] = {&dt_reported_temperature, &dt_desired_temperature};
@@ -134,7 +134,7 @@ static void publish_message_handler(EventLoopTimer *eventLoopTimer)
             Log_Debug("JSON Serialization failed: Buffer too small\n");
         }
 
-        if (dt_desired_temperature.twinStateUpdated) {
+        if (dt_desired_temperature.propertyUpdated) {
             if (desired_temperature > temperature) {
                 Log_Debug("It's too hot\n");
             } else if (desired_temperature < temperature) {
@@ -144,7 +144,7 @@ static void publish_message_handler(EventLoopTimer *eventLoopTimer)
             }
 
             // now update the reported temperature device twin
-            dx_deviceTwinReportState(&dt_reported_temperature, &temperature);
+            dx_deviceTwinReportValue(&dt_reported_temperature, &temperature);
         }
     }
 }
@@ -153,13 +153,13 @@ static void dt_desired_temperature_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBin
 {
     // validate data is sensible range before applying
     // For example set HVAC system desired temperature in celsius
-    if (deviceTwinBinding->twinType == DX_DEVICE_TWIN_DOUBLE && *(double *)deviceTwinBinding->twinState >= 18.0 &&
-        *(int *)deviceTwinBinding->twinState <= 30.0) {
+    if (deviceTwinBinding->twinType == DX_DEVICE_TWIN_DOUBLE && *(double *)deviceTwinBinding->propertyValue >= 18.0 &&
+        *(int *)deviceTwinBinding->propertyValue <= 30.0) {
 
-        desired_temperature = *(double *)deviceTwinBinding->twinState;
+        desired_temperature = *(double *)deviceTwinBinding->propertyValue;
 
         // If IoT Connect Pattern is to respond with the Device Twin Key Value then do the following
-        dx_deviceTwinReportState(deviceTwinBinding, deviceTwinBinding->twinState);
+        dx_deviceTwinReportValue(deviceTwinBinding, deviceTwinBinding->propertyValue);
     }
 }
 

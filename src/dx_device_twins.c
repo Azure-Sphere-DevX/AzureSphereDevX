@@ -46,31 +46,31 @@ static void deviceTwinOpen(DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
             "\n\nDevice Twin '%s' missing type information.\nInclude .twinType option in "
             "DX_DEVICE_TWIN_BINDING definition.\nExample .twinType=DX_DEVICE_TWIN_BOOL. Valid types "
             "include DX_DEVICE_TWIN_BOOL, DX_DEVICE_TWIN_INT, DX_DEVICE_TWIN_FLOAT, DX_DEVICE_TWIN_STRING.\n\n",
-            deviceTwinBinding->twinProperty);
+            deviceTwinBinding->propertyName);
         dx_terminate(DX_ExitCode_OpenDeviceTwin);
     }
 
     // types JSON and String allocated dynamically when called in azure_iot.c
     switch (deviceTwinBinding->twinType) {
     case DX_DEVICE_TWIN_INT:
-        deviceTwinBinding->twinState = malloc(sizeof(int));
-        memset(deviceTwinBinding->twinState, 0x00, sizeof(int));
-        *(int *)deviceTwinBinding->twinState = 0;
+        deviceTwinBinding->propertyValue = malloc(sizeof(int));
+        memset(deviceTwinBinding->propertyValue, 0x00, sizeof(int));
+        *(int *)deviceTwinBinding->propertyValue = 0;
         break;
     case DX_DEVICE_TWIN_FLOAT:
-        deviceTwinBinding->twinState = malloc(sizeof(float));
-        memset(deviceTwinBinding->twinState, 0x00, sizeof(float));
-        *(float *)deviceTwinBinding->twinState = 0.0f;
+        deviceTwinBinding->propertyValue = malloc(sizeof(float));
+        memset(deviceTwinBinding->propertyValue, 0x00, sizeof(float));
+        *(float *)deviceTwinBinding->propertyValue = 0.0f;
         break;
     case DX_DEVICE_TWIN_DOUBLE:
-        deviceTwinBinding->twinState = malloc(sizeof(double));
-        memset(deviceTwinBinding->twinState, 0x00, sizeof(double));
-        *(double *)deviceTwinBinding->twinState = 0.0;
+        deviceTwinBinding->propertyValue = malloc(sizeof(double));
+        memset(deviceTwinBinding->propertyValue, 0x00, sizeof(double));
+        *(double *)deviceTwinBinding->propertyValue = 0.0;
         break;
     case DX_DEVICE_TWIN_BOOL:
-        deviceTwinBinding->twinState = malloc(sizeof(bool));
-        memset(deviceTwinBinding->twinState, 0x00, sizeof(bool));
-        *(bool *)deviceTwinBinding->twinState = false;
+        deviceTwinBinding->propertyValue = malloc(sizeof(bool));
+        memset(deviceTwinBinding->propertyValue, 0x00, sizeof(bool));
+        *(bool *)deviceTwinBinding->propertyValue = false;
         break;
     case DX_DEVICE_TWIN_STRING:
         // Note no memory is allocated for string twin type as size is unknown
@@ -82,9 +82,9 @@ static void deviceTwinOpen(DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
 
 static void deviceTwinClose(DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
 {
-    if (deviceTwinBinding->twinState != NULL) {
-        free(deviceTwinBinding->twinState);
-        deviceTwinBinding->twinState = NULL;
+    if (deviceTwinBinding->propertyValue != NULL) {
+        free(deviceTwinBinding->propertyValue);
+        deviceTwinBinding->propertyValue = NULL;
     }
 }
 
@@ -127,7 +127,7 @@ static void DeviceTwinCallbackHandler(DEVICE_TWIN_UPDATE_STATE updateState,
 
     for (int i = 0; i < _deviceTwinCount; i++) {
         JSON_Value *jsonValue =
-            json_object_get_value(desiredProperties, _deviceTwins[i]->twinProperty);
+            json_object_get_value(desiredProperties, _deviceTwins[i]->propertyName);
         if (jsonValue != NULL) {
             SetDesiredState(desiredProperties, _deviceTwins[i]);
         }
@@ -146,23 +146,23 @@ cleanup:
 }
 
 /// <summary>
-///     Checks to see if the device twin twinProperty(name) is found in the json object. If yes,
+///     Checks to see if the device twin propertyName(name) is found in the json object. If yes,
 ///     then act upon the request
 /// </summary>
 static void SetDesiredState(JSON_Object *jsonObject, DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
 {
     if (json_object_has_value_of_type(jsonObject, "$version", JSONNumber)) {
-        deviceTwinBinding->twinVersion = (int)json_object_get_number(jsonObject, "$version");
+        deviceTwinBinding->propertyVersion = (int)json_object_get_number(jsonObject, "$version");
     }
 
     switch (deviceTwinBinding->twinType) {
     case DX_DEVICE_TWIN_INT:
-        if (json_object_has_value_of_type(jsonObject, deviceTwinBinding->twinProperty,
+        if (json_object_has_value_of_type(jsonObject, deviceTwinBinding->propertyName,
                                           JSONNumber)) {
-            *(int *)deviceTwinBinding->twinState =
-                (int)json_object_get_number(jsonObject, deviceTwinBinding->twinProperty);
+            *(int *)deviceTwinBinding->propertyValue =
+                (int)json_object_get_number(jsonObject, deviceTwinBinding->propertyName);
 
-            deviceTwinBinding->twinStateUpdated = true;
+            deviceTwinBinding->propertyUpdated = true;
 
             if (deviceTwinBinding->handler != NULL) {
                 deviceTwinBinding->handler(deviceTwinBinding);
@@ -170,12 +170,12 @@ static void SetDesiredState(JSON_Object *jsonObject, DX_DEVICE_TWIN_BINDING *dev
         }
         break;
     case DX_DEVICE_TWIN_FLOAT:
-        if (json_object_has_value_of_type(jsonObject, deviceTwinBinding->twinProperty,
+        if (json_object_has_value_of_type(jsonObject, deviceTwinBinding->propertyName,
                                           JSONNumber)) {
-            *(float *)deviceTwinBinding->twinState =
-                (float)json_object_get_number(jsonObject, deviceTwinBinding->twinProperty);
+            *(float *)deviceTwinBinding->propertyValue =
+                (float)json_object_get_number(jsonObject, deviceTwinBinding->propertyName);
 
-            deviceTwinBinding->twinStateUpdated = true;
+            deviceTwinBinding->propertyUpdated = true;
 
             if (deviceTwinBinding->handler != NULL) {
                 deviceTwinBinding->handler(deviceTwinBinding);
@@ -183,12 +183,12 @@ static void SetDesiredState(JSON_Object *jsonObject, DX_DEVICE_TWIN_BINDING *dev
         }
         break;
     case DX_DEVICE_TWIN_DOUBLE:
-        if (json_object_has_value_of_type(jsonObject, deviceTwinBinding->twinProperty,
+        if (json_object_has_value_of_type(jsonObject, deviceTwinBinding->propertyName,
                                           JSONNumber)) {
-            *(double *)deviceTwinBinding->twinState =
-                (double)json_object_get_number(jsonObject, deviceTwinBinding->twinProperty);
+            *(double *)deviceTwinBinding->propertyValue =
+                (double)json_object_get_number(jsonObject, deviceTwinBinding->propertyName);
 
-            deviceTwinBinding->twinStateUpdated = true;
+            deviceTwinBinding->propertyUpdated = true;
 
             if (deviceTwinBinding->handler != NULL) {
                 deviceTwinBinding->handler(deviceTwinBinding);
@@ -196,12 +196,12 @@ static void SetDesiredState(JSON_Object *jsonObject, DX_DEVICE_TWIN_BINDING *dev
         }
         break;
     case DX_DEVICE_TWIN_BOOL:
-        if (json_object_has_value_of_type(jsonObject, deviceTwinBinding->twinProperty,
+        if (json_object_has_value_of_type(jsonObject, deviceTwinBinding->propertyName,
                                           JSONBoolean)) {
-            *(bool *)deviceTwinBinding->twinState =
-                (bool)json_object_get_boolean(jsonObject, deviceTwinBinding->twinProperty);
+            *(bool *)deviceTwinBinding->propertyValue =
+                (bool)json_object_get_boolean(jsonObject, deviceTwinBinding->propertyName);
 
-            deviceTwinBinding->twinStateUpdated = true;
+            deviceTwinBinding->propertyUpdated = true;
 
             if (deviceTwinBinding->handler != NULL) {
                 deviceTwinBinding->handler(deviceTwinBinding);
@@ -209,15 +209,15 @@ static void SetDesiredState(JSON_Object *jsonObject, DX_DEVICE_TWIN_BINDING *dev
         }
         break;
     case DX_DEVICE_TWIN_STRING:
-        if (json_object_has_value_of_type(jsonObject, deviceTwinBinding->twinProperty,
+        if (json_object_has_value_of_type(jsonObject, deviceTwinBinding->propertyName,
                                           JSONString)) {
-            deviceTwinBinding->twinState =
-                (char *)json_object_get_string(jsonObject, deviceTwinBinding->twinProperty);
+            deviceTwinBinding->propertyValue =
+                (char *)json_object_get_string(jsonObject, deviceTwinBinding->propertyName);
 
             if (deviceTwinBinding->handler != NULL) {
                 deviceTwinBinding->handler(deviceTwinBinding);
             }
-            deviceTwinBinding->twinState = NULL;
+            deviceTwinBinding->propertyValue = NULL;
         }
         break;
     default:
@@ -228,7 +228,7 @@ static void SetDesiredState(JSON_Object *jsonObject, DX_DEVICE_TWIN_BINDING *dev
 /// <summary>
 ///     Sends device twin desire state IoT Plug and Play acknowledgement
 /// </summary>
-bool dx_deviceTwinAckDesiredState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, void *state,
+bool dx_deviceTwinAckDesiredValue(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, void *state,
                                   DX_DEVICE_TWIN_RESPONSE_CODE statusCode)
 {
     return deviceTwinReportState(deviceTwinBinding, state, true, statusCode);
@@ -237,7 +237,7 @@ bool dx_deviceTwinAckDesiredState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, voi
 /// <summary>
 ///     device twin report state to Azure IoT Hub
 /// </summary>
-bool dx_deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, void *state)
+bool dx_deviceTwinReportValue(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, void *state)
 {
     return deviceTwinReportState(deviceTwinBinding, state, false, DX_DEVICE_TWIN_RESPONSE_COMPLETED);
 }
@@ -263,7 +263,7 @@ static bool deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, voi
     }
 
     reportLen +=
-        strlen(deviceTwinBinding->twinProperty); // allow for twin property name in JSON response
+        strlen(deviceTwinBinding->propertyName); // allow for twin property name in JSON response
 
     if (deviceTwinBinding->twinType == DX_DEVICE_TWIN_STRING) {
         reportLen += strlen((char *)state);
@@ -285,74 +285,74 @@ static bool deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, voi
 
     switch (deviceTwinBinding->twinType) {
     case DX_DEVICE_TWIN_INT:
-        *(int *)deviceTwinBinding->twinState = *(int *)state;
+        *(int *)deviceTwinBinding->propertyValue = *(int *)state;
 
         if (deviceTwinPnPAcknowledgment) {
             len = snprintf(reportedPropertiesString, reportLen,
                            "{\"%s\":{\"value\":%d, \"ac\":%d, \"av\":%d}}",
-                           deviceTwinBinding->twinProperty, (*(int *)deviceTwinBinding->twinState),
-                           (int)statusCode, deviceTwinBinding->twinVersion);
+                           deviceTwinBinding->propertyName, (*(int *)deviceTwinBinding->propertyValue),
+                           (int)statusCode, deviceTwinBinding->propertyVersion);
         } else {
             len = snprintf(reportedPropertiesString, reportLen, "{\"%s\":%d}",
-                           deviceTwinBinding->twinProperty, (*(int *)deviceTwinBinding->twinState));
+                           deviceTwinBinding->propertyName, (*(int *)deviceTwinBinding->propertyValue));
         }
         break;
     case DX_DEVICE_TWIN_FLOAT:
-        *(float *)deviceTwinBinding->twinState = *(float *)state;
+        *(float *)deviceTwinBinding->propertyValue = *(float *)state;
 
         if (deviceTwinPnPAcknowledgment) {
             len =
                 snprintf(reportedPropertiesString, reportLen,
                          "{\"%s\":{\"value\":%f, \"ac\":%d, \"av\":%d}}",
-                         deviceTwinBinding->twinProperty, (*(float *)deviceTwinBinding->twinState),
-                         (int)statusCode, deviceTwinBinding->twinVersion);
+                         deviceTwinBinding->propertyName, (*(float *)deviceTwinBinding->propertyValue),
+                         (int)statusCode, deviceTwinBinding->propertyVersion);
         } else {
             len =
                 snprintf(reportedPropertiesString, reportLen, "{\"%s\":%f}",
-                         deviceTwinBinding->twinProperty, (*(float *)deviceTwinBinding->twinState));
+                         deviceTwinBinding->propertyName, (*(float *)deviceTwinBinding->propertyValue));
         }
         break;
     case DX_DEVICE_TWIN_DOUBLE:
-        *(double *)deviceTwinBinding->twinState = *(double *)state;
+        *(double *)deviceTwinBinding->propertyValue = *(double *)state;
 
         if (deviceTwinPnPAcknowledgment) {
             len =
                 snprintf(reportedPropertiesString, reportLen,
                          "{\"%s\":{\"value\":%lf, \"ac\":%d, \"av\":%d}}",
-                         deviceTwinBinding->twinProperty, (*(double *)deviceTwinBinding->twinState),
-                         (int)statusCode, deviceTwinBinding->twinVersion);
+                         deviceTwinBinding->propertyName, (*(double *)deviceTwinBinding->propertyValue),
+                         (int)statusCode, deviceTwinBinding->propertyVersion);
         } else {
             len = snprintf(reportedPropertiesString, reportLen, "{\"%s\":%lf}",
-                           deviceTwinBinding->twinProperty,
-                           (*(double *)deviceTwinBinding->twinState));
+                           deviceTwinBinding->propertyName,
+                           (*(double *)deviceTwinBinding->propertyValue));
         }
         break;
     case DX_DEVICE_TWIN_BOOL:
-        *(bool *)deviceTwinBinding->twinState = *(bool *)state;
+        *(bool *)deviceTwinBinding->propertyValue = *(bool *)state;
 
         if (deviceTwinPnPAcknowledgment) {
             len = snprintf(reportedPropertiesString, reportLen,
                            "{\"%s\":{\"value\":%s, \"ac\":%d, \"av\":%d}}",
-                           deviceTwinBinding->twinProperty,
-                           (*(bool *)deviceTwinBinding->twinState ? "true" : "false"),
-                           (int)statusCode, deviceTwinBinding->twinVersion);
+                           deviceTwinBinding->propertyName,
+                           (*(bool *)deviceTwinBinding->propertyValue ? "true" : "false"),
+                           (int)statusCode, deviceTwinBinding->propertyVersion);
         } else {
             len = snprintf(reportedPropertiesString, reportLen, "{\"%s\":%s}",
-                           deviceTwinBinding->twinProperty,
-                           (*(bool *)deviceTwinBinding->twinState ? "true" : "false"));
+                           deviceTwinBinding->propertyName,
+                           (*(bool *)deviceTwinBinding->propertyValue ? "true" : "false"));
         }
         break;
     case DX_DEVICE_TWIN_STRING:
-        deviceTwinBinding->twinState = NULL;
+        deviceTwinBinding->propertyValue = NULL;
 
         if (deviceTwinPnPAcknowledgment) {
             len = snprintf(reportedPropertiesString, reportLen,
                            "{\"%s\":{\"value\":\"%s\", \"ac\":%d, \"av\":%d}}",
-                           deviceTwinBinding->twinProperty, (char *)state, (int)statusCode,
-                           deviceTwinBinding->twinVersion);
+                           deviceTwinBinding->propertyName, (char *)state, (int)statusCode,
+                           deviceTwinBinding->propertyVersion);
         } else {
             len = snprintf(reportedPropertiesString, reportLen, "{\"%s\":\"%s\"}",
-                           deviceTwinBinding->twinProperty, (char *)state);
+                           deviceTwinBinding->propertyName, (char *)state);
         }
 
         break;
@@ -388,7 +388,7 @@ static bool deviceTwinUpdateReportedState(char *reportedPropertiesString)
         return false;
     } else {
 #if DX_LOGGING_ENABLED
-        Log_Debug("INFO: Reported state twinStateUpdated '%s'.\n", reportedPropertiesString);
+        Log_Debug("INFO: Reported state propertyUpdated '%s'.\n", reportedPropertiesString);
 #endif
 
         return true;
