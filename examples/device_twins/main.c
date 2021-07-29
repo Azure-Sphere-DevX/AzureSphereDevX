@@ -73,17 +73,17 @@ DX_TIMER_BINDING *timerSet[] = {&report_now_timer};
 /****************************************************************************************
  * Azure IoT Device Twin Bindings
  ****************************************************************************************/
-static DX_DEVICE_TWIN_BINDING dt_desired_sample_rate = {.twinProperty = "DesiredSampleRate",
+static DX_DEVICE_TWIN_BINDING dt_desired_sample_rate = {.propertyName = "DesiredSampleRate",
                                                         .twinType = DX_DEVICE_TWIN_INT,
                                                         .handler = dt_desired_sample_rate_handler};
 
-static DX_DEVICE_TWIN_BINDING dt_reported_temperature = {.twinProperty = "ReportedTemperature",
+static DX_DEVICE_TWIN_BINDING dt_reported_temperature = {.propertyName = "ReportedTemperature",
                                                          .twinType = DX_DEVICE_TWIN_FLOAT};
 
-static DX_DEVICE_TWIN_BINDING dt_reported_humidity = {.twinProperty = "ReportedHumidity",
+static DX_DEVICE_TWIN_BINDING dt_reported_humidity = {.propertyName = "ReportedHumidity",
                                                       .twinType = DX_DEVICE_TWIN_DOUBLE};
 
-static DX_DEVICE_TWIN_BINDING dt_reported_utc = {.twinProperty = "ReportedUTC",
+static DX_DEVICE_TWIN_BINDING dt_reported_utc = {.propertyName = "ReportedUTC",
                                                  .twinType = DX_DEVICE_TWIN_STRING};
 
 // All device twins listed in device_twin_bindings will be subscribed to in
@@ -104,39 +104,39 @@ static void report_now_handler(EventLoopTimer *eventLoopTimer)
     }
 
     // Update twin with current UTC (Universal Time Coordinate) in ISO format
-    dx_deviceTwinReportState(&dt_reported_utc, dx_getCurrentUtc(msgBuffer, sizeof(msgBuffer)));
+    dx_deviceTwinReportValue(&dt_reported_utc, dx_getCurrentUtc(msgBuffer, sizeof(msgBuffer)));
 
     // The type passed in must match the Divice Twin Type DX_DEVICE_TWIN_FLOAT
-    dx_deviceTwinReportState(&dt_reported_temperature, &temperature);
+    dx_deviceTwinReportValue(&dt_reported_temperature, &temperature);
 
     // The type passed in must match the Divice Twin Type DX_DEVICE_TWIN_DOUBLE
-    dx_deviceTwinReportState(&dt_reported_humidity, &humidity);
+    dx_deviceTwinReportValue(&dt_reported_humidity, &humidity);
 }
 
 static void dt_desired_sample_rate_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
 {
     // validate data is sensible range before applying
-    if (deviceTwinBinding->twinType == DX_DEVICE_TWIN_INT && *(int *)deviceTwinBinding->twinState >= 0 &&
-        *(int *)deviceTwinBinding->twinState <= 120) {
+    if (deviceTwinBinding->twinType == DX_DEVICE_TWIN_INT && *(int *)deviceTwinBinding->propertyValue >= 0 &&
+        *(int *)deviceTwinBinding->propertyValue <= 120) {
 
         dx_timerChange(&report_now_timer,
-                       &(struct timespec){*(int *)deviceTwinBinding->twinState, 0});
+                       &(struct timespec){*(int *)deviceTwinBinding->propertyValue, 0});
 
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState,
+        dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue,
                                      DX_DEVICE_TWIN_RESPONSE_COMPLETED);
 
     } else {
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState,
+        dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue,
                                      DX_DEVICE_TWIN_RESPONSE_ERROR);
     }
 
     /*	Casting device twin state examples
 
-            float value = *(float*)deviceTwinBinding->twinState;
-            double value = *(double*)deviceTwinBinding->twinState;
-            int value = *(int*)deviceTwinBinding->twinState;
-            bool value = *(bool*)deviceTwinBinding->twinState;
-            char* value = (char*)deviceTwinBinding->twinState;
+            float value = *(float*)deviceTwinBinding->propertyValue;
+            double value = *(double*)deviceTwinBinding->propertyValue;
+            int value = *(int*)deviceTwinBinding->propertyValue;
+            bool value = *(bool*)deviceTwinBinding->propertyValue;
+            char* value = (char*)deviceTwinBinding->propertyValue;
     */
 }
 

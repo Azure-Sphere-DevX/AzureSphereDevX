@@ -75,16 +75,19 @@ static DX_MESSAGE_PROPERTY *messageProperties[] = {&(DX_MESSAGE_PROPERTY){.key =
 static DX_MESSAGE_CONTENT_PROPERTIES contentProperties = {.contentEncoding = "utf-8", .contentType = "application/json"};
 
 // declare all bindings
-static DX_DEVICE_TWIN_BINDING dt_desired_sample_rate = {.twinProperty = "DesiredSampleRate", .twinType = DX_DEVICE_TWIN_INT, .handler = dt_desired_sample_rate_handler};
-static DX_DEVICE_TWIN_BINDING dt_deviceConnectUtc = {.twinProperty = "DeviceConnectUtc", .twinType = DX_DEVICE_TWIN_STRING};
-static DX_DEVICE_TWIN_BINDING dt_deviceStartUtc = {.twinProperty = "DeviceStartUtc", .twinType = DX_DEVICE_TWIN_STRING};
-static DX_DEVICE_TWIN_BINDING dt_reported_humidity = {.twinProperty = "ReportedHumidity", .twinType = DX_DEVICE_TWIN_DOUBLE};
-static DX_DEVICE_TWIN_BINDING dt_reported_temperature = {.twinProperty = "ReportedTemperature", .twinType = DX_DEVICE_TWIN_FLOAT};
-static DX_DEVICE_TWIN_BINDING dt_reported_utc = {.twinProperty = "ReportedUTC", .twinType = DX_DEVICE_TWIN_STRING};
-static DX_DEVICE_TWIN_BINDING dt_softwareVersion = {.twinProperty = "SoftwareVersion", .twinType = DX_DEVICE_TWIN_STRING};
+static DX_DEVICE_TWIN_BINDING dt_desired_sample_rate = {.propertyName = "DesiredSampleRate", .twinType = DX_DEVICE_TWIN_INT, .handler = dt_desired_sample_rate_handler};
+static DX_DEVICE_TWIN_BINDING dt_deviceConnectUtc = {.propertyName = "DeviceConnectUtc", .twinType = DX_DEVICE_TWIN_STRING};
+static DX_DEVICE_TWIN_BINDING dt_deviceStartUtc = {.propertyName = "DeviceStartUtc", .twinType = DX_DEVICE_TWIN_STRING};
+static DX_DEVICE_TWIN_BINDING dt_reported_humidity = {.propertyName = "ReportedHumidity", .twinType = DX_DEVICE_TWIN_DOUBLE};
+static DX_DEVICE_TWIN_BINDING dt_reported_temperature = {.propertyName = "ReportedTemperature", .twinType = DX_DEVICE_TWIN_FLOAT};
+static DX_DEVICE_TWIN_BINDING dt_reported_utc = {.propertyName = "ReportedUTC", .twinType = DX_DEVICE_TWIN_STRING};
+static DX_DEVICE_TWIN_BINDING dt_softwareVersion = {.propertyName = "SoftwareVersion", .twinType = DX_DEVICE_TWIN_STRING};
+
 static DX_DIRECT_METHOD_BINDING dm_light_control = {.methodName = "LightControl", .handler = LightControlHandler};
 static DX_GPIO_BINDING gpio_led = {.pin = LED2, .name = "gpio_led", .direction = DX_OUTPUT, .initialState = GPIO_Value_Low, .invertPin = true};
+
 static DX_GPIO_BINDING gpio_network_led = {.pin = NETWORK_CONNECTED_LED, .name = "gpio_network_led", .direction = DX_OUTPUT, .initialState = GPIO_Value_Low, .invertPin = true};
+
 static DX_TIMER_BINDING tmr_publish_message = {.period = {4, 0}, .name = "tmr_publish_message", .handler = publish_message_handler};
 static DX_TIMER_BINDING tmr_report_properties = {.period = {5, 0}, .name = "tmr_report_properties", .handler = report_properties_handler};
 
@@ -145,38 +148,38 @@ static void report_properties_handler(EventLoopTimer *eventLoopTimer)
     if (dx_isAzureConnected()) {
 
         // Update twin with current UTC (Universal Time Coordinate) in ISO format
-        dx_deviceTwinReportState(&dt_reported_utc, dx_getCurrentUtc(msgBuffer, sizeof(msgBuffer)));
+        dx_deviceTwinReportValue(&dt_reported_utc, dx_getCurrentUtc(msgBuffer, sizeof(msgBuffer)));
 
         // The type passed in must match the Divice Twin Type DX_DEVICE_TWIN_FLOAT
-        dx_deviceTwinReportState(&dt_reported_temperature, &temperature);
+        dx_deviceTwinReportValue(&dt_reported_temperature, &temperature);
 
         // The type passed in must match the Divice Twin Type DX_DEVICE_TWIN_DOUBLE
-        dx_deviceTwinReportState(&dt_reported_humidity, &humidity);
+        dx_deviceTwinReportValue(&dt_reported_humidity, &humidity);
     }
 }
 
 static void dt_desired_sample_rate_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
 {
-    int sample_rate_seconds = *(int *)deviceTwinBinding->twinState;
+    int sample_rate_seconds = *(int *)deviceTwinBinding->propertyValue;
 
     // validate data is sensible range before applying
     if (sample_rate_seconds >= 0 && sample_rate_seconds <= 120) {
 
         dx_timerChange(&tmr_publish_message, &(struct timespec){sample_rate_seconds, 0});
 
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_RESPONSE_COMPLETED);
+        dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_RESPONSE_COMPLETED);
 
     } else {
-        dx_deviceTwinAckDesiredState(deviceTwinBinding, deviceTwinBinding->twinState, DX_DEVICE_TWIN_RESPONSE_ERROR);
+        dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_RESPONSE_ERROR);
     }
 
     /*	Casting device twin state examples
 
-            float value = *(float*)deviceTwinBinding->twinState;
-            double value = *(double*)deviceTwinBinding->twinState;
-            int value = *(int*)deviceTwinBinding->twinState;
-            bool value = *(bool*)deviceTwinBinding->twinState;
-            char* value = (char*)deviceTwinBinding->twinState;
+            float value = *(float*)deviceTwinBinding->propertyValue;
+            double value = *(double*)deviceTwinBinding->propertyValue;
+            int value = *(int*)deviceTwinBinding->propertyValue;
+            bool value = *(bool*)deviceTwinBinding->propertyValue;
+            char* value = (char*)deviceTwinBinding->propertyValue;
     */
 }
 
@@ -206,13 +209,13 @@ static void NetworkConnectionState(bool connected)
         first_time = false;
 
         // This is the first connect so update device start time UTC and software version
-        dx_deviceTwinReportState(&dt_deviceStartUtc, dx_getCurrentUtc(msgBuffer, sizeof(msgBuffer)));
+        dx_deviceTwinReportValue(&dt_deviceStartUtc, dx_getCurrentUtc(msgBuffer, sizeof(msgBuffer)));
         snprintf(msgBuffer, sizeof(msgBuffer), "Sample version: %s, DevX version: %s", SAMPLE_VERSION_NUMBER, AZURE_SPHERE_DEVX_VERSION);
-        dx_deviceTwinReportState(&dt_softwareVersion, msgBuffer);
+        dx_deviceTwinReportValue(&dt_softwareVersion, msgBuffer);
     }
 
     if (connected) {
-        dx_deviceTwinReportState(&dt_deviceConnectUtc, dx_getCurrentUtc(msgBuffer, sizeof(msgBuffer)));
+        dx_deviceTwinReportValue(&dt_deviceConnectUtc, dx_getCurrentUtc(msgBuffer, sizeof(msgBuffer)));
     }
 
     dx_gpioStateSet(&gpio_network_led, connected);
