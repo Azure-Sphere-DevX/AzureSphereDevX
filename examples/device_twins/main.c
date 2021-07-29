@@ -60,6 +60,7 @@ DX_USER_CONFIG dx_config;
 // Forward declarations
 static void report_now_handler(EventLoopTimer *eventLoopTimer);
 static void dt_desired_sample_rate_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
+static void dt_copy_string_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
 
 /****************************************************************************************
  * Timer Bindings
@@ -77,6 +78,10 @@ static DX_DEVICE_TWIN_BINDING dt_desired_sample_rate = {.propertyName = "Desired
                                                         .twinType = DX_DEVICE_TWIN_INT,
                                                         .handler = dt_desired_sample_rate_handler};
 
+static DX_DEVICE_TWIN_BINDING dt_sample_string = {.propertyName = "SampleString",
+                                                 .twinType = DX_DEVICE_TWIN_STRING,
+                                                 .handler = dt_copy_string_handler};
+
 static DX_DEVICE_TWIN_BINDING dt_reported_temperature = {.propertyName = "ReportedTemperature",
                                                          .twinType = DX_DEVICE_TWIN_FLOAT};
 
@@ -89,7 +94,7 @@ static DX_DEVICE_TWIN_BINDING dt_reported_utc = {.propertyName = "ReportedUTC",
 // All device twins listed in device_twin_bindings will be subscribed to in
 // the InitPeripheralsAndHandlers function
 DX_DEVICE_TWIN_BINDING *device_twin_bindings[] = {&dt_desired_sample_rate, &dt_reported_temperature,
-                                                  &dt_reported_humidity, &dt_reported_utc};
+                                                  &dt_reported_humidity, &dt_reported_utc, &dt_sample_string};
 
 // Implementation
 
@@ -138,6 +143,35 @@ static void dt_desired_sample_rate_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBin
             bool value = *(bool*)deviceTwinBinding->propertyValue;
             char* value = (char*)deviceTwinBinding->propertyValue;
     */
+}
+
+// Sample device twin handler that demonstrates how to manage string device twin types.  When an 
+// application uses a string device twin, the application must make a local copy of the string on 
+// any device twin update.  
+static void dt_copy_string_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
+{
+    // Define a string array
+    #define MY_STRING_SIZE 63 + 1
+    char stringCopy[MY_STRING_SIZE];
+
+    // validate data is a string
+    if (deviceTwinBinding->twinType == DX_DEVICE_TWIN_STRING) {
+
+        // Copy the string to the local variable, null terminate it in case the incomming string is larger
+        // than MY_STRING_SIZE.
+        strncpy(stringCopy, deviceTwinBinding->propertyValue, MY_STRING_SIZE);
+        stringCopy[MY_STRING_SIZE] = '\0';
+        
+        // Output the new string to debug
+        Log_Debug("Rx device twin update for twin: %s, new value: %s\n", deviceTwinBinding->propertyName, stringCopy);
+
+        dx_deviceTwinAckDesiredValue(deviceTwinBinding, (char*)deviceTwinBinding->propertyValue,
+                                     DX_DEVICE_TWIN_RESPONSE_COMPLETED);
+
+    } else {
+        dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue,
+                                     DX_DEVICE_TWIN_RESPONSE_ERROR);
+    }
 }
 
 /// <summary>
