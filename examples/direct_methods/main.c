@@ -40,7 +40,7 @@
 #include "dx_azure_iot.h"
 #include "dx_config.h"
 #include "dx_direct_methods.h"
-#include "dx_exit_codes.h"
+#include "app_exit_codes.h"
 #include "dx_gpio.h"
 #include "dx_terminate.h"
 #include "dx_timer.h"

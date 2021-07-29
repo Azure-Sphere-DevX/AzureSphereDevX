@@ -14,14 +14,14 @@
  *   ENABLE YOUR DEVELOPER BOARD
  *
  *   Each Azure Sphere developer board manufacturer maps pins differently. You need to select the
- *configuration that matches your board.
+ *   configuration that matches your board.
  *
  *   Follow these steps:
  *
  *	   1. Open CMakeLists.txt.
  *	   2. Uncomment the set command that matches your developer board.
  *	   3. Click File, then Save to save the CMakeLists.txt file which will auto generate the
- *CMake Cache.
+ *        CMake Cache.
  *
  *
  *
@@ -32,19 +32,19 @@
  * Ideal when you have multiple VS Code instances
  *
  * Install the Peacock extension from
- *https://marketplace.visualstudio.com/items?itemName=johnpapa.vscode-peacock
+ * https://marketplace.visualstudio.com/items?itemName=johnpapa.vscode-peacock
  *
  * The following colours have been set:
  * The VS Code instance attached to the Real-Time core will be red. Real-time is red, as in racing
- *red. The VS Code instance attached to the High-level core is blue. High-level is blue, as in sky
- *is high and blue. You can change the default colours to match your preferences.
+ * red. The VS Code instance attached to the High-level core is blue. High-level is blue, as in sky
+ * is high and blue. You can change the default colours to match your preferences.
  *
  *
  * Intercore messaging.
  *
  * There needs to be a shared understanding of the data structure being shared between the real-time
- *and high-level apps This shared understanding is declared in the intercore_contract.h file.  This
- *file can be found in the IntercoreContract directory.
+ * and high-level apps This shared understanding is declared in the intercore_contract.h file.  This
+ * file can be found in the IntercoreContract directory.
  *
  *************************************************************************************************************************************/
 
@@ -53,7 +53,7 @@
 
 // Learning Path Libraries
 #include "dx_config.h"
-#include "dx_exit_codes.h"
+#include "app_exit_codes.h"
 #include "dx_intercore.h"
 #include "dx_terminate.h"
 #include "dx_timer.h"

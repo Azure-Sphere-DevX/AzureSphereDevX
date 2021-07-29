@@ -39,7 +39,7 @@
 
 #include "dx_azure_iot.h"
 #include "dx_config.h"
-#include "dx_exit_codes.h"
+#include "app_exit_codes.h"
 #include "dx_json_serializer.h"
 #include "dx_terminate.h"
 #include "dx_timer.h"
@@ -131,6 +131,7 @@ static void publish_message_handler(EventLoopTimer *eventLoopTimer)
 
         } else {
             Log_Debug("JSON Serialization failed: Buffer too small\n");
+            dx_terminate(APP_ExitCode_Telemetry_Buffer_Too_Small);
         }
     }
 }

@@ -37,7 +37,7 @@
 
 #include "hw/azure_sphere_learning_path.h" // Hardware definition
 
-#include "dx_exit_codes.h"
+#include "app_exit_codes.h"
 #include "dx_terminate.h"
 #include "dx_deferred_update.h"
 #include <applibs/log.h>

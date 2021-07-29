@@ -10,7 +10,7 @@
  *	   2. are not intended as a substitute for understanding the Azure Sphere SDK Samples.
  *	   3. aim to follow best practices as demonstrated by the Azure Sphere SDK Samples.
  *	   4. are provided as is and as a convenience to aid the Azure Sphere Developer Learning
- *experience.
+ *        experience.
  *
  *   DEVELOPER BOARD SELECTION
  *
@@ -40,7 +40,7 @@
 #include "dx_azure_iot.h"
 #include "dx_config.h"
 #include "dx_device_twins.h"
-#include "dx_exit_codes.h"
+#include "app_exit_codes.h"
 #include "dx_terminate.h"
 #include "dx_timer.h"
 #include "dx_utilities.h"
