@@ -183,16 +183,37 @@ void dx_azureConnect(DX_USER_CONFIG *userConfig, const char *networkInterface, c
     dx_azureToDeviceStart();
 }
 
+/// <summary>
+/// If network connection has changed then call all network status changed registered callbacks
+/// </summary>
+/// <param name="connection_state"></param>
+static void ProcessConnectionStatusCallbacks(bool connection_state) {
+    static bool previous_connection_state = false;
+
+    if (connection_state != previous_connection_state) {
+        previous_connection_state = connection_state;
+
+        for (size_t i = 0; i < MAX_CONNECTION_STATUS_CALLBACKS; i++) {
+            if (_connectionStatusCallback[i] != NULL) {
+                _connectionStatusCallback[i](connection_state);
+            }
+        }
+    }
+}
+
 bool dx_isAzureConnected(void)
 {
     if (!dx_isNetworkConnected(_networkInterface) && iotHubClientAuthenticationState == IoTHubClientAuthenticationState_Authenticated) {
         iotHubClientAuthenticationState = IoTHubClientAuthenticationState_NotAuthenticated;
         deviceConnectionState = DEVICE_NOT_CONNECTED;
+        ProcessConnectionStatusCallbacks(false);
         return false;
     } else if (iothubClientHandle != NULL && iotHubClientAuthenticationState == IoTHubClientAuthenticationState_Authenticated &&
                dx_isNetworkConnected(_networkInterface)) {
+        ProcessConnectionStatusCallbacks(true);
         return true;
     }
+    ProcessConnectionStatusCallbacks(false);
     return false;
 }
 
@@ -662,11 +683,7 @@ static void HubConnectionStatusCallback(IOTHUB_CLIENT_CONNECTION_STATUS result, 
         iotHubClientAuthenticationState = IoTHubClientAuthenticationState_Authenticated;
     }
 
-    for (size_t i = 0; i < MAX_CONNECTION_STATUS_CALLBACKS; i++) {
-        if (_connectionStatusCallback[i] != NULL) {
-            _connectionStatusCallback[i](dx_isAzureConnected());
-        }
-    }
+    dx_isAzureConnected();
 }
 
 static const char *GetMessageResultReasonString(IOTHUB_MESSAGE_RESULT reason)
