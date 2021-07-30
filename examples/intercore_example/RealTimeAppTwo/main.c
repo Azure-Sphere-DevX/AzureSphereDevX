@@ -1,3 +1,26 @@
+/* Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
+ *
+ * This example is built on the Azure Sphere DevX library.
+ *   1. DevX is an Open Source community-maintained implementation of the Azure Sphere SDK samples.
+ *   2. DevX is a modular library that simplifies common development scenarios.
+ *        - You can focus on your solution, not the plumbing.
+ *   3. DevX documentation is maintained at https://github.com/gloveboxes/AzureSphereDevX/wiki
+ *	 4. The DevX library is not a substitute for understanding the Azure Sphere SDK Samples.
+ *          - https://github.com/Azure/azure-sphere-samples
+ *
+ * DEVELOPER BOARD SELECTION
+ *
+ * The following developer boards are supported.
+ *
+ *	 1. AVNET Azure Sphere Starter Kit.
+ *   2. AVNET Azure Sphere Starter Kit Revision 2.
+ *	 3. Seeed Studio Azure Sphere MT3620 Development Kit aka Reference Design Board or rdb.
+ *	 4. Seeed Studio Seeed Studio MT3620 Mini Dev Board.
+ *
+ *
+ ************************************************************************************************/
+
 #include "intercore.h"
 #include "intercore_contract.h"
 
