@@ -122,9 +122,9 @@ static void report_now_handler(EventLoopTimer *eventLoopTimer)
         return;
     }
 
-    //if (!dx_isAzureConnected()) {
-    //    return;
-    //}
+    if (!dx_isAzureConnected()) {
+        return;
+    }
 
     float temperature = 25.05f;
     // Add some random value to humidity to trigger data out of range error
