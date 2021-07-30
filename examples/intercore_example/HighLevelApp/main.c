@@ -1,27 +1,33 @@
-﻿/*************************************************************************************************************************************
- *   Please read the disclaimer and the developer board selection section below
+﻿/* Copyright (c) Microsoft Corporation. All rights reserved.
+ * Licensed under the MIT License.
  *
+ * This example is built on the Azure Sphere DevX library.
+ *   1. DevX is an Open Source community-maintained implementation of the Azure Sphere SDK samples.
+ *   2. DevX is a modular library that simplifies common development scenarios.
+ *        - You can focus on your solution, not the plumbing.
+ *   3. DevX documentation is maintained at https://github.com/gloveboxes/AzureSphereDevX/wiki
+ *	 4. The DevX library is not a substitute for understanding the Azure Sphere SDK Samples.
+ *          - https://github.com/Azure/azure-sphere-samples
  *
- *   DEVELOPER BOARD SELECTION
+ * DEVELOPER BOARD SELECTION
  *
- *   The following developer boards are supported.
+ * The following developer boards are supported.
  *
- *	   1. AVNET Azure Sphere Starter Kit.
- *     2. AVNET Azure Sphere Starter Kit Revision 2.
- *	   3. Seeed Studio Azure Sphere MT3620 Development Kit aka Reference Design Board or rdb.
- *	   4. Seeed Studio Seeed Studio MT3620 Mini Dev Board.
+ *	 1. AVNET Azure Sphere Starter Kit.
+ *   2. AVNET Azure Sphere Starter Kit Revision 2.
+ *	 3. Seeed Studio Azure Sphere MT3620 Development Kit aka Reference Design Board or rdb.
+ *	 4. Seeed Studio Seeed Studio MT3620 Mini Dev Board.
  *
- *   ENABLE YOUR DEVELOPER BOARD
+ * ENABLE YOUR DEVELOPER BOARD
  *
- *   Each Azure Sphere developer board manufacturer maps pins differently. You need to select the
- *   configuration that matches your board.
+ * Each Azure Sphere developer board manufacturer maps pins differently. You need to select the
+ *    configuration that matches your board.
  *
- *   Follow these steps:
+ * Follow these steps:
  *
- *	   1. Open CMakeLists.txt.
- *	   2. Uncomment the set command that matches your developer board.
- *	   3. Click File, then Save to save the CMakeLists.txt file which will auto generate the
- *        CMake Cache.
+ *	 1. Open CMakeLists.txt.
+ *	 2. Uncomment the set command that matches your developer board.
+ *	 3. Click File, then Save to auto-generate the CMake Cache.
  *
  *
  *
