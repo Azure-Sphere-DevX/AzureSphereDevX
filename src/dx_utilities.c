@@ -11,6 +11,22 @@ bool dx_isStringNullOrEmpty(const char *string)
     return string == NULL || strlen(string) == 0;
 }
 
+
+/// <summary>
+/// check string contain only printable characters
+/// ! " # $ % & ' ( ) * + , - . / 0 1 2 3 4 5 6 7 8 9 : ; < = > ? @ A B C D E F G H I J K L M N O P Q
+/// R S T U V W X Y Z [ \ ] ^ _ ` a b c d e f g h i j k l m n o p q r s t u v w x y z { | } ~
+/// </summary>
+/// <param name="data"></param>
+/// <returns></returns>
+bool dx_isStringPrintable(char *data)
+{
+    while (isprint(*data)) {
+        data++;
+    }
+    return 0x00 == *data;
+}
+
 bool dx_isNetworkReady(void)
 {
     bool isNetworkReady = false;
