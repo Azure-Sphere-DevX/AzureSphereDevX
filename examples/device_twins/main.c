@@ -62,6 +62,7 @@ DX_USER_CONFIG dx_config;
 static void report_now_handler(EventLoopTimer *eventLoopTimer);
 static void dt_desired_sample_rate_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
 static void dt_copy_string_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
+static void dt_gpio_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding);
 
 static DX_MESSAGE_PROPERTY *sensorErrorProperties[] = {
     &(DX_MESSAGE_PROPERTY){.key = "appid", .value = "hvac"},
@@ -83,9 +84,28 @@ static DX_GPIO_BINDING network_connected_led = {.pin = NETWORK_CONNECTED_LED,
                               .initialState = GPIO_Value_Low,
                               .invertPin = true};
 
+static DX_GPIO_BINDING userLedRed =   {.pin = LED_RED,   
+                              .name = "userLedRed",   
+                              .direction = DX_OUTPUT,  
+                              .initialState = GPIO_Value_Low, 
+                              .invertPin = true};
+
+static DX_GPIO_BINDING userLedGreen = {.pin = LED_GREEN, 
+                              .name = "userLedGreen", 
+                              .direction = DX_OUTPUT,  
+                              .initialState = GPIO_Value_Low, 
+                              .invertPin = true};
+
+static DX_GPIO_BINDING userLedBlue =  {.pin = LED_BLUE,  
+                              .name = "userLedBlue",  
+                              .direction = DX_OUTPUT,  
+                              .initialState = GPIO_Value_Low, 
+                              .invertPin = true};
+
 // All bindings referenced in the bindings sets will be initialised in the InitPeripheralsAndHandlers function
 DX_TIMER_BINDING *timer_binding_set[] = {&report_now_timer};
-DX_GPIO_BINDING *gpio_binding_set[] = {&network_connected_led};
+DX_GPIO_BINDING *gpio_binding_set[] = {&network_connected_led, &userLedRed, 
+                                      &userLedGreen, &userLedBlue};
 
 /****************************************************************************************
  * Azure IoT Device Twin Bindings
@@ -107,11 +127,27 @@ static DX_DEVICE_TWIN_BINDING dt_reported_humidity = {.propertyName = "ReportedH
 static DX_DEVICE_TWIN_BINDING dt_reported_utc = {.propertyName = "ReportedUTC",
                                                  .twinType = DX_DEVICE_TWIN_STRING};
 
+static DX_DEVICE_TWIN_BINDING dt_user_led_red = {.propertyName = "userLedRed",
+                                                 .twinType = DX_DEVICE_TWIN_BOOL,  
+                                                 .handler = dt_gpio_handler, 
+                                                 .context = &userLedRed};	
+
+static DX_DEVICE_TWIN_BINDING dt_user_led_green = {.propertyName = "userLedGreen",
+                                                 .twinType = DX_DEVICE_TWIN_BOOL,
+                                                 .handler = dt_gpio_handler, 
+                                                 .context = &userLedGreen};
+
+static DX_DEVICE_TWIN_BINDING dt_user_led_blue = {.propertyName = "userLedBlue",
+                                                 .twinType = DX_DEVICE_TWIN_BOOL,
+                                                 .handler = dt_gpio_handler,
+                                                 .context = &userLedBlue};
+
 // All device twins listed in device_twin_bindings will be subscribed to in
 // the InitPeripheralsAndHandlers function
 DX_DEVICE_TWIN_BINDING *device_twin_bindings[] = {&dt_desired_sample_rate, &dt_reported_temperature,
                                                   &dt_reported_humidity, &dt_reported_utc,
-                                                  &dt_sample_string};
+                                                  &dt_sample_string, &dt_user_led_red,
+                                                  &dt_user_led_green, &dt_user_led_blue};
 
 
 // Validate sensor readings and report device twins
@@ -231,6 +267,29 @@ static void dt_copy_string_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
 // Set Network Connected state LED
 static void ConnectionStatus(bool connection_state) {
     dx_gpioStateSet(&network_connected_led, connection_state);
+}
+
+static void dt_gpio_handler(DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
+{
+    // Verify that the context pointer is non-null
+    if(deviceTwinBinding->context != NULL){
+        
+        // Cast the context pointer so we can access the GPIO Binding details
+        DX_GPIO_BINDING *gpio = (DX_GPIO_BINDING*)deviceTwinBinding->context;
+        
+        bool gpio_level = *(bool *)deviceTwinBinding->propertyValue;
+    
+        if(gpio_level){
+            dx_gpioOn(gpio);
+        }
+        else{
+            dx_gpioOff(gpio);
+        }
+        dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_RESPONSE_COMPLETED);
+    }
+    else{
+        dx_deviceTwinAckDesiredValue(deviceTwinBinding, deviceTwinBinding->propertyValue, DX_DEVICE_TWIN_RESPONSE_ERROR);
+    }
 }
 
 /// <summary>
