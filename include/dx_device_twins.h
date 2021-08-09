@@ -24,6 +24,7 @@ typedef struct _deviceTwinBinding {
 	bool propertyUpdated;
 	DX_DEVICE_TWIN_TYPE twinType;
 	void (*handler)(struct _deviceTwinBinding* deviceTwinBinding);
+	void *context;
 } DX_DEVICE_TWIN_BINDING;
 
 typedef enum
