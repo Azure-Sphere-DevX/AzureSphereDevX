@@ -20,7 +20,7 @@
 
 typedef struct {
 	char* rtAppComponentId;
-	int sockFd;
+    int sockFd;
 	bool nonblocking_io;
 	void (*interCoreCallback)(void*, ssize_t message_size);
 	void* intercore_recv_block;
@@ -29,3 +29,4 @@ typedef struct {
 
 bool dx_intercorePublish(DX_INTERCORE_BINDING* intercore_binding, void* control_block, size_t message_length);
 bool dx_intercoreConnect(DX_INTERCORE_BINDING* intercore_binding);
+ssize_t dx_intercoreRead(DX_INTERCORE_BINDING *intercore_binding);

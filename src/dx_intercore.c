@@ -35,6 +35,10 @@ static bool initialise_inter_core_communications(DX_INTERCORE_BINDING *intercore
         return false;
     }
 
+    if (intercore_binding->interCoreCallback == NULL) {
+        return true;
+    }
+
     // Register handler for incoming messages from real-time capable application.
     socketEventReg = EventLoop_RegisterIo(dx_timerGetEventLoop(), intercore_binding->sockFd,
                                           EventLoop_Input, SocketEventHandler, intercore_binding);
@@ -72,7 +76,6 @@ bool dx_intercorePublish(DX_INTERCORE_BINDING *intercore_binding, void *control_
     // Returns EAGAIN if socket is full
 
     // send is blocking on socket full
-    // allow 2 extra to the send length for ic msg control and reserve bytes
     int bytesSent = send(intercore_binding->sockFd, control_block, message_length,
                          intercore_binding->nonblocking_io ? MSG_DONTWAIT : 0);
     if (bytesSent == -1) {
@@ -81,6 +84,14 @@ bool dx_intercorePublish(DX_INTERCORE_BINDING *intercore_binding, void *control_
     }
 
     return true;
+}
+
+ssize_t dx_intercoreRead(DX_INTERCORE_BINDING* intercore_binding) {
+    if (intercore_binding->intercore_recv_block == NULL) {
+        return -1;
+    }
+
+    return recv(intercore_binding->sockFd, (void *)intercore_binding->intercore_recv_block, intercore_binding->intercore_recv_block_length, 0);
 }
 
 /// <summary>
@@ -110,7 +121,6 @@ static bool ProcessMsg(DX_INTERCORE_BINDING *intercore_binding)
         return false;
     }
 
-    // minus 2 for bytesReceived for ic msg control and reserve bytes
     intercore_binding->interCoreCallback(intercore_binding->intercore_recv_block, (ssize_t)bytesReceived);
 
     return true;
