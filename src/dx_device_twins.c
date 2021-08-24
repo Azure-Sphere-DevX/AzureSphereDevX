@@ -394,7 +394,7 @@ static bool deviceTwinUpdateReportedState(char *reportedPropertiesString)
         return true;
     }
 
-    IoTHubDeviceClient_LL_DoWork(dx_azureClientHandleGet());
+    // IoTHubDeviceClient_LL_DoWork(dx_azureClientHandleGet());
 }
 
 /// <summary>
