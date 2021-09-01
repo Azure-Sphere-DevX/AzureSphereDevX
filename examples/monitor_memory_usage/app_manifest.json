@@ -1,0 +1,16 @@
+{
+  "SchemaVersion": 1,
+  "Name": "TODO_Add_app_name_here",
+  "ComponentId": "b217fd65-ac8d-4d7c-b62c-0d07b5df6357",
+  "EntryPoint": "/bin/app",
+  "CmdArgs": [ "--ScopeID", "TODO_REPLACE_WITH_YOUR_ID_SCOPE" ],
+  "Capabilities": {
+    "Gpio": [],
+    "AllowedConnections": [
+      "global.azure-devices-provisioning.net",
+      "TODO_REPLACE_WITH_YOUR_IOT_HUB_ENDPOINT_URL"
+    ],
+    "DeviceAuthentication": "TODO_REPLACE_WITH_YOUR_AZURE_SPHERE_TENANT_ID"
+  },
+  "ApplicationType": "Default"
+}
