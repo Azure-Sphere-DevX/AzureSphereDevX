@@ -1,7 +1,16 @@
 # Azure IoT Starter Project (empty)
 
-This is an empty (starter) project that can be used for new Azure Sphere applications based on the DevX library.  The project connects to an Azure IoTHub,
-IoTCentral, or Avnet's IoTConnect and nothing more.  Use the other examples in this folder to help you see how to build out the project to meet your requirements.  Search the project for "TODO" to see where to add definitions, declarations and code.
+This example implements a feature to monitor the Azure Sphere High Level memory usage using the Applications_GetPeakUserModeMemoryUsageInKB() call.  The application uses a timer and handler to monitor the memory usage, and a direct method that leaks memory to test the feature.
+
+When a higher memory usage value is detected the application sends up telemetry in the format: `{"MemoryHighWaterMark":180}`
+
+      #define MONITOR_PERIOD 30
+      static DX_TIMER_BINDING tmr_monitor_memory = {.period = {MONITOR_PERIOD, 0}, .name = "tmr_monitor_memory", .handler = monitor_memory_handler};
+
+      static DX_DIRECT_METHOD_BINDING dm_memory_leak = {.methodName = "MemoryLeak", .handler = MemoryLeakHandler};
+      // The payload for the direct method is: {"LeakSize": <integer in KB> }
+
+
 ## Config app_manifest.json sample
 
 1. Set ID Scope
