@@ -1,12 +1,29 @@
 // Use main.h to define all your application definitions, message properties/contentProperties,
 // bindings and binding sets.
 
+// https://docs.microsoft.com/en-us/azure/iot-pnp/overview-iot-plug-and-play
+#define IOT_PLUG_AND_PLAY_MODEL_ID "" //TODO insert your PnP model ID if your application supports PnP
+
+// Details on how to connect your application using an ethernet adaptor
+// https://docs.microsoft.com/en-us/azure-sphere/network/connect-ethernet
+#define NETWORK_INTERFACE "wlan0"
+
+#define SAMPLE_VERSION_NUMBER "1.0"
+#define ONE_MS 1000000
+
+DX_USER_CONFIG dx_config;
+
 /****************************************************************************************
  * Avnet IoTConnect Support
  ****************************************************************************************/
 // TODO: If the application will connect to Avnet's IoTConnect platform enable the 
 // #define below
-#define USE_AVNET_IOTCONNECT
+//#define USE_AVNET_IOTCONNECT
+
+/****************************************************************************************
+ * Application defines
+ ****************************************************************************************/
+// TODO: Add any application constants
 
 /****************************************************************************************
  * Forward declarations
