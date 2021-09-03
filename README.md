@@ -1,5 +1,11 @@
 # Azure Sphere DevX library
 
+## Pulling this repository
+Note this repository uses git submodules.  To pull the repo and all its submodules use the command . . . 
+
+`git clone --recurse-submodules https://github.com/Azure-Sphere-DevX/AzureSphereDevX.git <optional target directory for source tree>`
+
+## DevX Overview
 The DevX library accelerates your development and will help to improve your developer experience building  Azure Sphere applications.
 
 The DevX library addresses many common Azure Sphere scenarios with a focus on:
