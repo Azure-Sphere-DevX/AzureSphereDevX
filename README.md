@@ -10,7 +10,7 @@ This repository uses git submodules. To clone the repo and all its submodules us
 git clone --recurse-submodules https://github.com/Azure-Sphere-DevX/AzureSphereDevX.git <optional target directory for source tree>
 ```
 
-## Clone the AzureSphereDevX examples
+## Clone the Azure Sphere DevX examples
 
 1. Clone the examples.
 
