@@ -2,14 +2,6 @@
 
 The AzureSphereDevX library and the AzureSphere.Examples are community maintained repositories.
 
-## Cloning this repository
-
-This repository uses git submodules. To clone the repo and all its submodules use the command . . .
-
-```
-git clone --recurse-submodules https://github.com/Azure-Sphere-DevX/AzureSphereDevX.git <optional target directory for source tree>
-```
-
 ## Clone the Azure Sphere DevX examples
 
 1. Clone the examples.
