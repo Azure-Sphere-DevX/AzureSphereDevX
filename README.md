@@ -20,6 +20,10 @@ git clone --recurse-submodules https://github.com/Azure-Sphere-DevX/AzureSphereD
 
 1. Run the Update and Build tools. Follow the [build tools](https://github.com/Azure-Sphere-DevX/AzureSphereDevX.Examples/wiki/Build-Tools) notes to update and test build all examples.
 
+## Azure Sphere DevX Documentation
+
+Visit the [DevX library Wiki](https://github.com/Azure-Sphere-DevX/AzureSphereDevX.Examples/wiki) page to learn more.
+
 ## Azure Sphere DevX Overview
 
 The DevX library accelerates your development and will help to improve your developer experience building  Azure Sphere applications.
@@ -36,10 +40,10 @@ The DevX library will help reduce the amount of code you write and improve reada
 
 The focus of the Azure Sphere DevX library is the communications and simplification of common scenarios when building Azure Sphere applications.
 
-## Azure Sphere DevX Documentation
-
-Visit the [DevX library Wiki](https://github.com/Azure-Sphere-DevX/AzureSphereDevX.Examples/wiki) page to learn more.
+## Azure Sphere GenX
 
 Be sure to visit the [Azure Sphere GenX Code Generator WiKi](https://github.com/Azure-Sphere-DevX/AzureSphereGenX/wiki) partner project.
+
+Azure Sphere DevX Library overview
 
 ![Azure Sphere DevX Library](https://github.com/gloveboxes/AzureSphereDevX/wiki/media/architecture.png)
