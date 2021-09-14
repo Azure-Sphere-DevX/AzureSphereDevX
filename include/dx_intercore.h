@@ -28,6 +28,6 @@ typedef struct {
 } DX_INTERCORE_BINDING;
 
 bool dx_intercorePublish(DX_INTERCORE_BINDING* intercore_binding, void* control_block, size_t message_length);
-ssize_t dx_intercorePublishThenRead(DX_INTERCORE_BINDING *intercore_binding, void *control_block, size_t message_length,
-                                    uint64_t timeoutInMicroseconds);
-bool dx_intercoreConnect(DX_INTERCORE_BINDING* intercore_binding);
+ssize_t dx_intercorePublishThenRead(DX_INTERCORE_BINDING *intercore_binding, void *control_block, size_t message_length);
+bool dx_intercoreConnect(DX_INTERCORE_BINDING *intercore_binding);
+bool dx_intercoreReadTimeoutSet(DX_INTERCORE_BINDING *intercore_binding, suseconds_t timeoutInMicroseconds);
