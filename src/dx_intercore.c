@@ -86,12 +86,34 @@ bool dx_intercorePublish(DX_INTERCORE_BINDING *intercore_binding, void *control_
     return true;
 }
 
-ssize_t dx_intercoreRead(DX_INTERCORE_BINDING* intercore_binding) {
+static ssize_t dx_intercoreRead(DX_INTERCORE_BINDING* intercore_binding) {
     if (intercore_binding->intercore_recv_block == NULL) {
         return -1;
     }
 
     return recv(intercore_binding->sockFd, (void *)intercore_binding->intercore_recv_block, intercore_binding->intercore_recv_block_length, 0);
+}
+
+
+ssize_t dx_intercorePublishThenRead(DX_INTERCORE_BINDING *intercore_binding, void *control_block, size_t message_length,
+                                    uint64_t timeoutInMicroseconds)
+{
+    if (dx_intercorePublish(intercore_binding, control_block, message_length)) {
+
+        uint64_t seconds = timeoutInMicroseconds / 1000000ul;
+        timeoutInMicroseconds %= 1000000ul;
+        
+        const struct timeval recvTimeout = {.tv_sec = seconds, .tv_usec = timeoutInMicroseconds};
+
+        if (setsockopt(intercore_binding->sockFd, SOL_SOCKET, SO_RCVTIMEO, &recvTimeout, sizeof(recvTimeout)) == -1) {
+            Log_Debug("ERROR: Unable to set socket timeout: %d (%s)\n", errno, strerror(errno));
+            return -1;
+        }
+
+        return recv(intercore_binding->sockFd, (void *)intercore_binding->intercore_recv_block,
+                    intercore_binding->intercore_recv_block_length, 0);
+    }
+    return -1;
 }
 
 /// <summary>
