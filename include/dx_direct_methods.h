@@ -8,14 +8,15 @@
 
 typedef enum 
 {
-	DX_METHOD_SUCCEEDED = 200,
-	DX_METHOD_FAILED = 500,
-	DX_METHOD_NOT_FOUND = 404
+    DX_METHOD_SUCCEEDED = 200,
+    DX_METHOD_FAILED = 500,
+    DX_METHOD_NOT_FOUND = 404
 } DX_DIRECT_METHOD_RESPONSE_CODE;
 
 typedef struct _directMethodBinding {
-	const char* methodName;
-	DX_DIRECT_METHOD_RESPONSE_CODE(*handler)(JSON_Value* json, struct _directMethodBinding* peripheral, char** responseMsg);
+    const char* methodName;
+    DX_DIRECT_METHOD_RESPONSE_CODE(*handler)(JSON_Value* json, struct _directMethodBinding* peripheral, char** responseMsg);
+    void *context;
 } DX_DIRECT_METHOD_BINDING;
 
 void dx_directMethodUnsubscribe(void);
