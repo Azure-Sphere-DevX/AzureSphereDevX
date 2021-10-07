@@ -2,7 +2,7 @@
 
 bool dx_pwmSetDutyCycle(DX_PWM_BINDING *pwm_binding, uint32_t hertz, uint32_t dutyCyclePercentage)
 {
-    if (pwm_binding->initialized && IN_RANGE(dutyCyclePercentage, 0, 100) && hertz < 1000000000) {
+    if (pwm_binding->initialized && IN_RANGE(dutyCyclePercentage, 0, 100) && hertz < 100000) {
         PwmState state = {.enabled = true, .polarity = pwm_binding->pwmPolarity};
 
         state.period_nsec = 1000000000 / hertz;
@@ -20,11 +20,7 @@ bool dx_pwmSetDutyCycle(DX_PWM_BINDING *pwm_binding, uint32_t hertz, uint32_t du
 
 bool dx_pwmStop(DX_PWM_BINDING *pwm_binding)
 {
-    PwmState state;
-    state.period_nsec = 100000;
-    state.dutyCycle_nsec = 100;
-    state.polarity = pwm_binding->pwmPolarity;
-    state.enabled = false;
+    PwmState state = {.period_nsec = 100000, .dutyCycle_nsec = 100, .polarity = pwm_binding->pwmPolarity, .enabled = false};
 
     if (PWM_Apply(pwm_binding->fd, pwm_binding->channelId, &state) == -1) {
         Log_Debug("PWM Channel ID (%d), aka (%s) apply failed\n", pwm_binding->channelId, pwm_binding->name);
