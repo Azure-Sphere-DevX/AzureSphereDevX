@@ -23,7 +23,7 @@ bool dx_pwmStop(DX_PWM_BINDING *pwmBinding)
 {
     if (pwmBinding->pwmController->initialized)
     {
-        // set arbitarty period and duraction. The important thing is enabled = false
+        // set arbitrary period and duraction. The important thing is enabled = false
         PwmState state = {.period_nsec = 100000, .dutyCycle_nsec = 100, .polarity = pwmBinding->pwmPolarity, .enabled = false};
 
         if (PWM_Apply(pwmBinding->pwmController->fd, pwmBinding->channelId, &state) == -1)
