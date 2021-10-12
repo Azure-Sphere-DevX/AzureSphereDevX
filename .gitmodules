@@ -1,6 +1,0 @@
-[submodule "examples/intercore_example/RealTimeAppOne/mt3620_m4_software"]
-	path = examples/intercore_example/RealTimeAppOne/mt3620_m4_software
-	url = https://github.com/MediaTek-Labs/mt3620_m4_software.git
-[submodule "examples/intercore_example/RealTimeAppTwo/mt3620_m4_software"]
-	path = examples/intercore_example/RealTimeAppTwo/mt3620_m4_software
-	url = https://github.com/MediaTek-Labs/mt3620_m4_software.git
