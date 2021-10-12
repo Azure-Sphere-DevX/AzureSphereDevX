@@ -7,7 +7,7 @@ The AzureSphereDevX library and the AzureSphere.Examples are community maintaine
 1. Clone the examples.
 
     ```bash
-    git clone --recurse-submodules https://github.com/Azure-Sphere-DevX/AzureSphereDevX.Examples.git
+    git clone https://github.com/Azure-Sphere-DevX/AzureSphereDevX.git
     ```
 
 1. Run the Update and Build tools. Follow the [build tools](https://github.com/Azure-Sphere-DevX/AzureSphereDevX.Examples/wiki/Build-Tools) notes to update and test build all examples.
@@ -23,10 +23,13 @@ The DevX library accelerates your development and will help to improve your deve
 The DevX library addresses many common Azure Sphere scenarios with a focus on:
 
 1. IoT Hub messaging
+1. Avnet IoTConnect messaging
 1. IoT Hub Device Twins and Direct Methods
 1. Intercore Messaging
 1. Event Timers
-1. GPIO.
+1. GPIO
+1. UARTS
+1. PWM
 
 The DevX library will help reduce the amount of code you write and improve readability and long-term application maintenance.
 
