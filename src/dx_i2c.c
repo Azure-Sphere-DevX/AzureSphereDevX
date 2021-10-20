@@ -2,6 +2,10 @@
 
 bool dx_i2cOpen(DX_I2C_BINDING *i2c_binding)
 {
+    if (i2c_binding->opened) {
+        return true;
+    }
+
     i2c_binding->fd = I2CMaster_Open(i2c_binding->interfaceId);
     if (i2c_binding->fd < 0) {
         Log_Debug("ERROR: I2CMaster_Open: errno=%d (%s)\n", errno, strerror(errno));
