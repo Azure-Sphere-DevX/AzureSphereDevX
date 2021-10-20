@@ -55,6 +55,10 @@ typedef enum {
 	DX_ExitCode_Uart_Write_Failed = 213,
 	DX_ExitCode_UartHandler = 212,
 
-	DX_ExitCode_Add_List_Node_Malloc_Failed = 221,
-	DX_ExitCode_Avnet_Add_Child_Failed = 210
+	DX_ExitCode_Add_List_Node_Malloc_Failed = 211,
+	DX_ExitCode_Avnet_Add_Child_Failed = 210,
+
+	DX_ExitCode_I2C_Open_Failed = 209,
+    DX_ExitCode_I2C_SetBusSpeed_Failed = 208,
+    DX_ExitCode_I2C_SetTimeout_Failed = 207
 } ExitCode;
