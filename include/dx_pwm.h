@@ -6,23 +6,21 @@
 #include "dx_utilities.h"
 #include "stdbool.h"
 #include <applibs/pwm.h>
+#include <unistd.h>
 
-typedef struct DX_PWM_CONTROLLER
-{
+typedef struct DX_PWM_CONTROLLER {
     int fd;
     PWM_ControllerId controllerId;
     bool initialized;
     char *name;
 } DX_PWM_CONTROLLER;
 
-typedef struct DX_PWM_BINDING
-{
+typedef struct DX_PWM_BINDING {
     DX_PWM_CONTROLLER *pwmController;
     PWM_ChannelId channelId;
     PwmPolarity pwmPolarity;
     char *name;
 } DX_PWM_BINDING;
-
 
 /// <summary>
 /// Set the PWM hertz and duty cycle percentage.
@@ -53,3 +51,17 @@ bool dx_pwmOpen(DX_PWM_BINDING *pwmBinding);
 /// <param name="pwmSet"></param>
 /// <param name="pwmSetCount"></param>
 void dx_pwmSetOpen(DX_PWM_BINDING **pwmSet, size_t pwmSetCount);
+
+/// <summary>
+/// Close PWM file descriptor
+/// </summary>
+/// <param name="pwm_binding"></param>
+/// <returns></returns>
+bool dx_pwmClose(DX_PWM_BINDING *pwmBinding);
+
+/// <summary>
+/// Close a set of PWM Bindings
+/// </summary>
+/// <param name="pwmSet"></param>
+/// <param name="pwmSetCount"></param>
+void dx_pwmSetClose(DX_PWM_BINDING **pwmSet, size_t pwmSetCount);
