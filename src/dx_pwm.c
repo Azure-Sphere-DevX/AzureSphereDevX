@@ -58,14 +58,13 @@ void dx_pwmSetOpen(DX_PWM_BINDING **pwmSet, size_t pwmSetCount)
 
 bool dx_pwmClose(DX_PWM_BINDING *pwmBinding)
 {
-    if (!pwmBinding->pwmController->initialized) {
-        return true;
-    }
+    if (pwmBinding->pwmController->initialized) {
 
-    pwmBinding->pwmController->initialized = false;
+        pwmBinding->pwmController->initialized = false;
 
-    if (close(pwmBinding->pwmController->fd) != 0) {
-        return false;
+        if (close(pwmBinding->pwmController->fd) != 0) {
+            return false;
+        }
     }
 
     return true;
