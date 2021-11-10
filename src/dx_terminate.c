@@ -36,3 +36,16 @@ int dx_getTerminationExitCode(void)
 {
     return _exitCode;
 }
+
+void dx_eventLoopRun(void)
+{
+    EventLoop *el = dx_timerGetEventLoop();
+    // run the main event loop
+    while (!terminationRequired) {
+        int result = EventLoop_Run(el, -1, true);
+        // Continue if interrupted by signal, e.g. due to breakpoint being set.
+        if (result == -1 && errno != EINTR) {
+            dx_terminate(DX_ExitCode_Main_EventLoopFail);
+        }
+    }
+}
