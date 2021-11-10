@@ -15,7 +15,7 @@
 
 bool dx_isTerminationRequired(void);
 int dx_getTerminationExitCode(void);
+void dx_eventLoopRun(void);
 void dx_registerTerminationHandler(void);
-void dx_runEventLoop(void);
 void dx_terminate(int exitCode);
 void dx_terminationHandler(int signalNumber);

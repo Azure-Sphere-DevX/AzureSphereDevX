@@ -37,7 +37,7 @@ int dx_getTerminationExitCode(void)
     return _exitCode;
 }
 
-void dx_runEventLoop(void)
+void dx_eventLoopRun(void)
 {
     EventLoop *el = dx_timerGetEventLoop();
     // run the main event loop
