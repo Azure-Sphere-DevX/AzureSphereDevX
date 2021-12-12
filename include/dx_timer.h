@@ -6,6 +6,7 @@
 #include "eventloop_timer_utilities.h"
 #include "stdbool.h"
 #include <applibs/eventloop.h>
+#include <applibs/log.h>
 
 #define DX_DEFINE_TIMER_HANDLER(name)                            \
     void name(EventLoopTimer *eventLoopTimer)                    \
@@ -22,6 +23,8 @@
 typedef struct {
     void (*handler)(EventLoopTimer *timer);
     struct timespec period;
+    struct timespec *delay;
+    struct timespec *repeat;
     EventLoopTimer *eventLoopTimer;
     const char *name;
 } DX_TIMER_BINDING;

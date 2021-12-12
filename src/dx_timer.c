@@ -32,19 +32,40 @@ bool dx_timerStart(DX_TIMER_BINDING *timer)
         return false;
     }
 
+    // Already initialized
     if (timer->eventLoopTimer != NULL) {
         return true;
     }
 
-    if (timer->period.tv_nsec == 0 &&
-        timer->period.tv_sec == 0) { // Set up a disabled DX_TIMER_BINDING for oneshot or change timer
+    if (timer->delay != NULL && timer->repeat != NULL) {
+        Log_Debug("Can't specify both a delay and a repeat period\n");
+        return false;
+    }
+
+    // is this a oneshot timer
+    if (timer->delay != NULL) {
+        timer->eventLoopTimer = CreateEventLoopDisarmedTimer(eventLoop, timer->handler);
+        if (timer->eventLoopTimer == NULL) {
+            return false;
+        }
+        return SetEventLoopTimerOneShot(timer->eventLoopTimer, timer->delay) == 0;
+    }
+
+    // is this a repeating timer
+    if (timer->repeat != NULL) {
+        timer->eventLoopTimer = CreateEventLoopPeriodicTimer(eventLoop, timer->handler, timer->repeat);
+        return timer->eventLoopTimer != NULL;
+    }
+
+    // support for initial timer implementation
+    // if timer period is zero then create a disarmed timer
+    if (timer->period.tv_nsec == 0 && timer->period.tv_sec == 0) { // Set up a disabled DX_TIMER_BINDING for oneshot or change timer
         timer->eventLoopTimer = CreateEventLoopDisarmedTimer(eventLoop, timer->handler);
         if (timer->eventLoopTimer == NULL) {
             return false;
         }
     } else {
-        timer->eventLoopTimer =
-            CreateEventLoopPeriodicTimer(eventLoop, timer->handler, &timer->period);
+        timer->eventLoopTimer = CreateEventLoopPeriodicTimer(eventLoop, timer->handler, &timer->period);
         if (timer->eventLoopTimer == NULL) {
             return false;
         }
