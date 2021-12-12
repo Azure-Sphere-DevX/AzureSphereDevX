@@ -6,13 +6,13 @@
 #include "dx_azure_iot.h"
 #include "dx_gpio.h"
 
-#define DX_DEFINE_DIRECTMETHOD_HANDLER(name, json, directMethodBinding, responseMsg)                                         \
+#define DX_DEFINE_DIRECT_METHOD_HANDLER(name, json, directMethodBinding, responseMsg)                                         \
     DX_DIRECT_METHOD_RESPONSE_CODE name(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) \
     {
 
-#define DX_END_DIRECTMETHOD_HANDLER }
+#define DX_END_DIRECT_METHOD_HANDLER }
 
-#define DX_DECLARE_DIRECTMETHOD_HANDLER(name) \
+#define DX_DECLARE_DIRECT_METHOD_HANDLER(name) \
     DX_DIRECT_METHOD_RESPONSE_CODE name(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);
 
 typedef enum { DX_METHOD_SUCCEEDED = 200, DX_METHOD_FAILED = 500, DX_METHOD_NOT_FOUND = 404 } DX_DIRECT_METHOD_RESPONSE_CODE;
