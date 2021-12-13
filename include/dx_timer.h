@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "dx_terminate.h"
 #include "eventloop_timer_utilities.h"
 #include "stdbool.h"
 #include <applibs/eventloop.h>

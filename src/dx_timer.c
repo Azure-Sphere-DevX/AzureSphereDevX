@@ -38,7 +38,8 @@ bool dx_timerStart(DX_TIMER_BINDING *timer)
     }
 
     if (timer->delay != NULL && timer->repeat != NULL) {
-        Log_Debug("Can't specify both a delay and a repeat period\n");
+        Log_Debug("Can't specify both a timer delay and a repeat period\n");
+        dx_terminate(DX_ExitCode_Create_Timer_Failed);
         return false;
     }
 
@@ -46,15 +47,25 @@ bool dx_timerStart(DX_TIMER_BINDING *timer)
     if (timer->delay != NULL) {
         timer->eventLoopTimer = CreateEventLoopDisarmedTimer(eventLoop, timer->handler);
         if (timer->eventLoopTimer == NULL) {
+            dx_terminate(DX_ExitCode_Create_Timer_Failed);
             return false;
         }
-        return SetEventLoopTimerOneShot(timer->eventLoopTimer, timer->delay) == 0;
+
+        if (SetEventLoopTimerOneShot(timer->eventLoopTimer, timer->delay) != 0) {
+            dx_terminate(DX_ExitCode_Create_Timer_Failed);
+            return false;
+        }
+        return true;
     }
 
     // is this a repeating timer
     if (timer->repeat != NULL) {
         timer->eventLoopTimer = CreateEventLoopPeriodicTimer(eventLoop, timer->handler, timer->repeat);
-        return timer->eventLoopTimer != NULL;
+        if (timer->eventLoopTimer == NULL) {
+            dx_terminate(DX_ExitCode_Create_Timer_Failed);
+            return false;
+        }
+        return true;
     }
 
     // support for initial timer implementation
@@ -62,11 +73,13 @@ bool dx_timerStart(DX_TIMER_BINDING *timer)
     if (timer->period.tv_nsec == 0 && timer->period.tv_sec == 0) { // Set up a disabled DX_TIMER_BINDING for oneshot or change timer
         timer->eventLoopTimer = CreateEventLoopDisarmedTimer(eventLoop, timer->handler);
         if (timer->eventLoopTimer == NULL) {
+            dx_terminate(DX_ExitCode_Create_Timer_Failed);
             return false;
         }
     } else {
         timer->eventLoopTimer = CreateEventLoopPeriodicTimer(eventLoop, timer->handler, &timer->period);
         if (timer->eventLoopTimer == NULL) {
+            dx_terminate(DX_ExitCode_Create_Timer_Failed);
             return false;
         }
     }

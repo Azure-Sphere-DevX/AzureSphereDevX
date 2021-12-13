@@ -60,5 +60,7 @@ typedef enum {
 
 	DX_ExitCode_I2C_Open_Failed = 209,
     DX_ExitCode_I2C_SetBusSpeed_Failed = 208,
-    DX_ExitCode_I2C_SetTimeout_Failed = 207
+    DX_ExitCode_I2C_SetTimeout_Failed = 207,
+
+	DX_ExitCode_Create_Timer_Failed = 206,
 } ExitCode;
