@@ -17,6 +17,7 @@ static char *iotHubUri = NULL;
 static const char *_networkInterface = NULL;
 static DX_USER_CONFIG *_userConfig = NULL;
 static int outstandingMessageCount = 0;
+static bool connection_initialized = false;
 
 static char *_pnpModelIdJson = NULL;
 static const char *_pnpModelId = NULL;
@@ -164,6 +165,10 @@ bool createPnpModelIdJson(void)
 
 void dx_azureConnect(DX_USER_CONFIG *userConfig, const char *networkInterface, const char *plugAndPlayModelId)
 {
+    if (connection_initialized) {
+        return;
+    }
+
     if (userConfig->connectionType == DX_CONNECTION_TYPE_NOT_DEFINED) {
         Log_Debug("ERROR: Connection type not defined\n");
         dx_terminate(DX_ExitCode_Validate_Connection_Type_Not_Defined);
@@ -181,13 +186,16 @@ void dx_azureConnect(DX_USER_CONFIG *userConfig, const char *networkInterface, c
     }
 
     dx_azureToDeviceStart();
+
+    connection_initialized = true;
 }
 
 /// <summary>
 /// If network connection has changed then call all network status changed registered callbacks
 /// </summary>
 /// <param name="connection_state"></param>
-static void ProcessConnectionStatusCallbacks(bool connection_state) {
+static void ProcessConnectionStatusCallbacks(bool connection_state)
+{
     static bool previous_connection_state = false;
 
     if (connection_state != previous_connection_state) {
