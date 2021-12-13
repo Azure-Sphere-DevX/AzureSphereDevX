@@ -125,6 +125,7 @@ void dx_azureToDeviceStop(void)
 {
     if (azureConnectionTimer.eventLoopTimer != NULL) {
         dx_timerStop(&azureConnectionTimer);
+        connection_initialized = false;
     }
 }
 
