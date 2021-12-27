@@ -6,11 +6,12 @@
 #include "dx_azure_iot.h"
 #include "dx_gpio.h"
 
-#define DX_DEFINE_DIRECT_METHOD_HANDLER(name, json, directMethodBinding, responseMsg)                                         \
+#define DX_DIRECT_METHOD_HANDLER(name, json, directMethodBinding, responseMsg)                                         \
     DX_DIRECT_METHOD_RESPONSE_CODE name(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg) \
     {
 
-#define DX_END_DIRECT_METHOD_HANDLER }
+#define DX_DIRECT_METHOD_END \
+    }
 
 #define DX_DECLARE_DIRECT_METHOD_HANDLER(name) \
     DX_DIRECT_METHOD_RESPONSE_CODE name(JSON_Value *json, DX_DIRECT_METHOD_BINDING *directMethodBinding, char **responseMsg);

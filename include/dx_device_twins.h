@@ -8,11 +8,11 @@
 #include "dx_gpio.h"
 #include <iothub_device_client_ll.h>
 
-#define DX_DEFINE_DEVICE_TWIN_HANDLER(name, deviceTwinBinding) \
+#define DX_DEVICE_TWIN_HANDLER(name, deviceTwinBinding) \
 	void name(DX_DEVICE_TWIN_BINDING *deviceTwinBinding)      \
 	{
 
-#define DX_END_DEVICE_TWIN_HANDLER \
+#define DX_DEVICE_TWIN_HANDLER_END \
 	}
 
 #define DX_DECLARE_DEVICE_TWIN_HANDLER(name) \

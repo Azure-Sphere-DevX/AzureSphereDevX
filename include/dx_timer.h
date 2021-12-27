@@ -9,15 +9,17 @@
 #include <applibs/eventloop.h>
 #include <applibs/log.h>
 
-#define DX_DEFINE_TIMER_HANDLER(name)                            \
+#define DX_TIMER_HANDLER(name)                            \
     void name(EventLoopTimer *eventLoopTimer)                    \
     {                                                            \
-        if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0) {   \
+        if (ConsumeEventLoopTimerEvent(eventLoopTimer) != 0)     \
+        {                                                        \
             dx_terminate(DX_ExitCode_ConsumeEventLoopTimeEvent); \
             return;                                              \
         }
 
-#define DX_END_TIMER_HANDLER }
+#define DX_TIMER_HANDLER_END \
+    }
 
 #define DX_DECLARE_TIMER_HANDLER(name) void name(EventLoopTimer *eventLoopTimer)
 
