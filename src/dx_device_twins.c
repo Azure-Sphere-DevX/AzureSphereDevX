@@ -77,6 +77,7 @@ static void deviceTwinOpen(DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
         break;
     case DX_DEVICE_TWIN_JSON_OBJECT:
         // Note no memory is allocated for JSON OBJECT twin type as size is unknown
+        break;
     default:
         break;
     }
