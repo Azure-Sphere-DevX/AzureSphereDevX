@@ -85,7 +85,7 @@ bool dx_isDeviceAuthReady(void)
         Log_Debug("ERROR: Application_IsDeviceAuthReady: %d (%s)\n", errno, strerror(errno));
     } else {
         if (!currentAppDeviceAuthReady) {
-            Log_Debug("ERROR: Current Application not Device Auth Ready\n");
+            Log_Debug("ERROR: No internet connection, check your network connection\n");
         }
     }
 
