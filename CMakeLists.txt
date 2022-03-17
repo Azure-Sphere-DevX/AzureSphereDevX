@@ -22,6 +22,7 @@ set(Source
     "./src/dx_deferred_update.c"	
     "./src/dx_avnet_iot_connect.c"	
     "./src/dx_uart.c"
+    "./src/dx_proxy.c"
 )
 source_group("Source" FILES ${Source})
 

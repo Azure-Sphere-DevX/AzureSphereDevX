@@ -170,22 +170,26 @@ void dx_azureConnect(DX_USER_CONFIG *userConfig, const char *networkInterface, c
         return;
     }
 
+    // Verify that a connection type is definedf
     if (userConfig->connectionType == DX_CONNECTION_TYPE_NOT_DEFINED) {
         Log_Debug("ERROR: Connection type not defined\n");
         dx_terminate(DX_ExitCode_Validate_Connection_Type_Not_Defined);
         return;
     }
 
+    // Set private pointers to the application configuration structures
     _userConfig = userConfig;
     _networkInterface = networkInterface;
     _pnpModelId = plugAndPlayModelId;
 
+    // Create a JSON key value pair with the PnP model details "{"modelId":"PassedInModelIDString"};
     if (_userConfig->connectionType == DX_CONNECTION_TYPE_DPS) {
         if (!createPnpModelIdJson()) {
             return;
         }
     }
 
+    // Start the timer that drives the Azure connection process
     dx_azureToDeviceStart();
 
     connection_initialized = true;
@@ -257,7 +261,9 @@ static void AzureConnectionHandler(EventLoopTimer *eventLoopTimer)
         deviceConnectionState = DEVICE_NOT_CONNECTED;
     }
 
+    // Use the current connection state to determine what to do next
     switch (iotHubClientAuthenticationState) {
+        // This is the start state when we first run
     case IoTHubClientAuthenticationState_NotAuthenticated:
         SetupAzureClient();
         nextEventPeriod = (struct timespec){1, 0};
@@ -442,10 +448,17 @@ static bool ConnectToIotHub(const char *hostname)
         return false;
     }
 
-    if ((iothubClientHandle = IoTHubDeviceClient_LL_CreateWithAzureSphereFromDeviceAuth(hostname, &MQTT_Protocol)) == NULL) {
-        Log_Debug("ERROR: Failed to create client IoT Hub Client Handle\n");
-        return false;
+    if(dx_proxyIsEnabled()){
+
+        if(!dx_proxyOpenIoTHubHandleWithMqttWebSocket(hostname, &iothubClientHandle)){
+            return false;                                                                
+        }
     }
+    // Proxy not enabled
+    else if ((iothubClientHandle = IoTHubDeviceClient_LL_CreateWithAzureSphereFromDeviceAuth(hostname, &MQTT_Protocol)) == NULL) {
+            Log_Debug("ERROR: Failed to create client IoT Hub Client Handle\n");
+        return false;
+    }    
 
     // IOTHUB_CLIENT_RESULT iothub_result
     if ((iothubResult = IoTHubDeviceClient_LL_SetOption(iothubClientHandle, "SetDeviceId", &deviceIdForDaaCertUsage)) != IOTHUB_CLIENT_OK) {
@@ -568,13 +581,23 @@ static bool SetUpAzureIoTHubClientWithDaaDpsPnP(void)
 
         security_init_called = true;
 
-        // Create Provisioning Client for communication with DPS using MQTT protocol
-        if ((prov_handle = Prov_Device_LL_Create(dpsUrl, _userConfig->idScope, Prov_Device_MQTT_Protocol)) == NULL) {
-            Log_Debug("ERROR: Failed to create Provisioning Client\n");
-            deviceConnectionState = DEVICE_PROVISIONING_ERROR;
-            goto cleanup;
-        }
+        // Check to see if we're using the web proxy
+        if(dx_proxyIsEnabled()){
 
+            if (!dx_proxyCreateDpsClientWithMqttWebSocket(dpsUrl, _userConfig->idScope, &prov_handle)){
+                goto cleanup;
+            }
+        }
+        // Not using a web proxy
+        else{
+
+            // Create Provisioning Client for communication with DPS using MQTT protocol
+            if ((prov_handle = Prov_Device_LL_Create(dpsUrl, _userConfig->idScope, Prov_Device_MQTT_Protocol)) == NULL) {
+                Log_Debug("ERROR: Failed to create Provisioning Client\n");
+                deviceConnectionState = DEVICE_PROVISIONING_ERROR;
+                goto cleanup;
+            }
+        }
         // Sets Device ID on Provisioning Client
         if ((prov_result = Prov_Device_LL_SetOption(prov_handle, "SetDeviceId", &deviceIdForDaaCertUsage)) != PROV_DEVICE_RESULT_OK) {
             Log_Debug("ERROR: Failed to set Device ID in Provisioning Client, error=%d\n", prov_result);

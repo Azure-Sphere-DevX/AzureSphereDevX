@@ -63,4 +63,7 @@ typedef enum {
     DX_ExitCode_I2C_SetTimeout_Failed = 207,
 
 	DX_ExitCode_Create_Timer_Failed = 206,
+	
+	DX_ExitCode_Configure_Proxy_Failed = 205,
+	DX_ExitCode_Enable_Disable_Proxy_Failed = 204,
 } ExitCode;

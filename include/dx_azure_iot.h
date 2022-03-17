@@ -15,7 +15,10 @@
 #include "dx_timer.h"
 #include "dx_utilities.h"
 #include "dx_avnet_iot_connect.h"
+#include "dx_proxy.h"
 #include "iothubtransportmqtt.h"
+#include <iothubtransportmqtt_websockets.h>
+#include <azure_prov_client/prov_transport_mqtt_ws_client.h>
 #include <applibs/log.h>
 #include <azure_prov_client/iothub_security_factory.h>
 #include <azure_sphere_provisioning.h>
@@ -123,3 +126,5 @@ void dx_azureRegisterDeviceTwinCallback(void (*deviceTwinCallbackHandler)(DEVICE
 void dx_azureRegisterDirectMethodCallback(int (*directMethodCallbackHandler)(const char *method_name, const unsigned char *payload,
                                                                              size_t payloadSize, unsigned char **responsePayload,
                                                                              size_t *responsePayloadSize, void *userContextCallback));
+
+
