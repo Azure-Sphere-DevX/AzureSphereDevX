@@ -15,6 +15,7 @@
 #include "dx_timer.h"
 #include "dx_utilities.h"
 #include "dx_avnet_iot_connect.h"
+#include "dx_proxy.h"
 #include "iothubtransportmqtt.h"
 #include <iothubtransportmqtt_websockets.h>
 #include <azure_prov_client/prov_transport_mqtt_ws_client.h>
@@ -47,16 +48,6 @@ typedef struct DX_MESSAGE_CONTENT_PROPERTIES {
     const char *contentEncoding;
     const char *contentType;
 } DX_MESSAGE_CONTENT_PROPERTIES;
-
-typedef struct DX_PROXY_PROPERTIES{
-    const char *proxyAddress;       // The Proxy Server Address
-    const uint16_t proxyPort;       // The Proxy Server Port
-    const char *proxyUsername;      // Proxy Username (basic auth), or NULL to use anonymous auth
-    const char *proxyPassword;      // Proxy Password (basic auth), or NULL to use anponymous auth
-    const char *noProxyAdresses;    // Comma seperated list of IP address' that should NOT be routed
-                                    //   to the proxy
-    const bool proxyEnabled;                                    
-} DX_PROXY_PROPERTIES;
 
 /// <summary>
 /// Check if there is a network connection and an authenticated connection to Azure IoT Hub/Central
@@ -135,18 +126,5 @@ void dx_azureRegisterDeviceTwinCallback(void (*deviceTwinCallbackHandler)(DEVICE
 void dx_azureRegisterDirectMethodCallback(int (*directMethodCallbackHandler)(const char *method_name, const unsigned char *payload,
                                                                              size_t payloadSize, unsigned char **responsePayload,
                                                                              size_t *responsePayloadSize, void *userContextCallback));
-
-/// <summary>
-/// Configure Proxy Settings
-/// </summary>
-/// <param name="proxyProperties"></param>
-void dx_azureConfigureProxy(DX_PROXY_PROPERTIES *proxyProperties);
-
-/// <summary>
-/// Enable or disable an already configured proxy.
-/// </summary>
-/// <param name="enableProxy">To enable or disable proxy. Set to true to enable, and false to
-/// disable proxy</param>
-void dx_azureEnableProxy(bool enableProxy);  
 
 

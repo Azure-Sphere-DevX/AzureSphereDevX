@@ -16,7 +16,6 @@ static IOTHUB_DEVICE_CLIENT_LL_HANDLE iothubClientHandle = NULL;
 static char *iotHubUri = NULL;
 static const char *_networkInterface = NULL;
 static DX_USER_CONFIG *_userConfig = NULL;
-static DX_PROXY_PROPERTIES *_proxyConfig = NULL;
 static int outstandingMessageCount = 0;
 static bool connection_initialized = false;
 
@@ -449,36 +448,16 @@ static bool ConnectToIotHub(const char *hostname)
         return false;
     }
 
-    if((_proxyConfig->proxyEnabled) && (_proxyConfig->proxyAddress != NULL)){
+    if(dx_proxyIsEnabled()){
 
-        iothubClientHandle =
-            IoTHubDeviceClient_LL_CreateWithAzureSphereFromDeviceAuth(hostname, MQTT_WebSocket_Protocol);
-
-        if (iothubClientHandle == NULL) {
-            Log_Debug("ERROR: IoTHubDeviceClient_LL_CreateFromDeviceAuth returned NULL.\n");
-            return false;
-        }
-
-        IOTHUB_CLIENT_RESULT iothubResult;
-
-        HTTP_PROXY_OPTIONS httpProxyOptions;
-        memset(&httpProxyOptions, 0, sizeof(httpProxyOptions));
-        httpProxyOptions.host_address = _proxyConfig->proxyAddress;
-        httpProxyOptions.port = _proxyConfig->proxyPort;
-
-        if ((iothubResult = IoTHubDeviceClient_LL_SetOption(
-            iothubClientHandle, OPTION_HTTP_PROXY, &httpProxyOptions)) != IOTHUB_CLIENT_OK) {
-            Log_Debug("ERROR: Failure setting Azure IoT Hub client option  \"OPTION_HTTP_PROXY\": %s\n",
-                IOTHUB_CLIENT_RESULTStrings(iothubResult));
-                return false;
+        if(!dx_proxyOpenIoTHubHandleWithMqttWebSocket(hostname, &iothubClientHandle)){
+            return false;                                                                
         }
     }
     // Proxy not enabled
-    else{
-        if ((iothubClientHandle = IoTHubDeviceClient_LL_CreateWithAzureSphereFromDeviceAuth(hostname, &MQTT_Protocol)) == NULL) {
+    else if ((iothubClientHandle = IoTHubDeviceClient_LL_CreateWithAzureSphereFromDeviceAuth(hostname, &MQTT_Protocol)) == NULL) {
             Log_Debug("ERROR: Failed to create client IoT Hub Client Handle\n");
-            return false;
-        }
+        return false;
     }    
 
     // IOTHUB_CLIENT_RESULT iothub_result
@@ -603,33 +582,9 @@ static bool SetUpAzureIoTHubClientWithDaaDpsPnP(void)
         security_init_called = true;
 
         // Check to see if we're using the web proxy
-        if((_proxyConfig->proxyEnabled) && (_proxyConfig->proxyAddress != NULL)){
+        if(dx_proxyIsEnabled()){
 
-            // Create Provisioning Client for communication with DPS
-            // using MQTT protocol
-            prov_handle = Prov_Device_LL_Create(dpsUrl,  _userConfig->idScope, Prov_Device_MQTT_WS_Protocol);
-            if (prov_handle == NULL) {
-                Log_Debug("ERROR: Failed to create Provisioning Client\n");
-                goto cleanup;
-            }
-
-            // Use DAA cert in provisioning flow - requires the SetDeviceId option to be set on the
-            // provisioning client.
-            static const int deviceIdForDaaCertUsage = 1;
-            PROV_DEVICE_RESULT prov_result =
-                Prov_Device_LL_SetOption(prov_handle, "SetDeviceId", &deviceIdForDaaCertUsage);
-            if (prov_result != PROV_DEVICE_RESULT_OK) {
-                Log_Debug("ERROR: Failed to set Device ID in Provisioning Client\n");
-                goto cleanup;
-            }
-
-            HTTP_PROXY_OPTIONS httpProxyOptions;
-            memset(&httpProxyOptions, 0, sizeof(httpProxyOptions));
-            httpProxyOptions.host_address = _proxyConfig->proxyAddress;
-            httpProxyOptions.port = _proxyConfig->proxyPort;
-            prov_result = Prov_Device_LL_SetOption(prov_handle, OPTION_HTTP_PROXY, &httpProxyOptions);
-            if (prov_result != PROV_DEVICE_RESULT_OK) {
-                Log_Debug("ERROR: Failed to set Proxy options in Provisioning Client\n");
+            if (!dx_proxyCreateDpsClientWithMqttWebSocket(dpsUrl, _userConfig->idScope, &prov_handle)){
                 goto cleanup;
             }
         }
@@ -818,138 +773,4 @@ static const char *GetReasonString(IOTHUB_CLIENT_CONNECTION_STATUS_REASON reason
         break;
     }
     return reasonString;
-}
-
-/// <summary>
-/// Configure Proxy Settings
-/// </summary>
-/// <param name="proxyProperties"></param>
-void dx_azureConfigureProxy(DX_PROXY_PROPERTIES *proxyProperties)
-{
-    int result = -1;
-
-    // Capture a pointer to the incomming proxyProperties
-    _proxyConfig = proxyProperties;
-
-    // By default, proxy configuration option Networking_ProxyOptions_Enabled is set and the proxy
-    // type is Networking_ProxyType_HTTP.
-    Networking_ProxyConfig *proxyConfig = Networking_Proxy_Create();
-    if (proxyConfig == NULL) {
-        Log_Debug("ERROR: Networking_Proxy_Create(): %d (%s)\n", errno, strerror(errno));
-        goto cleanup;
-    }
-
-    // Set the proxy address and port.
-    if (Networking_Proxy_SetProxyAddress(proxyConfig, proxyProperties->proxyAddress, proxyProperties->proxyPort) == -1) {
-        Log_Debug("ERROR: Networking_Proxy_SetProxyAddress(): %d (%s)\n", errno, strerror(errno));
-        goto cleanup;
-    }
-
-    // If both username and password are set, use basic authentication. Otherwise use anonymous
-    // authentication.
-    if ((proxyProperties->proxyUsername != NULL) && (proxyProperties->proxyPassword != NULL)) {
-        if (Networking_Proxy_SetBasicAuthentication(proxyConfig, proxyProperties->proxyUsername, proxyProperties->proxyPassword) ==
-            -1) {
-            Log_Debug("ERROR: Networking_Proxy_SetBasicAuthentication(): %d (%s)\n", errno,
-                      strerror(errno));
-            goto cleanup;
-        }
-    } else {
-        if (Networking_Proxy_SetAnonymousAuthentication(proxyConfig) == -1) {
-            Log_Debug("ERROR: Networking_Proxy_SetAnonymousAuthentication(): %d (%s)\n", errno,
-                      strerror(errno));
-            goto cleanup;
-        }
-    }
-
-    // Set addresses for which proxy should not be used if "noProxyAddresses" is modified.
-    if (proxyProperties->noProxyAdresses != NULL) {
-        if (Networking_Proxy_SetProxyNoProxyAddresses(proxyConfig, proxyProperties->noProxyAdresses) == -1) {
-            Log_Debug("ERROR: Networking_Proxy_SetProxyNoProxyAddresses(): %d (%s)\n", errno,
-                      strerror(errno));
-            goto cleanup;
-        }
-    }
-
-    // Apply the proxy configuration.
-    if (Networking_Proxy_Apply(proxyConfig) == -1) {
-        Log_Debug("ERROR: Networking_Proxy_Apply(): %d (%s)\n", errno, strerror(errno));
-        goto cleanup;
-    }
-    result = 0;
-
-cleanup:
-    if (proxyConfig) {
-        Networking_Proxy_Destroy(proxyConfig);
-    }
-
-    // If we encountered any errors exit and return the exit reason to the OS
-    if(result != 0){
-        dx_terminate(DX_ExitCode_Configure_Proxy_Failed);
-    }
-}
-
-/// <summary>
-/// Enable or disable an already configured proxy.
-/// </summary>
-/// <param name="enableProxy">To enable or disable proxy. Set to true to enable, and false to
-/// disable proxy</param>
-void dx_azureEnableProxy(bool enableProxy)
-{
-    int result = -1;
-    Networking_ProxyConfig  *proxyConfig = Networking_Proxy_Create();
-    if (proxyConfig == NULL) {
-        Log_Debug("ERROR: Networking_Proxy_Create(): %d (%s)\n", errno, strerror(errno));
-        goto cleanup;
-    }
-
-    // Need to get the current config, otherwise the existing config will get overwritten with a
-    // blank/default config when the change is applied.
-    if (Networking_Proxy_Get(proxyConfig) == -1) {
-
-        if (errno == ENOENT) {
-            Log_Debug("There is currently no proxy configured.\n");
-        } else {
-            Log_Debug("ERROR: Networking_Proxy_Get(): %d (%s)\n", errno, strerror(errno));
-        }
-        goto cleanup;
-    }
-
-    // Get the proxy options.
-    Networking_ProxyOptions proxyOptions = 0;
-    if (Networking_Proxy_GetProxyOptions(proxyConfig, &proxyOptions) == -1) {
-        Log_Debug("ERROR: Networking_Proxy_GetProxyOptions(): %d (%s)\n", errno, strerror(errno));
-        goto cleanup;
-    }
-
-    // Set the enabled/disabled proxy option.
-    if (enableProxy) {
-        // Set flag Networking_ProxyOptions_Enabled;
-        proxyOptions |= Networking_ProxyOptions_Enabled;
-    } else {
-        // Reset flag Networking_ProxyOptions_Enabled;
-        proxyOptions &= ~((unsigned int)Networking_ProxyOptions_Enabled);
-    }
-
-    if (Networking_Proxy_SetProxyOptions(proxyConfig, proxyOptions) == -1) {
-        Log_Debug("ERROR: Networking_Proxy_SetProxyOptions(): %d (%s)\n", errno, strerror(errno));
-        goto cleanup;
-    }
-
-    // Apply the proxy configuration.
-    if (Networking_Proxy_Apply(proxyConfig) == -1) {
-        Log_Debug("ERROR: Networking_Proxy_Apply(): %d (%s)\n", errno, strerror(errno));
-        goto cleanup;
-    }
-    result = 0;
-
-cleanup:
-    if (proxyConfig) {
-        Networking_Proxy_Destroy(proxyConfig);
-    }
-    
-    // If we encountered any errors exit and return the exit reason to the OS
-    if(result != 0){
-        dx_terminate(DX_ExitCode_Enable_Disable_Proxy_Failed);
-    }
 }
