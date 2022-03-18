@@ -230,5 +230,5 @@ bool dx_proxyCreateDpsClientWithMqttWebSocket(const char *dpsUrl,
 /// Return the status of the web proxy, enabled (true) or disabled (false).
 /// </summary>
 bool dx_proxyIsEnabled(void){
-    return _proxyConfig != NULL ? _proxyConfig->proxyEnabled : false;
+    return _proxyConfig->proxyEnabled;
 }
