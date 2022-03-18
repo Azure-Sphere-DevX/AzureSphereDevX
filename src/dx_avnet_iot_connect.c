@@ -213,23 +213,16 @@ cleanup:
 static void IoTCSend200HelloMessage(void)
 {
 
-    // Send the IoT Connect hello message to inform the platform that we're on-line!
-    JSON_Value *rootValue = json_value_init_object();
-    JSON_Object *rootObject = json_value_get_object(rootValue);
-
-    json_object_dotset_number(rootObject, "mt", 200);
-    json_object_dotset_number(rootObject, "v", 2.0F);
-
-    char *serializedTelemetryUpload = json_serialize_to_string(rootValue);
-
-    if (!dx_azurePublish(serializedTelemetryUpload, strnlen(serializedTelemetryUpload, 64), NULL, 0, NULL)) {
+    // Send the IoT Connect hello message to inform the platform that we're on-line!  
+    const char helloMessage[] = "{\"mt\": 200, \"v\": 2.1}";
+   
+    if (!dx_azurePublish(helloMessage, strnlen(helloMessage, 32), NULL, 0, NULL)) {
 
         Log_Debug("[AVT IoTConnect] IoTCHello message send error: %s\n", "error");
     }
-
-    Log_Debug("[AVT IoTConnect] TX: %s\n", serializedTelemetryUpload);
-    json_free_serialized_string(serializedTelemetryUpload);
-    json_value_free(rootValue);
+    else{
+    Log_Debug("[AVT IoTConnect] TX: %s\n", helloMessage);
+    }
 }
 
 // Construct a new message that contains all the required IoTConnect data and the original telemetry
