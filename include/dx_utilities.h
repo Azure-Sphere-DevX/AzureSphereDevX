@@ -7,6 +7,8 @@
 #include <applibs/log.h>
 #include <applibs/networking.h>
 #include <ctype.h>
+#include <curl/curl.h>
+#include <curl/easy.h>
 #include <errno.h>
 #include <math.h>
 #include <pthread.h>
@@ -21,6 +23,9 @@
 #define NELEMS(x)  (sizeof(x) / sizeof((x)[0]))
 #define IN_RANGE(number, low, high) (low <= number && high >= number)
 #define NULL_OR_EMPTY(string) (string == NULL || strlen(string) == 0)
+#define DX_SAFE_STRING_COPY(dest, source, length) \
+    strncpy(dest, source, length);                \
+    dest[length - 1] = 0x00;
 
 bool dx_isDeviceAuthReady(void);
 bool dx_isNetworkConnected(const char *networkInterface);
@@ -38,6 +43,7 @@ bool dx_isStringPrintable(char *data);
 
 bool dx_startThreadDetached(void *(daemon)(void *), void *arg, char *daemon_name);
 char *dx_getCurrentUtc(char *buffer, size_t bufferSize);
+char *dx_getHttpData(const char *url);
 int dx_stringEndsWith(const char *str, const char *suffix);
 int64_t dx_getNowMilliseconds(void);
 void dx_Log_Debug(char *fmt, ...);

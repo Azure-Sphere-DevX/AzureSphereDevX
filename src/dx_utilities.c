@@ -6,6 +6,12 @@
 static char *_log_debug_buffer = NULL;
 static size_t _log_debug_buffer_size;
 
+// Curl stuff.
+struct MemoryStruct {
+    char *memory;
+    size_t size;
+};
+
 bool dx_isStringNullOrEmpty(const char *string)
 {
     return string == NULL || strlen(string) == 0;
@@ -25,6 +31,80 @@ bool dx_isStringPrintable(char *data)
         data++;
     }
     return 0x00 == *data;
+}
+
+static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
+{
+    size_t realsize = size * nmemb;
+    struct MemoryStruct *mem = (struct MemoryStruct *)userp;
+
+    char *ptr = realloc(mem->memory, mem->size + realsize + 1);
+    if (!ptr) {
+        /* out of memory! */
+        Log_Debug("not enough memory (realloc returned NULL)\n");
+        return 0;
+    }
+
+    mem->memory = ptr;
+    memcpy(&(mem->memory[mem->size]), contents, realsize);
+    mem->size += realsize;
+    mem->memory[mem->size] = 0;
+
+    return realsize;
+}
+
+// https://curl.se/libcurl/c/getinmemory.html
+char *dx_getHttpData(const char *url)
+{
+    static bool curl_initialized = false;
+    CURL *curl_handle;
+    CURLcode res;
+
+    if (!curl_initialized) {
+        curl_global_init(CURL_GLOBAL_ALL);
+        curl_initialized = true;
+    }
+
+    struct MemoryStruct chunk;
+
+    chunk.memory = malloc(1); /* will be grown as needed by the realloc above */
+    chunk.size = 0;           /* no data at this point */
+
+    /* init the curl session */
+    curl_handle = curl_easy_init();
+
+    /* specify URL to get */
+    curl_easy_setopt(curl_handle, CURLOPT_URL, url);
+
+    /* use a GET to fetch data */
+    curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1L);
+
+    /* send all data to this function  */
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+
+    /* we pass our 'chunk' struct to the callback function */
+    curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
+
+    /* some servers do not like requests that are made without a user-agent
+       field, so we provide one */
+    curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+
+    // based on the libcurl sample - https://curl.se/libcurl/c/https.html
+    curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, 0L);
+
+    /* get it! */
+    res = curl_easy_perform(curl_handle);
+
+    curl_easy_cleanup(curl_handle);
+
+    if (res == CURLE_OK) {
+        // caller is responsible for freeing this.
+        return chunk.memory;
+    } else {
+        free(chunk.memory);
+    }
+
+    return NULL;
 }
 
 bool dx_isNetworkReady(void)
