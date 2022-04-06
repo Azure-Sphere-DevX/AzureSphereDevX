@@ -43,7 +43,7 @@ bool dx_isStringPrintable(char *data);
 
 bool dx_startThreadDetached(void *(daemon)(void *), void *arg, char *daemon_name);
 char *dx_getCurrentUtc(char *buffer, size_t bufferSize);
-char *dx_getHttpData(const char *url);
+char *dx_getHttpData(const char *url, long timeout);
 int dx_stringEndsWith(const char *str, const char *suffix);
 int64_t dx_getNowMilliseconds(void);
 void dx_Log_Debug(char *fmt, ...);

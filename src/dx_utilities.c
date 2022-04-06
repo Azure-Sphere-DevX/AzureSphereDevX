@@ -54,7 +54,7 @@ static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, voi
 }
 
 // https://curl.se/libcurl/c/getinmemory.html
-char *dx_getHttpData(const char *url)
+char *dx_getHttpData(const char *url, long timeout)
 {
     static bool curl_initialized = false;
     CURL *curl_handle;
@@ -78,6 +78,9 @@ char *dx_getHttpData(const char *url)
 
     /* use a GET to fetch data */
     curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1L);
+
+    /* Set timeout */
+    curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, timeout);
 
     /* send all data to this function  */
     curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
