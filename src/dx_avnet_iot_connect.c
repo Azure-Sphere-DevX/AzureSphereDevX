@@ -33,6 +33,19 @@ static avt_iotc_2_1_t avt_2_1_properties;
 static avt_iotc_has_t avt_has_properties;
 static avt_iotc_api_ver_t api_version = AVT_API_VERSION_2_1;
 
+static DX_MESSAGE_PROPERTY *telemetryMsgProps[AVT_TELEMETRY_PROP_COUNT];
+static DX_MESSAGE_PROPERTY *devIdMsgProps[AVT_DEV_ID_PROP_COUNT];
+
+// char arrays for custom application message properties
+char vKey[] = "v";
+char vValue[DX_AVNET_IOT_CONNECT_MAX_MSG_PROPERTY_LEN] = {"\0"};
+char mtKey[] = "mt";
+char mtValue[] = "0";
+char cdKey[] = "cd";
+char cdValue[DX_AVNET_IOT_CONNECT_MAX_MSG_PROPERTY_LEN] = {"\0"};
+char diKey[] = "di";
+char diValue[] = "1";
+
 // Define a pointer to a linked list of children devices/nodes for gateway implementations
 gw_child_list_node_t* gwChildrenListHead = NULL;
 
@@ -52,6 +65,7 @@ static void IoTCSend221AddChildMessage(const char* id, const char* tg, const cha
 static bool IoTCProcess221Response(JSON_Object *dProperties);
 static void IoTCSend222DeleteChildMessage(gw_child_list_node_t* childToDelete);
 static bool IoTCProcess222Response(JSON_Object *dProperties);
+static bool IoTCBuildCustomMessageProperties(void);
 
 // Routines associated with gateway implementations and managing the linked list of children devices
 bool IoTCListAddChild(const char* id, const char* tg);
@@ -288,7 +302,7 @@ static void IoTCSend200HelloMessage(void)
 bool dx_avnetJsonSerializePayload(const char *originalJsonMessage, char *modifiedJsonMessage, size_t modifiedBufferSize, gw_child_list_node_t* childDevice)
 {
 
-    bool result = false;
+    bool result = true;
 
     size_t utcBufferSize = 32;
     char utcBuffer[utcBufferSize];
@@ -303,6 +317,7 @@ bool dx_avnetJsonSerializePayload(const char *originalJsonMessage, char *modifie
         static const char IoTCTelemetryJson[] = "{\"sid\":\"%s\",\"dtg\":\"%s\",\"mt\":0,\"d\":[{\"d\":%s}]}";
         static const char IoTCTelemetryJson2_1[] = "{\"dt\":\"%s\",\"d\":[{\"dt\":\"%s\",\"d\":%s}]}";
         static const char IoTCGwTelemetryJson[] = "{\"sid\":\"%s\",\"dtg\":\"%s\",\"mt\":0,\"d\":[{\"id\":\"%s\",\"tg\":\"%s\",\"d\":%s}]}";
+        static const char IoTCGwTelemetryJson2_1[] = "{\"dt\":\"%s\",\"d\":[{\"id\":\"%s\",\"tg\":\"%s\",\"dt\":\"%s\",\"d\":%s}}]}";
 
         // Determine the largest message size needed.  We'll use this to validate the incoming target
         // buffer is large enough
@@ -323,26 +338,31 @@ bool dx_avnetJsonSerializePayload(const char *originalJsonMessage, char *modifie
             goto cleanup;
         }
 
-        // Build up the IoTC message and insert the telemetry JSON
-        if(childDevice != NULL){
-            snprintf(modifiedJsonMessage, maxModifiedMessageSize, IoTCGwTelemetryJson, 
-                     avt_1_0_properties.sid, avt_1_0_properties.meta_dtg, childDevice->id, 
-                     childDevice->tg, originalJsonMessage);
-        }
-        else if (api_version == AVT_API_VERSION_2_1){
+        if(AVT_API_VERSION_1_0 == api_version){
 
+            if(childDevice != NULL){
+                snprintf(modifiedJsonMessage, maxModifiedMessageSize, IoTCGwTelemetryJson, 
+                        avt_1_0_properties.sid, avt_1_0_properties.meta_dtg, childDevice->id, 
+                        childDevice->tg, originalJsonMessage);
+            }
+            else{
+                snprintf(modifiedJsonMessage, maxModifiedMessageSize, IoTCTelemetryJson, 
+                        avt_1_0_properties.sid, avt_1_0_properties.meta_dtg, originalJsonMessage);
+            }
+        }
+        else if(AVT_API_VERSION_2_1 == api_version){
+            
             dx_getCurrentUtc(utcBuffer, utcBufferSize);
 
-            snprintf(modifiedJsonMessage, maxModifiedMessageSize, IoTCTelemetryJson2_1, 
-                    &utcBuffer, &utcBuffer, originalJsonMessage);
+            if(childDevice != NULL){
+                snprintf(modifiedJsonMessage, maxModifiedMessageSize, IoTCGwTelemetryJson2_1, 
+                        utcBuffer, childDevice->id, childDevice->tg, utcBuffer, originalJsonMessage);
+            }
+            else{                       
+                snprintf(modifiedJsonMessage, maxModifiedMessageSize, IoTCTelemetryJson2_1, 
+                        utcBuffer, utcBuffer, originalJsonMessage);
+            }
         }
-        else{
-            snprintf(modifiedJsonMessage, maxModifiedMessageSize, IoTCTelemetryJson, 
-                     avt_1_0_properties.sid, avt_1_0_properties.meta_dtg, originalJsonMessage);
-        }
-       
-        result = true;
-
     }
     else{
         Log_Debug("[AVT IoTConnect] ERROR: dx_avnetJsonSerializePayload was passed invalid JSON\n");
@@ -548,19 +568,46 @@ static void IoTCrequestChildDeviceInfo(void)
 
     // Send the IoT Connect hello message to inform the platform that we're on-line!
     JSON_Value *rootValue = json_value_init_object();
-    JSON_Object *rootObject =
-    
-    json_value_get_object(rootValue);
-    json_object_dotset_number(rootObject, "mt", 204);
-    json_object_dotset_string(rootObject, "sid", avt_1_0_properties.sid);
-    
-    char *serializedTelemetryUpload = json_serialize_to_string(rootValue);
-    dx_azurePublish(serializedTelemetryUpload, strnlen(serializedTelemetryUpload, 128), NULL, 0, NULL);
-    Log_Debug("[AVT IoTConnect] TX: %s\n", serializedTelemetryUpload);
+    JSON_Object *rootObject = json_value_get_object(rootValue);
 
-    json_free_serialized_string(serializedTelemetryUpload);   
+    if(AVT_API_VERSION_1_0 == api_version){
+
+        json_object_dotset_number(rootObject, "mt", 204);
+        json_object_dotset_string(rootObject, "sid", avt_1_0_properties.sid);
+        
+        char *serializedTelemetryUpload = json_serialize_to_string(rootValue);
+        dx_azurePublish(serializedTelemetryUpload, strnlen(serializedTelemetryUpload, 128), NULL, 0, NULL);
+        Log_Debug("[AVT IoTConnect] TX: %s\n", serializedTelemetryUpload);
+        json_free_serialized_string(serializedTelemetryUpload);  
+    }
+    else if(AVT_API_VERSION_2_1 == api_version){
+
+        json_object_dotset_number(rootObject, "mt", 204);
+        
+        char *serializedTelemetryUpload = json_serialize_to_string(rootValue);
+        dx_azurePublish(serializedTelemetryUpload, strnlen(serializedTelemetryUpload, 128), telemetryMsgProps, NELEMS(telemetryMsgProps), &ioTCContentProperties);
+        Log_Debug("[AVT IoTConnect] TX: %s\n", serializedTelemetryUpload);
+        json_free_serialized_string(serializedTelemetryUpload);  
+    }
+ 
     json_value_free(rootValue);
 }
+
+static bool IoTCProcessDataFrequencyResponse(JSON_Object *dProperties){
+
+    // The meta properties should have a "df" key
+    if (json_object_has_value(dProperties, "df") != 0) {
+        avt_2_1_properties.meta_df = (int)json_object_get_number(dProperties, "df");
+        Log_Debug("[AVT IoTConnect] df: %d\n", avt_2_1_properties.meta_df);
+    }
+    else {
+        Log_Debug("[AVT IoTConnect] df not found!\n");
+        return false;
+    }  
+    
+    return true;
+}
+
 /*
 
  Process the hello response message.  We're expecting a specific JSON structure from IoT Connect
@@ -589,15 +636,18 @@ static void IoTCrequestChildDeviceInfo(void)
  }
 
  V2.1 message
- {
+{
 	"d": {
 		"ec": 0,
 		"ct": 200,
-		"dt": "2022-03-30T13:37:26.7925561Z",
+		"dt": "2022-04-06T16:25:54.9272761Z",
 		"meta": {
 			"df": 60,
-			"cd": "1389Z64",
-			"gtw": null,
+			"cd": "138913Y",
+			"gtw": {
+				"tg": "spheregwdevice",
+				"g": "8274249f-e31d-429b-b1dd-a43d537a5c04"
+			},
 			"edge": 0,
 			"pf": 0,
 			"hwv": "",
@@ -607,27 +657,13 @@ static void IoTCrequestChildDeviceInfo(void)
 		"has": {
 			"d": 0,
 			"attr": 1,
-			"set": 1,
+			"set": 0,
 			"r": 0,
 			"ota": 0
 		}
 	}
 }
 */
-static bool IoTCProcessDataFrequencyResponse(JSON_Object *dProperties){
-
-    // The meta properties should have a "df" key
-    if (json_object_has_value(dProperties, "df") != 0) {
-        avt_2_1_properties.meta_df = (int)json_object_get_number(dProperties, "df");
-        Log_Debug("[AVT IoTConnect] df: %d\n", avt_2_1_properties.meta_df);
-    }
-    else {
-        Log_Debug("[AVT IoTConnect] df not found!\n");
-        return false;
-    }  
-    
-    return true;
-}
 
 static bool IoTCProcessHelloResponse(JSON_Object* dProperties){
     
@@ -688,8 +724,10 @@ static bool IoTCProcessHelloResponse(JSON_Object* dProperties){
             if (json_object_has_value(metaProperties, "dtg") != 0) {
                 strncpy(avt_1_0_properties.meta_dtg, (char *)json_object_get_string(metaProperties, "dtg"), DX_AVNET_IOT_CONNECT_GUID_LEN);
               
+                Log_Debug("dtg Len: %d\n", strnlen(avt_1_0_properties.meta_dtg, DX_AVNET_IOT_CONNECT_GUID_LEN));
+
                 // Verify that the new dtg is a valid GUID, if not then we just received an empty dtg.
-                if(DX_AVNET_IOT_CONNECT_GUID_LEN == strnlen(avt_1_0_properties.meta_dtg, DX_AVNET_IOT_CONNECT_GUID_LEN+1)){ 
+                if(DX_AVNET_IOT_CONNECT_GUID_LEN-1 == strnlen(avt_1_0_properties.meta_dtg, DX_AVNET_IOT_CONNECT_GUID_LEN)){ 
                     dtgFlag = true;
                 }
                 //Log_Debug("[AVT IoTConnect] dtg: %s\n", dtgGUID);            }
@@ -740,7 +778,31 @@ static bool IoTCProcessHelloResponse(JSON_Object* dProperties){
             }
             else {
                 Log_Debug("[AVT IoTConnect] df not found!\n");
-            }            
+            }              
+
+            // Check to see if the object contains a "gtw" object.  If so then this is a gateway
+            // device and we need to extract data for the IoTConnect messages
+            // further down in this function
+            JSON_Object *gtwProperties = json_object_dotget_object(metaProperties, "gtw");
+            if (gtwProperties == NULL) {
+
+                Log_Debug("[AVT IoTConnect] metaProperties not found\n");
+            }
+            else{
+
+                // The meta properties should have a "tg" key
+                if (json_object_has_value(gtwProperties, "tg") != 0) {
+                    strncpy(avt_2_1_properties.meta_gtw_tg, (char *)json_object_get_string(gtwProperties, "tg"), DX_AVNET_IOT_CONNECT_TG_LEN);
+                    Log_Debug("[AVT IoTConnect] tg: %s\n", avt_2_1_properties.meta_gtw_tg);
+                }
+                
+                // The meta properties should have a "g" key
+                if (json_object_has_value(gtwProperties, "g") != 0) {
+                    strncpy(avt_2_1_properties.meta_gtw_g, (char *)json_object_get_string(gtwProperties, "g"), DX_AVNET_IOT_CONNECT_GUID_LEN);
+                    Log_Debug("[AVT IoTConnect] g: %s\n", avt_2_1_properties.meta_gtw_g);
+                }
+            }
+                    
         }
     }
     // The d object has a "has" object
@@ -762,7 +824,14 @@ static bool IoTCProcessHelloResponse(JSON_Object* dProperties){
 
 
         if(avnetConnected == false){
-            
+
+            if(AVT_API_VERSION_2_1 == api_version){
+           
+            // Build out the IoTConnect application message properties using the data we just
+            // received.          
+                IoTCBuildCustomMessageProperties();
+            }
+
             // If the hasDValue is greater than 0, then this is a gateway device and there are child
             // devices configured for this device.  Send the request for child details.  Note that we
             // don't set the avnetConnected flag in this case.  When the child device information is 
@@ -776,12 +845,6 @@ static bool IoTCProcessHelloResponse(JSON_Object* dProperties){
                 // We have all the data we need set the IoTConnect Connected flag to true
                 avnetConnected = true;
                 Log_Debug("[AVT IoTConnect] Set the IoTCConnected flag to true!\n");
-
-                if(cdFlag && vFlag ){
-                    // Using the data from the hello response fill in the 2.1 telemetry message properties
-                    //strncpy(&telemetryMessageProperties[AVT_TELEMETRY_PROP_CD]->value, avt_2_1_properties.meta_cd , DX_AVNET_IOT_CONNECT_CD_LEN);
-                    //telemetryMessageProperties[AVT_TELEMETRY_PROP_V]->value = "2.1";
-                }
             }
         }
     }
@@ -866,25 +929,47 @@ static bool IoTCProcess204Response(JSON_Object *dProperties){
 static void IoTCSend221AddChildMessage(const char* id, const char* tg, const char* displayName){
 
     char timeBuffer[64] = {'\0'};
+    //DX_MESSAGE_PROPERTY *telemetryMessageProperties[AVT_TELEMETRY_PROP_COUNT];
+    char *serializedTelemetryUpload = NULL;
 
-    // Construct and send the IoT Connect 221 message to dynamically add a child
+
     JSON_Value *rootValue = json_value_init_object();
     JSON_Object *rootObject = json_value_get_object(rootValue);
-    json_object_dotset_string(rootObject, "t", dx_getCurrentUtc(timeBuffer, sizeof(timeBuffer)));
-    json_object_dotset_number(rootObject, "mt", 221);
-    json_object_dotset_string(rootObject, "sid", avt_1_0_properties.sid);
 
-    json_object_dotset_string(rootObject, "d.g", avt_1_0_properties.meta_g);
-    json_object_dotset_string(rootObject, "d.dn", displayName);
-    json_object_dotset_string(rootObject, "d.id", id);
-    json_object_dotset_string(rootObject, "d.eg", avt_1_0_properties.meta_eg);
-    json_object_dotset_string(rootObject, "d.dtg", avt_1_0_properties.meta_dtg);
-    json_object_dotset_string(rootObject, "d.tg", tg);
+    if(AVT_API_VERSION_1_0 == api_version){
 
-    char *serializedTelemetryUpload = json_serialize_to_string(rootValue);
-    Log_Debug("[AVT IoTConnect] TX: %s\n", serializedTelemetryUpload);
-    dx_azurePublish(serializedTelemetryUpload, strnlen(serializedTelemetryUpload, 512), NULL, 0, NULL);
-    
+        // Construct and send the IoT Connect 221 message to dynamically add a child
+        json_object_dotset_string(rootObject, "t", dx_getCurrentUtc(timeBuffer, sizeof(timeBuffer)));
+        json_object_dotset_number(rootObject, "mt", 221);
+        json_object_dotset_string(rootObject, "sid", avt_1_0_properties.sid);
+
+        json_object_dotset_string(rootObject, "d.g", avt_1_0_properties.meta_g);
+        json_object_dotset_string(rootObject, "d.dn", displayName);
+        json_object_dotset_string(rootObject, "d.id", id);
+        json_object_dotset_string(rootObject, "d.eg", avt_1_0_properties.meta_eg);
+        json_object_dotset_string(rootObject, "d.dtg", avt_1_0_properties.meta_dtg);
+        json_object_dotset_string(rootObject, "d.tg", tg);
+
+        serializedTelemetryUpload = json_serialize_to_string(rootValue);
+        Log_Debug("[AVT IoTConnect] TX: %s\n", serializedTelemetryUpload);
+        dx_azurePublish(serializedTelemetryUpload, strnlen(serializedTelemetryUpload, 512), NULL, 0, NULL);
+
+    }
+    else if(AVT_API_VERSION_2_1 == api_version){
+        
+        // Construct and send the IoT Connect 221 message to dynamically add a child
+        json_object_dotset_number(rootObject, "mt", 221);
+        json_object_dotset_string(rootObject, "d.g", avt_2_1_properties.meta_gtw_g);
+        json_object_dotset_string(rootObject, "d.id", id);
+        json_object_dotset_string(rootObject, "d.dn", displayName);
+        json_object_dotset_string(rootObject, "d.tg", tg);
+
+        serializedTelemetryUpload = json_serialize_to_string(rootValue);
+        Log_Debug("[AVT IoTConnect] TX: %s\n", serializedTelemetryUpload);
+        dx_azurePublish(serializedTelemetryUpload, strnlen(serializedTelemetryUpload, 512), telemetryMsgProps,
+                        NELEMS(telemetryMsgProps), &ioTCContentProperties);
+    }
+   
     json_free_serialized_string(serializedTelemetryUpload);   
     json_value_free(rootValue);
 }
@@ -906,20 +991,37 @@ static void IoTCSend222DeleteChildMessage(gw_child_list_node_t* childToDelete){
 
     char timeBuffer[64] = {'\0'};
 
-    // Construct and send the IoT Connect 221 message to dynamically add a child
+    // Construct and send the IoT Connect 222 message to dynamically delete a child
     JSON_Value *rootValue = json_value_init_object();
     JSON_Object *rootObject = json_value_get_object(rootValue);
-    json_object_dotset_string(rootObject, "t", dx_getCurrentUtc(timeBuffer, sizeof(timeBuffer)));
-    json_object_dotset_number(rootObject, "mt", 222);
-    json_object_dotset_string(rootObject, "sid", avt_1_0_properties.sid);
-
-    json_object_dotset_string(rootObject, "d.g", avt_1_0_properties.meta_g);
-    json_object_dotset_string(rootObject, "d.id", childToDelete->id);
-
     char *serializedTelemetryUpload = json_serialize_to_string(rootValue);
-    Log_Debug("[AVT IoTConnect] TX: %s\n", serializedTelemetryUpload);
-    dx_azurePublish(serializedTelemetryUpload, strnlen(serializedTelemetryUpload, 512), NULL, 0, NULL);
-    
+
+    if(AVT_API_VERSION_1_0 == api_version){
+
+        json_object_dotset_string(rootObject, "t", dx_getCurrentUtc(timeBuffer, sizeof(timeBuffer)));
+        json_object_dotset_number(rootObject, "mt", 222);
+        json_object_dotset_string(rootObject, "sid", avt_1_0_properties.sid);
+
+        json_object_dotset_string(rootObject, "d.g", avt_1_0_properties.meta_g);
+        json_object_dotset_string(rootObject, "d.id", childToDelete->id);
+
+        serializedTelemetryUpload = json_serialize_to_string(rootValue);
+        Log_Debug("[AVT IoTConnect] TX: %s\n", serializedTelemetryUpload);
+        dx_azurePublish(serializedTelemetryUpload, strnlen(serializedTelemetryUpload, 512), NULL, 0, NULL);
+
+    }
+    else if(AVT_API_VERSION_2_1 == api_version){
+        
+        // Construct and send the IoT Connect 222 message to dynamically delete a child
+        json_object_dotset_number(rootObject, "mt", 222);
+        json_object_dotset_string(rootObject, "d.id", childToDelete->id);
+
+        serializedTelemetryUpload = json_serialize_to_string(rootValue);
+        Log_Debug("[AVT IoTConnect] TX: %s\n", serializedTelemetryUpload);
+        dx_azurePublish(serializedTelemetryUpload, strnlen(serializedTelemetryUpload, 512), telemetryMsgProps,
+                        NELEMS(telemetryMsgProps), &ioTCContentProperties);
+    }
+
     json_free_serialized_string(serializedTelemetryUpload);   
     json_value_free(rootValue);
 
@@ -1269,27 +1371,9 @@ void dx_avnetSetApiVersion(avt_iotc_api_ver_t version){
 
         // Toggle the been here done that flag
         versionHasBeenSet = true;
-
-        // Do we need to restart the IoTConnect connection logic?
-
     }
 }
 
-/*
-bool add_msg_property(DX_MESSAGE_PROPERTY *propPtr, char* keyString, char* valueString){
-    
-    strncpy(*propPtr->key, keyString, strnlen(keyString, 32)); 
-    strncpy(*propPtr->value, valueString, strnlen(valueString, 32));
-
-    if((strncmp(propPtr->key, keyString, DX_AVNET_IOT_CONNECT_MAX_MSG_PROPERTY_LEN) != 0) ||
-       (strncmp(propPtr->value, valueString, DX_AVNET_IOT_CONNECT_MAX_MSG_PROPERTY_LEN) != 0)){
-           return false;
-    }
-
-    return true;
-}
-*/
-/// <summary>
 /// Takes a properly formatted JSON telemetry message . . 
 /// 1. Adds the required Avnet IoTConnect Header to the message
 /// 2. Add the 2.1 API required application message properties to the incomming messageProperties list
@@ -1303,21 +1387,14 @@ bool dx_avnetPublish(const void *message,
                      DX_MESSAGE_CONTENT_PROPERTIES *messageContentProperties, 
                      gw_child_list_node_t* childDevice){
 
-
     // Declare an array large enough for the incomming message properties + 3 for the required IoTConnect
     // application message properties
-    DX_MESSAGE_PROPERTY *telemetryMessageProperties[messagePropertyCount+3];
-    char vKey[] = "v";
-    char vValue[DX_AVNET_IOT_CONNECT_MAX_MSG_PROPERTY_LEN] = {"\0"};
+    DX_MESSAGE_PROPERTY *telemetryMessageProperties[messagePropertyCount + AVT_TELEMETRY_PROP_COUNT];
 
-    char mtKey[] = "mt";
-    char mtValue[] = "0";
-
-    char cdKey[] = "cd";
-    char cdValue[DX_AVNET_IOT_CONNECT_MAX_MSG_PROPERTY_LEN] = {"\0"};
+    size_t modifiedPropertyCount = 0;
 
     // Allocate memory for this array of pointers
-    for(int i = 0; i < messagePropertyCount+3; i++){
+    for(int i = 0; i < messagePropertyCount + AVT_TELEMETRY_PROP_COUNT; i++){
         telemetryMessageProperties[i] = malloc(sizeof(DX_MESSAGE_PROPERTY));
         if(telemetryMessageProperties[i] == NULL){
             dx_terminate(DX_ExitCode_IoTC_Memory_Allocation_Failed);
@@ -1354,41 +1431,47 @@ bool dx_avnetPublish(const void *message,
         // If we're using the 2.1 API, we need to add application message properties for IoTConnect routing
         if(api_version == AVT_API_VERSION_2_1){
 
-            // Populate the extended telemetryMessageProperty pointer array
-            telemetryMessageProperties[AVT_TELEMETRY_PROP_CD]->key = cdKey;
-            strncpy(cdValue, avt_2_1_properties.meta_cd, DX_AVNET_IOT_CONNECT_MAX_MSG_PROPERTY_LEN);
-            telemetryMessageProperties[AVT_TELEMETRY_PROP_CD]->value = cdValue;
+            // Copy the IoTConnect application message properties into the local array
+            for (size_t i = 0; i < AVT_TELEMETRY_PROP_COUNT ; i++) {
+                if (!dx_isStringNullOrEmpty(telemetryMsgProps[i]->key) && !dx_isStringNullOrEmpty(telemetryMsgProps[i]->value)) {
+                    telemetryMessageProperties[i]->key = telemetryMsgProps[i]->key;
+                    telemetryMessageProperties[i]->value = telemetryMsgProps[i]->value; 
+                    modifiedPropertyCount++;
+                }
+            }
 
-            snprintf(vValue, 4, "%.1f", avt_2_1_properties.meta_v);
-            telemetryMessageProperties[AVT_TELEMETRY_PROP_V]->key = vKey;
-            telemetryMessageProperties[AVT_TELEMETRY_PROP_V]->value = vValue;
-
-            telemetryMessageProperties[AVT_TELEMETRY_PROP_MT]->key = mtKey;
-            telemetryMessageProperties[AVT_TELEMETRY_PROP_MT]->value = mtValue;
-            
             // Determine if there are passed in message properties.  If so, we need to add the
             // message properties to our array of pointers. Start right after the IoTConnect
             // properties we just added
             if ((messageProperties != NULL) && (messagePropertyCount > 0)) {
                 for (size_t i = 0; i < messagePropertyCount ; i++) {
                     if (!dx_isStringNullOrEmpty(messageProperties[i]->key) && !dx_isStringNullOrEmpty(messageProperties[i]->value)) {
-                        telemetryMessageProperties[i+AVT_TELEMETRY_PROP_MT+1]->key = messageProperties[i]->key;
-                        telemetryMessageProperties[i+AVT_TELEMETRY_PROP_MT+1]->value = messageProperties[i]->value; 
+                        telemetryMessageProperties[i + AVT_TELEMETRY_PROP_COUNT]->key = messageProperties[i]->key;
+                        telemetryMessageProperties[i + AVT_TELEMETRY_PROP_COUNT]->value = messageProperties[i]->value; 
+                        modifiedPropertyCount++;
                     }
                 }
             }
 
             // Send the modified message!
             dx_azurePublish(avt_msg_buffer, 
-                        strnlen(avt_msg_buffer, max_msg_buffer_size), 
+                        strnlen(avt_msg_buffer, max_msg_buffer_size),
                         telemetryMessageProperties, 
-                        messagePropertyCount+3,
+                        NELEMS(telemetryMessageProperties),
+                        messageContentProperties);
+        }
+        else if(AVT_API_VERSION_1_0 == api_version){
+                        // Send the modified message!
+            dx_azurePublish(avt_msg_buffer, 
+                        strnlen(avt_msg_buffer, max_msg_buffer_size), 
+                        messageProperties, 
+                        messagePropertyCount,
                         messageContentProperties);
         }
     }
 
-    // Allocate memory for this array of pointers
-    for(int i = 0; i < messagePropertyCount+3; i++){
+    // Free the memory for the array of pointers
+    for(int i = 0; i < messagePropertyCount + AVT_TELEMETRY_PROP_COUNT; i++){
         free(telemetryMessageProperties[i]);
     }
 
@@ -1410,6 +1493,75 @@ int dx_avnetGetDataFrequency(void){
     else{
 
         return avt_2_1_properties.meta_df;
-
     }
+}
+
+static bool IoTCBuildCustomMessageProperties(void){
+    
+    // Protect against multiple entries/memory allocations
+    static bool memoryIsAllocated = false;
+
+    // Check for the case where we received a stale C2D message
+//    if(dx_isAvnetConnected()){
+
+        if(!memoryIsAllocated){
+            // Allocate memory for this array of pointers
+            for(size_t i = 0; i < AVT_TELEMETRY_PROP_COUNT; i++){
+                telemetryMsgProps[i] = malloc(sizeof(DX_MESSAGE_PROPERTY));
+                devIdMsgProps[i] =  malloc(sizeof(DX_MESSAGE_PROPERTY));
+                if((telemetryMsgProps[i] == NULL) || (devIdMsgProps[i] == NULL)){
+                    dx_terminate(DX_ExitCode_IoTC_Memory_Allocation_Failed);
+                    return false;
+                }
+                memset(telemetryMsgProps[i], 0x00, sizeof(DX_MESSAGE_PROPERTY));
+                memset(devIdMsgProps[i], 0x00, sizeof(DX_MESSAGE_PROPERTY));
+
+            }
+            memoryIsAllocated = true;
+        }
+
+        // Populate the telemetry Message Properties
+        telemetryMsgProps[AVT_TELEMETRY_PROP_CD]->key = cdKey;
+        strncpy(cdValue, avt_2_1_properties.meta_cd, DX_AVNET_IOT_CONNECT_MAX_MSG_PROPERTY_LEN);
+        telemetryMsgProps[AVT_TELEMETRY_PROP_CD]->value = cdValue;
+
+        snprintf(vValue, 4, "%.1f", avt_2_1_properties.meta_v);
+        telemetryMsgProps[AVT_TELEMETRY_PROP_V]->key = vKey;
+        telemetryMsgProps[AVT_TELEMETRY_PROP_V]->value = vValue;
+
+        telemetryMsgProps[AVT_TELEMETRY_PROP_MT]->key = mtKey;
+        telemetryMsgProps[AVT_TELEMETRY_PROP_MT]->value = mtValue;
+
+        // Populate the Device ID Message Properties
+        devIdMsgProps[AVT_DEV_ID_PROP_CD]->key = cdKey;
+        devIdMsgProps[AVT_DEV_ID_PROP_CD]->value = cdValue;
+
+        devIdMsgProps[AVT_DEV_ID_PROP_V]->key = vKey;
+        devIdMsgProps[AVT_DEV_ID_PROP_V]->value = vValue;
+
+        devIdMsgProps[AVT_DEV_ID_PROP_DI]->key = diKey;
+        devIdMsgProps[AVT_DEV_ID_PROP_DI]->value = diValue;
+
+        Log_Debug("AVT custom message properties ready!\n");
+        
+        return true;
+//    }
+  //  return false;
+}
+
+/// <summary>
+/// Returns the number of gateway child devices 
+/// </summary>
+/// <returns></returns>
+int dx_avnetGwGetNumChildren(void){
+    
+    int numChildren = 0;
+    gw_child_list_node_t* nodePtr = dx_avnetGetFirstChild();
+    
+    while(nodePtr != NULL){
+
+        numChildren++;
+        nodePtr = dx_avnetGetNextChild(nodePtr);
+    }
+    return numChildren;
 }

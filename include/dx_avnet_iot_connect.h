@@ -40,13 +40,14 @@ SOFTWARE.
 #include "dx_config.h"
 
 #define DX_AVNET_IOT_CONNECT_MAX_MSG_PROPERTY_LEN 32
-#define DX_AVNET_IOT_CONNECT_CD_LEN 7
-#define DX_AVNET_IOT_CONNECT_GUID_LEN 36
-#define DX_AVNET_IOT_CONNECT_SID_LEN 64
+#define DX_AVNET_IOT_CONNECT_CD_LEN (7 + 1)
+#define DX_AVNET_IOT_CONNECT_GUID_LEN (36 + 1)
+#define DX_AVNET_IOT_CONNECT_SID_LEN (64 + 1)
 #define DX_AVNET_IOT_CONNECT_METADATA 256
 #define DX_AVNET_IOT_CONNECT_JSON_BUFFER_SIZE 512
-#define DX_AVNET_IOT_CONNECT_HW_VER_MAX_LEN 32
-#define DX_AVNET_IOT_CONNECT_SW_VER_MAX_LEN 32
+#define DX_AVNET_IOT_CONNECT_HW_VER_MAX_LEN (32 + 1)
+#define DX_AVNET_IOT_CONNECT_SW_VER_MAX_LEN (32 + 1)
+#define DX_AVNET_IOT_CONNECT_TG_LEN 32
 
 // The gateway field length is long to acomidate long ids from child devices
 #define DX_AVNET_IOT_CONNECT_GW_FIELD_LEN 128+64
@@ -54,12 +55,12 @@ SOFTWARE.
 // Define the data we can receive in a 1.0 hello message response
 typedef struct
 {
-    char sid[DX_AVNET_IOT_CONNECT_SID_LEN + 1];
+    char sid[DX_AVNET_IOT_CONNECT_SID_LEN];
 
-    char meta_g[DX_AVNET_IOT_CONNECT_GUID_LEN + 1];
-    char meta_dtg[DX_AVNET_IOT_CONNECT_GUID_LEN + 1];
+    char meta_g[DX_AVNET_IOT_CONNECT_GUID_LEN];
+    char meta_dtg[DX_AVNET_IOT_CONNECT_GUID_LEN];
 	int  meta_edge;
-    char  meta_eg[DX_AVNET_IOT_CONNECT_GUID_LEN + 1];
+    char  meta_eg[DX_AVNET_IOT_CONNECT_GUID_LEN];
 } avt_iotc_1_0_t;
 
 // Define the data we can receive in a 2.1 hello message response
@@ -67,7 +68,8 @@ typedef struct
 {
     int   meta_df;
     char  meta_cd[DX_AVNET_IOT_CONNECT_CD_LEN];
-    char  meta_gtw[DX_AVNET_IOT_CONNECT_GUID_LEN];
+    char  meta_gtw_tg[DX_AVNET_IOT_CONNECT_TG_LEN];
+    char  meta_gtw_g[DX_AVNET_IOT_CONNECT_GUID_LEN];
 	int   meta_edge;
 	int   meta_pf;
 	char  meta_hwv[DX_AVNET_IOT_CONNECT_HW_VER_MAX_LEN];
@@ -158,8 +160,18 @@ typedef enum
 {
 	AVT_TELEMETRY_PROP_CD = 0,
     AVT_TELEMETRY_PROP_V = 1,
-    AVT_TELEMETRY_PROP_MT = 2
+    AVT_TELEMETRY_PROP_MT = 2,
+    AVT_TELEMETRY_PROP_COUNT = 3 // This entry must be the last one in the enum or the telemetry logic will break
 } AVT_IOTC_TELEMETRY_PROPERTY_INDEX;
+
+typedef enum
+{
+	AVT_DEV_ID_PROP_CD = 0,
+    AVT_DEV_ID_PROP_V = 1,
+    AVT_DEV_ID_PROP_DI = 2,
+    AVT_DEV_ID_PROP_COUNT = 3 // This entry must be the last one in the enum or the telemetry logic will break
+} AVT_IOTC_DEV_ID_PROPERTY_INDEX;
+
 
 // Linked list node definition
 typedef struct node {
@@ -287,3 +299,8 @@ void dx_avnetSetApiVersion(avt_iotc_api_ver_t version);
 /// <returns></returns>
 int dx_avnetGetDataFrequency(void);
 
+/// <summary>
+/// Returns the number of gateway child devices 
+/// </summary>
+/// <returns></returns>
+int dx_avnetGwGetNumChildren(void);
