@@ -49,6 +49,8 @@ typedef enum {
 
 	DX_ExitCode_Init_IoTCTimer = 220,
 	DX_ExitCode_IoTCTimer_Consume = 219,
+	DX_ExitCode_IoTC_Set_Api_Version_Error = 218,
+	DX_ExitCode_IoTC_Memory_Allocation_Failed = 217,
 
 	DX_ExitCode_Uart_Open_Failed = 215,
 	DX_ExitCode_Uart_Read_Failed = 214,
@@ -66,4 +68,5 @@ typedef enum {
 	
 	DX_ExitCode_Configure_Proxy_Failed = 205,
 	DX_ExitCode_Enable_Disable_Proxy_Failed = 204,
+
 } ExitCode;
