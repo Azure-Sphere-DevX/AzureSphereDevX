@@ -1363,7 +1363,7 @@ void dx_avnetSetApiVersion(avt_iotc_api_ver_t version){
 
     if(versionHasBeenSet){
         avt_Debug(AVT_DEBUG_LEVEL_ERROR, "Avnet API version can only be set once!\n");
-        dx_terminate(DX_ExitCode_IoTC_Set__api_version_Error);
+        dx_terminate(DX_ExitCode_IoTC_Set_Api_Version_Error);
     }
 
     // Verify the input
