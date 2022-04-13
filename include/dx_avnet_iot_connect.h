@@ -172,6 +172,14 @@ typedef enum
     AVT_DEV_ID_PROP_COUNT = 3 // This entry must be the last one in the enum or the telemetry logic will break
 } AVT_IOTC_DEV_ID_PROPERTY_INDEX;
 
+typedef enum
+{
+	AVT_DEBUG_LEVEL_OFF = 0,
+    AVT_DEBUG_LEVEL_ERROR,
+    AVT_DEBUG_LEVEL_INFO,
+    AVT_DEBUG_LEVEL_VERBOSE,
+    AVT_DEBUG_LEVEL_LEVEL_MAX
+} AVT_IOTC_DEBUG_LEVELS;
 
 // Linked list node definition
 typedef struct node {
@@ -304,3 +312,12 @@ int dx_avnetGetDataFrequency(void);
 /// </summary>
 /// <returns></returns>
 int dx_avnetGwGetNumChildren(void);
+
+/// <summary>
+/// Sets the debug level for the Avnet IoTConnect implementation.
+/// The IoTConnect debug will be output if the debug type is <= 
+/// the debug level set by the high level application.
+/// </summary>
+/// <param name="debugLevel"></param>
+/// <returns></returns>
+void dx_avnetSetDebugLevel(uint8_t);
