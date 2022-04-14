@@ -14,7 +14,6 @@
 #include "dx_terminate.h"
 #include "dx_timer.h"
 #include "dx_utilities.h"
-#include "dx_avnet_iot_connect.h"
 #include "dx_proxy.h"
 #include "iothubtransportmqtt.h"
 #include <iothubtransportmqtt_websockets.h>

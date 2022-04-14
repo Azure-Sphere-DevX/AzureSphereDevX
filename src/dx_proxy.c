@@ -44,6 +44,7 @@ bool dx_proxyOpenIoTHubHandleWithMqttWebSocket(const char *hostname,
 void dx_proxyConfigureProxy(DX_PROXY_PROPERTIES *proxyProperties)
 {
     int result = -1;
+    Networking_ProxyConfig *proxyConfig = NULL;
 
     // Verify we have a valid input
     if(proxyProperties == NULL){
@@ -121,13 +122,14 @@ cleanup:
 void dx_proxyEnableProxy(bool enableProxy)
 {
     int result = -1;
+    Networking_ProxyConfig *proxyConfig = NULL;
 
     // Verify that the proxy configuration has been set
     if(_proxyConfig == NULL){
         goto cleanup;
     }
 
-    Networking_ProxyConfig  *proxyConfig = Networking_Proxy_Create();
+    proxyConfig = Networking_Proxy_Create();
     if (proxyConfig == NULL) {
         Log_Debug("ERROR: Networking_Proxy_Create(): %d (%s)\n", errno, strerror(errno));
         goto cleanup;
