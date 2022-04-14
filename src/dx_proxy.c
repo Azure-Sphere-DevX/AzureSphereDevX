@@ -53,6 +53,7 @@ void dx_proxyConfigureProxy(DX_PROXY_PROPERTIES *proxyProperties)
 
     // By default, proxy configuration option Networking_ProxyOptions_Enabled is set and the proxy
     // type is Networking_ProxyType_HTTP.
+    Networking_ProxyConfig *proxyConfig = NULL;
     proxyConfig = Networking_Proxy_Create();
     if (proxyConfig == NULL) {
         Log_Debug("ERROR: Networking_Proxy_Create(): %d (%s)\n", errno, strerror(errno));
