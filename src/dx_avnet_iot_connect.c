@@ -730,8 +730,6 @@ static bool IoTCProcessHelloResponse(JSON_Object* dProperties){
             if (json_object_has_value(metaProperties, "dtg") != 0) {
                 strncpy(_avt_1_0_properties.meta_dtg, (char *)json_object_get_string(metaProperties, "dtg"), DX_AVNET_IOT_CONNECT_GUID_LEN);
               
-                Log_Debug("dtg Len: %d\n", strnlen(_avt_1_0_properties.meta_dtg, DX_AVNET_IOT_CONNECT_GUID_LEN));
-
                 // Verify that the new dtg is a valid GUID, if not then we just received an empty dtg.
                 if(DX_AVNET_IOT_CONNECT_GUID_LEN-1 == strnlen(_avt_1_0_properties.meta_dtg, DX_AVNET_IOT_CONNECT_GUID_LEN)){ 
                     dtgFlag = true;
