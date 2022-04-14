@@ -30,7 +30,6 @@ The DevX library addresses many common Azure Sphere scenarios with a focus on:
 1. GPIO
 1. UARTS
 1. PWM
-1. Web Proxy Configuration
 
 The DevX library will help reduce the amount of code you write and improve readability and long-term application maintenance.
 
