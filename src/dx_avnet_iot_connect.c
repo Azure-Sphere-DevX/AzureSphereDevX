@@ -272,7 +272,7 @@ static void IoTCSend200HelloMessage(void)
 
     char helloMessage_api_1[]   = "{\"mt\": 200, \"v\": 1}";
     char helloMessage_api_2_1[] = "{\"mt\": 200, \"sid\": \"\"}";
-    char *selectedHelloMessage;
+    char *selectedHelloMessage = NULL;
 
     if(_api_version == AVT_API_VERSION_1_0){
         selectedHelloMessage = helloMessage_api_1;
