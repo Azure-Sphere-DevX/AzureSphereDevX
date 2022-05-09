@@ -18,6 +18,7 @@ extern volatile sig_atomic_t terminationRequired;
 #define DX_DECLARE_ASYNC_HANDLER(name) void name(DX_ASYNC_BINDING *handle)
 
 typedef struct _asyncBinding {
+    char *name;
     bool triggered;
     void *data;
     void (*handler)(struct _asyncBinding *handle);
