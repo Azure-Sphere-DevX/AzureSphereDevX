@@ -11,7 +11,7 @@
 #include <string.h>
 #include <time.h>
 
-// volatile sig_atomic_t terminationRequired = false;
+extern volatile bool asyncEventReady;
 
 bool dx_isTerminationRequired(void);
 int dx_getTerminationExitCode(void);
