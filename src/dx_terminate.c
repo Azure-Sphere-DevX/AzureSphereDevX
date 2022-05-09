@@ -3,7 +3,7 @@
 
 #include "dx_terminate.h"
 
-static volatile sig_atomic_t terminationRequired = false;
+volatile sig_atomic_t terminationRequired = false;
 static volatile sig_atomic_t _exitCode = 0;
 
 void dx_registerTerminationHandler(void)
