@@ -27,9 +27,9 @@ bool dx_gpioOpen(DX_GPIO_BINDING *peripheral)
             GPIO_OpenAsOutput(peripheral->pin, GPIO_OutputMode_PushPull, peripheral->initialState);
         if (peripheral->fd < 0) {
             Log_Debug(
-                "Error opening GPIO: %s (%d). Check that app_manifest.json includes the GPIO "
+                "Error opening GPIO: %s %s (%d). Check that app_manifest.json includes the GPIO "
                 "used.\n",
-                strerror(errno), errno);
+                peripheral->name, strerror(errno), errno);
             dx_terminate(DX_ExitCode_Gpio_Open_Output_Failed);
             return false;
         }
@@ -38,9 +38,9 @@ bool dx_gpioOpen(DX_GPIO_BINDING *peripheral)
         peripheral->fd = GPIO_OpenAsInput(peripheral->pin);
         if (peripheral->fd < 0) {
             Log_Debug(
-                "Error opening GPIO: %s (%d). Check that app_manifest.json includes the GPIO "
+                "Error opening GPIO: %s %s (%d). Check that app_manifest.json includes the GPIO "
                 "used.\n",
-                strerror(errno), errno);
+                peripheral->name, strerror(errno), errno);
             dx_terminate(DX_ExitCode_Gpio_Open_Input_Failed);
             return false;
         }
