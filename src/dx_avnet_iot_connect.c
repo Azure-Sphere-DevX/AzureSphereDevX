@@ -270,9 +270,10 @@ static void IoTCSend200HelloMessage(void)
     DX_MESSAGE_PROPERTY *helloMessageProperties[] =  {&(DX_MESSAGE_PROPERTY){.key = "v", .value = "2.1"}, 
                                                         &(DX_MESSAGE_PROPERTY){.key = "di", .value = "1"}};
 
+    char helloError[] = "Error, no valid API version set\n";
     char helloMessage_api_1[]   = "{\"mt\": 200, \"v\": 1}";
     char helloMessage_api_2_1[] = "{\"mt\": 200, \"sid\": \"\"}";
-    char *selectedHelloMessage = NULL;
+    char *selectedHelloMessage = helloError;
 
     if(_api_version == AVT_API_VERSION_1_0){
         selectedHelloMessage = helloMessage_api_1;
