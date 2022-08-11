@@ -685,7 +685,7 @@ static bool IoTCProcessHelloResponse(JSON_Object* dProperties){
     // further down in this function
     JSON_Object *metaProperties = json_object_dotget_object(dProperties, "meta");
     if (metaProperties == NULL) {
-        avt_Debug(AVT_DEBUG_LEVEL_ERROR, "metaProperties not found\n");
+        avt_Debug(AVT_DEBUG_LEVEL_INFO, "metaProperties not found\n");
     }
 
     // Parse a 1.0
@@ -790,7 +790,7 @@ static bool IoTCProcessHelloResponse(JSON_Object* dProperties){
             JSON_Object *gtwProperties = json_object_dotget_object(metaProperties, "gtw");
             if (gtwProperties == NULL) {
 
-                avt_Debug(AVT_DEBUG_LEVEL_ERROR, "metaProperties not found\n");
+                avt_Debug(AVT_DEBUG_LEVEL_INFO, "metaProperties not found\n");
             }
             else{
 
