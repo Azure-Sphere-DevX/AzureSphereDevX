@@ -125,5 +125,12 @@ void dx_azureRegisterDeviceTwinCallback(void (*deviceTwinCallbackHandler)(DEVICE
 void dx_azureRegisterDirectMethodCallback(int (*directMethodCallbackHandler)(const char *method_name, const unsigned char *payload,
                                                                              size_t payloadSize, unsigned char **responsePayload,
                                                                              size_t *responsePayloadSize, void *userContextCallback));
+/// <summary>
+/// Returns the outstanding Telemetry message count.  This variable is incrremented 
+/// each time the application sends a telemetry message and decremented each time a 
+/// telemetry message has been accepted by the IoTHub.
+/// </summary>
+int dx_azureGetOutstandingMessageCount(void);
+
 
 

@@ -387,6 +387,16 @@ IOTHUB_DEVICE_CLIENT_LL_HANDLE dx_azureClientHandleGet(void)
     return iothubClientHandle;
 }
 
+/// <summary>
+/// Returns the outstanding Telemetry message count.  This variable is incrremented 
+/// each time the application sends a telemetry message and decremented each time a 
+/// telemetry message has been accepted by the IoTHub.
+/// </summary>
+int dx_azureGetOutstandingMessageCount(void)
+{
+    return outstandingMessageCount;
+}
+
 static IOTHUBMESSAGE_DISPOSITION_RESULT HubMessageReceivedCallback(IOTHUB_MESSAGE_HANDLE message, void *context)
 {
     if (_messageReceivedCallback != NULL) {
