@@ -258,6 +258,36 @@ bool dx_deviceTwinReportValue(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, void *s
 }
 
 /// <summary>
+///   Removes an unwanted reported property from the reported properties section of a device twin
+/// </summary>
+static bool deviceTwinRemoveReportedProperty(DX_DEVICE_TWIN_BINDING *deviceTwinBinding)
+{
+    bool result = false;
+    
+    // Assume that the reported property key + JSON bit <= 64 characters
+    size_t reportLen = 64;
+
+    char *reportedPropertiesString = (char *)malloc(reportLen);
+    if (reportedPropertiesString == NULL) {
+        return false;
+    }
+
+    int len = snprintf(reportedPropertiesString, reportLen, "{\"%s\":null}",
+                    deviceTwinBinding->propertyName);
+
+    if ((len > 0) && (len <= reportLen)) {
+        result = deviceTwinUpdateReportedState(reportedPropertiesString);
+    }
+
+    if (reportedPropertiesString != NULL) {
+        free(reportedPropertiesString);
+        reportedPropertiesString = NULL;
+    }
+
+    return result;
+}
+
+/// <summary>
 ///   Supports device twin report state and device twin ack desired state request
 /// </summary>
 static bool deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, void *state,
@@ -279,6 +309,12 @@ static bool deviceTwinReportState(DX_DEVICE_TWIN_BINDING *deviceTwinBinding, voi
 
     reportLen +=
         strlen(deviceTwinBinding->propertyName); // allow for twin property name in JSON response
+
+    // Check for a null reported value in the state pointer.  If the user passed in null, then assume they want
+    // to clear the reported property from the device twin.
+    if(state == NULL){
+        return deviceTwinRemoveReportedProperty(deviceTwinBinding);
+    } 
 
     if ((deviceTwinBinding->twinType == DX_DEVICE_TWIN_STRING) || (deviceTwinBinding->twinType == DX_DEVICE_TWIN_JSON_OBJECT)) {
         reportLen += strlen((char *)state);
