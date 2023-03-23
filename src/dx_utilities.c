@@ -201,7 +201,7 @@ int dx_stringEndsWith(const char *str, const char *suffix)
     return strncmp(str + lenstr - lensuffix, suffix, lensuffix) == 0;
 }
 
-bool dx_startThreadDetached(void *(daemon)(void *), void *arg, char *daemon_name)
+bool dx_startThreadDetached(void *(*daemon)(void *), void *arg, char *daemon_name)
 {
     pthread_attr_t attr;
     pthread_attr_init(&attr);
