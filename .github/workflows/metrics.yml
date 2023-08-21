@@ -28,3 +28,15 @@ jobs:
           reporting_endpoint_url: ${{ secrets.REPORTING_ENDPOINT_URL }}
           reporting_endpoint_key: ${{ secrets.REPORTING_ENDPOINT_KEY }}
           reporting_group: $${{ secrets.REPORTING_GROUP }}
+
+      - uses: actions/checkout@v3
+
+      - name: timestamp
+        run: date -Iseconds -u > .repo_stats_timestamp
+
+      - name: Update resources
+        run: |
+          git add .repo_stats_timestamp
+          git config user.name "Repo Stats Timestamp"
+          git commit -am "Repo Stats Timestamp"
+          git push
