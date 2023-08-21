@@ -24,6 +24,7 @@ jobs:
 
             - name: Update resources
               run: |
+                git add .gitclonetimestamp
                 git config --global user.name 'Git Clone Counter'
                 git config --global user.email 'your-username@users.noreply.github.com'
                 git commit -am "Clone Count Report"
