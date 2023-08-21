@@ -11,6 +11,7 @@ on:
     # Run this once per day, towards the end of the day for keeping the most
     # recent data point most meaningful (hours are interpreted in UTC).
     # https://cron.help/every-month
+    # Action run 23:15 UTC 1st of each month
     - cron: "15 23 1 * *"
   workflow_dispatch: # Allow for running this manually.
 
