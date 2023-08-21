@@ -20,10 +20,14 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
+
+            - name: timestamp
+              run: date -Iseconds -u > .gitclonecount
+
+            - name: Update resources
+              uses: test-room-7/action-update-file@v1
               with:
                 commit-msg: Update resources
                 github-token: ${{ secrets.GITHUB_TOKEN }}
-            - name: timestamp
-              run: date -Iseconds -u > .gitclonecount
            
                 
