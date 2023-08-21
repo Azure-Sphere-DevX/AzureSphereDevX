@@ -23,8 +23,8 @@ jobs:
               run: date -Iseconds -u > .gitclonetimestamp
 
             - name: Update resources
-              uses: test-room-7/action-update-file@v1
-              with:
-                file-path: ".gitclonetimestamp"
-                commit-msg: Update resources
-                github-token: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                git config --global user.name 'Git Clone Counter'
+                git config --global user.email 'your-username@users.noreply.github.com'
+                git commit -am "Clone Count Report"
+                git push
