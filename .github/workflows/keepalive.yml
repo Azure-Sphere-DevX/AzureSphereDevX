@@ -1,7 +1,6 @@
-# GitHub Action Keep Alive to post repo metrics to an Azure Function App webhook
 # GitHub Actions go to sleep after 60 days of no activity
-# This action runs every month and updates the .gitclonetimestamp with the current UTC
-# This will generate a git check out, update the .gitclonetimestamp, and git commit and push to the repo
+# This action runs every month and updates the .stats_timestamp with the current UTC
+# This will generate activity on the repo
 # This activity will keep the git hub repo metrics action alive
 
 name: "GitHub repo metrics report keep alive"
