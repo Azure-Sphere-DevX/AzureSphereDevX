@@ -20,11 +20,11 @@ jobs:
             - uses: actions/checkout@v3
 
             - name: timestamp
-              run: date -Iseconds -u > .repo_stats_timestamp
+              run: date -Iseconds -u > .stats_timestamp
 
             - name: Update resources
               run: |
-                git add .repo_stats_timestamp
+                git add .stats_timestamp
                 git config user.name "Repo Stats Timestamp"
                 git commit -am "Repo Stats Timestamp"
                 git push
