@@ -24,7 +24,7 @@ jobs:
 
             - name: Update resources
               run: |
-                git add .
+                git add .gitclonetimestamp
                 git config user.name "Git Clone Counter"
                 git commit -am "Clone Count Report"
                 git push
