@@ -1,11 +1,9 @@
-# GitHub Action to post GitHub metrics to an Azure Function App webhook
-# Required secrets
-#   1. A PAT with repo rights:    PAT_REPO_REPORT
-#   2. The webhook endpoint url:  REPORTING_ENDPOINT_URL
-#   3. The webhook endpoint key:  REPORTING_ENDPOINT_KEY
-#   4. Reporting group/team:      REPORTING_GROUP
+# GitHub Action KeepAlive to post GitHub metrics to an Azure Function App webhook
+# GitHub Actions go to sleep after 60 days of no activity
+# This action runs every 30 days and updates the .gitclonetimestamp with the current UTC
+# This will generate a git check out, update the .gitclonetimestamp, and git commit and push to the repo
 
-name: "GitHub repo metrics report keepalive"
+name: "GitHub repo metrics report keep alive"
 
 on:
   schedule:
@@ -22,13 +20,11 @@ jobs:
             - uses: actions/checkout@v3
 
             - name: timestamp
-              run: date -Iseconds -u > .gitclonecount
+              run: date -Iseconds -u > .gitclonetimestamp
 
             - name: Update resources
               uses: test-room-7/action-update-file@v1
               with:
-                file-path: ".gitclonecount"
+                file-path: ".gitclonetimestamp"
                 commit-msg: Update resources
                 github-token: ${{ secrets.GITHUB_TOKEN }}
-           
-                
