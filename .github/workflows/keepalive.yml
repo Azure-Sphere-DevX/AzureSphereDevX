@@ -1,1 +1,29 @@
+# GitHub Action to post GitHub metrics to an Azure Function App webhook
+# Required secrets
+#   1. A PAT with repo rights:    PAT_REPO_REPORT
+#   2. The webhook endpoint url:  REPORTING_ENDPOINT_URL
+#   3. The webhook endpoint key:  REPORTING_ENDPOINT_KEY
+#   4. Reporting group/team:      REPORTING_GROUP
 
+name: "GitHub repo metrics report keepalive"
+
+on:
+  schedule:
+    # Run this once per day, towards the end of the day for keeping the most
+    # recent data point most meaningful (hours are interpreted in UTC).
+    - cron: "0 23 * * *"
+  workflow_dispatch: # Allow for running this manually.
+
+jobs:
+    resources:
+        name: Update resources
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                commit-msg: Update resources
+                github-token: ${{ secrets.GITHUB_TOKEN }}
+            - name: timestamp
+              run: date -Iseconds -u > .gitclonecount
+           
+                
