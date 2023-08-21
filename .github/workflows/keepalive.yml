@@ -25,6 +25,6 @@ jobs:
             - name: Update resources
               run: |
                 git add .repo_stats_timestamp
-                git config user.name ${{ github.actor }}
+                git config user.name "Repo Stats Timestamp"
                 git commit -am "Repo Stats Timestamp"
                 git push
