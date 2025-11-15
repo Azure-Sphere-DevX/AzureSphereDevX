@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <sys/types.h>
 #include <iothubtransportmqtt_websockets.h>
 #include <azure_prov_client/prov_transport_mqtt_ws_client.h>
 #include <applibs/log.h>
